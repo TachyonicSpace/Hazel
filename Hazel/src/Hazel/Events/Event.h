@@ -9,7 +9,7 @@ namespace Hazel {
 	//events in hazel are currently blocking, meaning events are immidiatly dealt with 
 	//and blocking events that come after it
 	//for the future, a better stratagy would be to buffer events and process them "later"
-
+	
 	enum class EventType
 	{
 		None = 0,

@@ -8,6 +8,7 @@ namespace Hazel {
 
 	Hazel::Application::Application()
 	{
+		m_Window = std::unique_ptr<Window>(Window::Create());
 	}
 
 	Hazel::Application::~Application()
@@ -16,9 +17,10 @@ namespace Hazel {
 
 	void Hazel::Application::Run()
 	{
-		WindowResizeEvent e(1280, 720);
-		HZ_CORE_TRACE(e);
-		while (true);
+		while (m_running)
+		{
+			m_Window->OnUpdate();
+		}
 	}
 
 }
