@@ -30,8 +30,6 @@ project "Hazel"
 		"%{prj.name}/vendor/spdlog/include"
 	}
 
-	printf(includedirs)
-
 	filter "system:windows"
 		cppdialect "C++17"
 		staticruntime "On"
@@ -75,7 +73,7 @@ project "Sandbox"
 
 	includedirs
 	{
-		"%{prj.name}/vendor/spdlog/include",
+		"Hazel/vendor/spdlog/include",
 		"Hazel/src"
 	}
 
