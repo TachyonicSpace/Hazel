@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
 	Hazel::log::Init();
 	HZ_CORE_WARN("initilized log");
 	int i = 5;
-	HZ_CLIENT_INFO("initilized log Var={0}", i);
+	HZ_INFO("initilized log Var={0}", i);
 	auto app = Hazel::CreateApplication();
 	app->Run();
 	delete app;

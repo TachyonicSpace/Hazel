@@ -35,7 +35,7 @@ namespace Hazel {
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
 
-		HZ_CORE_INFO("Creating a window {0} ({1}, {2})", props.Title, props.Width, props.Height);
+		HZ_CORE_INFO("Creating a Window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 
 		if (!s_GLFWInitilized)
 		{
@@ -80,16 +80,19 @@ namespace Hazel {
 					case GLFW_PRESS:
 					{
 						KeyPressedEvent event(key, 0);
+						data.EventCallback(event);
 						break;
 					}
 					case GLFW_RELEASE:
 					{
 						KeyReleasedEvent event(key);
+						data.EventCallback(event);
 						break;
 					}
 					case GLFW_REPEAT:
 					{
 						KeyPressedEvent event(key, 1);
+						data.EventCallback(event);
 						break;
 					}
 					}
