@@ -30,7 +30,7 @@ namespace Hazel {
 		struct WindowData
 		{
 			std::string Title;
-			unsigned int Width, Height;
+			unsigned int Width = -1, Height = -1;
 			bool VSync;
 
 			EventCallbackFn EventCallback;
