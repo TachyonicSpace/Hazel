@@ -55,11 +55,17 @@
     <ClInclude Include="src\Hazel\Window.h">
       <Filter>Hazel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Hazel\input.h">
+      <Filter>Hazel</Filter>
+    </ClInclude>
     <ClInclude Include="src\Hazel\log.h">
       <Filter>Hazel</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGl\ImGuiOpenGlRenderer.h">
       <Filter>Platform\OpenGl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Windows\WindowsInput.h">
+      <Filter>Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
       <Filter>Platform\Windows</Filter>
@@ -84,6 +90,9 @@
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGl\ImGuiOpenGlRenderer.cpp">
       <Filter>Platform\OpenGl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
+      <Filter>Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
       <Filter>Platform\Windows</Filter>
