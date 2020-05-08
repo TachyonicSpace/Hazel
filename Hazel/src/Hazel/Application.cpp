@@ -60,8 +60,6 @@ namespace Hazel {
 			for (Layer* l : m_LayerStack)
 				l->OnUpdate();
 
-			auto[x, y] =  Input::GetMousePos();
-			HZ_CORE_TRACE("{0}, {1}", x, y);
 
 			m_Window->OnUpdate();
 		}
