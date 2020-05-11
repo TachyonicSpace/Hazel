@@ -29,7 +29,7 @@ namespace Hazel {
 		bool OnWindowClose(WindowCloseEvent& e);
 
 		std::unique_ptr<Window> m_Window;
-		ImGuiLayer* m_ImGuiLayer;
+		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
 		LayerStack m_LayerStack;
 	private:
