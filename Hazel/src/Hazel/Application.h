@@ -32,6 +32,8 @@ namespace Hazel {
 		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
 		LayerStack m_LayerStack;
+
+		unsigned int m_VertexArray, m_VertexBuffer, m_IndexArray;
 	private:
 		static Application* s_Instance;
 	};
