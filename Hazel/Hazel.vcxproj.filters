@@ -1326,6 +1326,11 @@
     <ClInclude Include="src\Hazel\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Platform\OpenGl\OpenGlContext.h" />
     <ClInclude Include="src\Hazel\Renderer\Shader.h" />
+    <ClInclude Include="src\Platform\OpenGl\OpenGLBuffer.h" />
+    <ClInclude Include="src\Hazel\Renderer\Buffer.h" />
+    <ClInclude Include="src\Hazel\Renderer\Renderer.h" />
+    <ClInclude Include="src\Hazel\Renderer\VertexArray.h" />
+    <ClInclude Include="src\Platform\OpenGl\OpenGLVertexArray.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Application.cpp">
@@ -1358,5 +1363,10 @@
     <ClCompile Include="src\Hazel\Renderer\GraphicsContext.cpp" />
     <ClCompile Include="src\Platform\OpenGl\OpenGlContext.cpp" />
     <ClCompile Include="src\Hazel\Renderer\Shader.cpp" />
+    <ClCompile Include="src\Platform\OpenGl\OpenGLBuffer.cpp" />
+    <ClCompile Include="src\Hazel\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Hazel\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\Hazel\Renderer\VertexArray.cpp" />
+    <ClCompile Include="src\Platform\OpenGl\OpenGLVertexArray.cpp" />
   </ItemGroup>
 </Project>

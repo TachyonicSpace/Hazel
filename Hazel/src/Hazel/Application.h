@@ -11,6 +11,9 @@
 
 #include "Hazel/Renderer/Shader.h"
 
+#include "Renderer/Buffer.h"
+#include "Renderer/VertexArray.h"
+
 namespace Hazel {
 
 	class HAZEL_API Application {
@@ -30,15 +33,16 @@ namespace Hazel {
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 
-		std::unique_ptr<Window> m_Window;
+		std::shared_ptr<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
 		LayerStack m_LayerStack;
 
 
-		unsigned int m_VertexBuffer, m_IndexBuffer, m_VertexArray;
-
-		std::unique_ptr<Shader> m_Shader;
+		std::shared_ptr<VertexArray> m_VertexArray;
+		std::shared_ptr<Shader> m_Shader;
+		std::shared_ptr<VertexBuffer> m_VertexBuffer;
+		std::shared_ptr<IndexBuffer> m_IndexBuffer;
 	private:
 		static Application* s_Instance;
 	};
