@@ -7,6 +7,8 @@
 #include "Events\Event.h"
 #include "Hazel\Events\ApplicationEvent.h"
 
+#include "Renderer/Camera.h"
+
 #include "Hazel/ImGui/ImGuiLayer.h"
 
 #include "Hazel/Renderer/Shader.h"

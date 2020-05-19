@@ -280,5 +280,11 @@ namespace Hazel
 		glUseProgram(0);
 	}
 
+	void Shader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
+	{
+		GLint loc = glGetUniformLocation(m_RendererId, name.c_str());
+		glUniformMatrix4fv(loc, 1, GL_FALSE, &matrix[0][0]);
+	}
+
 
 }

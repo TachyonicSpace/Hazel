@@ -2,18 +2,11 @@
 
 #include "imgui/imgui.h"
 
-
-std::shared_ptr<Hazel::Shader> m_Shader;
-std::shared_ptr<Hazel::VertexArray> m_VertexArray;
-
-std::shared_ptr<Hazel::Shader> m_squareShader;
-std::shared_ptr<Hazel::VertexArray> m_SquareVertexArray;
-
 class ExampleLayer : public Hazel::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("example")
+		: Layer("example"), cam(-1.6f, 1.6f, -0.9f, .9f)
 	{
 		m_VertexArray.reset(Hazel::VertexArray::Create());
 
@@ -75,14 +68,16 @@ public:
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
 
+			uniform mat4 u_ViewProjection;
+
 			out vec3 v_position;
 			out vec4 v_color;
 
 			void main()
 			{
 				v_position = a_Position;
-				gl_Position = vec4(a_Position, 1.0);
 				v_color = a_Color;
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 			}
 
 		)";
@@ -113,12 +108,14 @@ public:
 
 			layout(location = 0) in vec3 a_Position;
 
+			uniform mat4 u_ViewProjection;
+
 			out vec3 v_position;
 
 			void main()
 			{
 				v_position = a_Position;
-				gl_Position = vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 			}
 
 		)";
@@ -139,44 +136,63 @@ public:
 
 		)";
 		m_squareShader.reset(new Hazel::Shader(vertexSrc2, fragmentSrc2));
+
+		cam.SetPosition({ 0, 0, 0 });
+		cam.SetRotation(0);
 	}
 
 	void OnImGuiRender() override
 	{
-		ImGui::Begin("name");
-		ImGui::Text("hello mortals");
-		ImGui::End();
 	}
 
 	void OnUpdate() override
 	{
-		Hazel::Renderer::BeginScene();
+
+		auto& pos = cam.GetPos();
+		float speed = .01;
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_W))
+			cam.SetPosition({ pos.x, pos.y - speed, pos.z });
+
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
+			cam.SetPosition({ pos.x + speed, pos.y, pos.z });
+
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_S))
+			cam.SetPosition({ pos.x, pos.y + speed, pos.z });
+
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
+			cam.SetPosition({ pos.x - speed, pos.y, pos.z });
+
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT))
+			cam.SetRotation(cam.GetRotation() + 10);
+
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_RIGHT))
+			cam.SetRotation(cam.GetRotation() - 10);
+
+		Hazel::Renderer::BeginScene(cam);
 		{
 
-			m_squareShader->Bind();
-			Hazel::Renderer::Submit(m_SquareVertexArray);
-
-			m_Shader->Bind();
-			Hazel::Renderer::Submit(m_VertexArray);
+			Hazel::Renderer::Submit(m_squareShader, m_SquareVertexArray);
+			Hazel::Renderer::Submit(m_Shader, m_VertexArray);
 
 		}
 		Hazel::Renderer::EndScene();
 
-
-
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_TAB)) {
-			HZ_INFO("tab is pressed");
-		}
 	}
 
 	void OnEvent(Hazel::Event& event) override
 	{
-		if (event.GetEventType() == Hazel::EventType::KeyPressed)
-		{
-			Hazel::KeyPressedEvent& e = (Hazel::KeyPressedEvent&)event;
-			HZ_TRACE("{0}", (char)e.GetKeyCode());
-		}
+		
 	}
+
+
+	private:
+		std::shared_ptr<Hazel::Shader> m_Shader;
+		std::shared_ptr<Hazel::VertexArray> m_VertexArray;
+
+		std::shared_ptr<Hazel::Shader> m_squareShader;
+		std::shared_ptr<Hazel::VertexArray> m_SquareVertexArray;
+
+		Hazel::OrthographicCamera cam;
 };
 
 class Sandbox : public Hazel::Application {
