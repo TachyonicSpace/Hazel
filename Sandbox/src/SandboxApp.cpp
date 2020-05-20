@@ -2,11 +2,14 @@
 
 #include "imgui/imgui.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
+
 class ExampleLayer : public Hazel::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("example"), cam(-1.6f, 1.6f, -0.9f, .9f)
+		: Layer("example"), cam(-1.6f, 1.6f, -0.9f, .9f), m_SquarePos(0)
 	{
 		m_VertexArray.reset(Hazel::VertexArray::Create());
 
@@ -69,6 +72,7 @@ public:
 			layout(location = 1) in vec4 a_Color;
 
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
 
 			out vec3 v_position;
 			out vec4 v_color;
@@ -77,7 +81,7 @@ public:
 			{
 				v_position = a_Position;
 				v_color = a_Color;
-				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
 			}
 
 		)";
@@ -109,13 +113,14 @@ public:
 			layout(location = 0) in vec3 a_Position;
 
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
 
 			out vec3 v_position;
 
 			void main()
 			{
 				v_position = a_Position;
-				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
 			}
 
 		)";
@@ -163,6 +168,8 @@ public:
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
 			cam.SetPosition({ pos.x - moveSpeed * ts, pos.y, pos.z });
 
+
+
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT))
 			cam.SetRotation(cam.GetRotation() + rotateSpeed * ts);
 
@@ -176,8 +183,18 @@ public:
 
 		Hazel::Renderer::BeginScene(cam);
 		{
+			static auto scale = glm::scale(glm::mat4(1), glm::vec3(.1));
 
-			Hazel::Renderer::Submit(m_squareShader, m_SquareVertexArray);
+			for(int y = 0; y < 20; y++)
+			{
+				for (int i = 0; i < 20; i++)
+				{
+					glm::vec3 pos(i * .11f, y * .11f, 0);
+					glm::mat4 transform = glm::translate(glm::mat4(1), pos) * scale;
+					Hazel::Renderer::Submit(m_squareShader, m_SquareVertexArray, transform);
+				}
+			}
+
 			Hazel::Renderer::Submit(m_Shader, m_VertexArray);
 
 		}
