@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "Core/Timestep.h"
 
 #include "Window.h"
 #include "Hazel\LayerStack.h"
@@ -35,11 +36,12 @@ namespace Hazel {
 		inline Window& GetWindow() { return *m_Window; }
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
-
+	private:
 		std::shared_ptr<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
 		LayerStack m_LayerStack;
+		float m_LastFrameTime = 0;
 	private:
 		static Application* s_Instance;
 	};

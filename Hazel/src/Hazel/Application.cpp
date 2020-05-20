@@ -3,6 +3,7 @@
 
 #include "input.h"
 
+#include "GLFW/glfw3.h"
 
 namespace Hazel {
 
@@ -55,13 +56,12 @@ namespace Hazel {
 	{
 		while (m_Running)
 		{
-			
-			RenderCommand::SetClearColor({ .1f, .1f, .2f, 1 });
-			RenderCommand::Clear();
-
+			float time = (float)glfwGetTime();
+			Timestep ts = time - m_LastFrameTime;
+			m_LastFrameTime = time;
 
 			for (Layer* l : m_LayerStack)
-				l->OnUpdate();
+				l->OnUpdate(ts);
  
 			m_ImGuiLayer->Begin();
 			for (Layer* l : m_LayerStack)

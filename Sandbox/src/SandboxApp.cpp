@@ -145,28 +145,34 @@ public:
 	{
 	}
 
-	void OnUpdate() override
+	void OnUpdate(Hazel::Timestep& ts) override
 	{
+		HZ_CORE_TRACE("Delta time:{0} seconds, [{1} milliseconds]\n", ts.GetSeconds(), ts.GetMilliseconds());
 
 		auto& pos = cam.GetPos();
-		float speed = .01;
+		float moveSpeed = 1, rotateSpeed = 180;
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_W))
-			cam.SetPosition({ pos.x, pos.y - speed, pos.z });
+			cam.SetPosition({ pos.x, pos.y - moveSpeed * ts, pos.z });
 
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
-			cam.SetPosition({ pos.x + speed, pos.y, pos.z });
+			cam.SetPosition({ pos.x + moveSpeed * ts, pos.y, pos.z });
 
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_S))
-			cam.SetPosition({ pos.x, pos.y + speed, pos.z });
+			cam.SetPosition({ pos.x, pos.y + moveSpeed * ts, pos.z });
 
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
-			cam.SetPosition({ pos.x - speed, pos.y, pos.z });
+			cam.SetPosition({ pos.x - moveSpeed * ts, pos.y, pos.z });
 
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT))
-			cam.SetRotation(cam.GetRotation() + 10);
+			cam.SetRotation(cam.GetRotation() + rotateSpeed * ts);
 
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_RIGHT))
-			cam.SetRotation(cam.GetRotation() - 10);
+			cam.SetRotation(cam.GetRotation() - rotateSpeed * ts);
+
+
+
+		Hazel::RenderCommand::SetClearColor({ .1f, .1f, .2f, 1 });
+		Hazel::RenderCommand::Clear();
 
 		Hazel::Renderer::BeginScene(cam);
 		{

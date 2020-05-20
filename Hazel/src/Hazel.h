@@ -6,6 +6,8 @@
 #include "Hazel\Layer.h"
 #include "Hazel\log.h"
 
+#include "Hazel\Core\Timestep.h"
+
 #include "Hazel\input.h"
 #include "Hazel\MouseButtonCodes.h"
 #include "Hazel\KeyCodes.h"
