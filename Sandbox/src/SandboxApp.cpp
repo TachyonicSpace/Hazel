@@ -9,7 +9,7 @@ class ExampleLayer : public Hazel::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("example"), cam(-1.6f, 1.6f, -0.9f, .9f)
+		: Layer("example"), cam(-1.6f, 1.6f, -0.9f, .9f), m_SquarePos(0)
 	{
 		m_VertexArray.reset(Hazel::VertexArray::Create());
 
