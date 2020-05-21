@@ -50,7 +50,13 @@ namespace Hazel {
 		void Bind() const;
 		void UnBind() const;
 
+		//set uniforms
+		void UploadUniform1f(const std::string& name, float value);
+		void UploadUniformVec4(const std::string& name, glm::vec4& values);
 		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
+	private:
+		std::unordered_map<std::string, int> m_UniformLocationCache;
+		int GetUniformLocation(const std::string& name);
 	private:
 		uint32_t m_RendererId;
 	};
