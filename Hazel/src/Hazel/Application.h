@@ -37,7 +37,7 @@ namespace Hazel {
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 	private:
-		std::shared_ptr<Window> m_Window;
+		Ref<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
 		LayerStack m_LayerStack;

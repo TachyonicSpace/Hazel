@@ -24,7 +24,7 @@ public:
 			0.f, .5f, 0.f,		 .8f, .8f, .2f, 1.f
 		};
 
-		std::shared_ptr<Hazel::VertexBuffer> vb;
+		Hazel::Ref<Hazel::VertexBuffer> vb;
 		vb.reset(Hazel::VertexBuffer::Create(vertices, sizeof(vertices)));
 
 
@@ -38,7 +38,7 @@ public:
 
 
 		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<Hazel::IndexBuffer> ib;
+		Hazel::Ref<Hazel::IndexBuffer> ib;
 		ib.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(indices[0])));
 		m_VertexArray->AddIndexBuffer(ib);
 
@@ -57,14 +57,14 @@ public:
 			{Hazel::ShaderDataType::Float3, "position"}
 		};
 
-		std::shared_ptr<Hazel::VertexBuffer> squarevb;
+		Hazel::Ref<Hazel::VertexBuffer> squarevb;
 		squarevb.reset(Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 		squarevb->SetLayout(squareLayout);
 		m_SquareVertexArray->AddVertexBuffer(squarevb);
 
 		uint32_t squareIndices[6] = { 0, 1, 2,
 									  2, 3, 0 };
-		std::shared_ptr<Hazel::IndexBuffer> squareib;
+		Hazel::Ref<Hazel::IndexBuffer> squareib;
 		squareib.reset(Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(squareIndices[0])));
 		m_SquareVertexArray->AddIndexBuffer(squareib);
 
@@ -166,16 +166,16 @@ public:
 		auto& pos = cam.GetPos();
 		float moveSpeed = 1, rotateSpeed = 180;
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_W))
-			cam.SetPosition({ pos.x, pos.y - moveSpeed * ts, pos.z });
-
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
-			cam.SetPosition({ pos.x + moveSpeed * ts, pos.y, pos.z });
-
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_S))
 			cam.SetPosition({ pos.x, pos.y + moveSpeed * ts, pos.z });
 
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
 			cam.SetPosition({ pos.x - moveSpeed * ts, pos.y, pos.z });
+
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_S))
+			cam.SetPosition({ pos.x, pos.y - moveSpeed * ts, pos.z });
+
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
+			cam.SetPosition({ pos.x + moveSpeed * ts, pos.y, pos.z });
 
 
 
@@ -221,11 +221,11 @@ public:
 
 
 	private:
-		std::shared_ptr<Hazel::Shader> m_Shader;
-		std::shared_ptr<Hazel::VertexArray> m_VertexArray;
+		Hazel::Ref<Hazel::Shader> m_Shader;
+		Hazel::Ref<Hazel::VertexArray> m_VertexArray;
 
-		std::shared_ptr<Hazel::Shader> m_FlatColorShader;
-		std::shared_ptr<Hazel::VertexArray> m_SquareVertexArray;
+		Hazel::Ref<Hazel::Shader> m_FlatColorShader;
+		Hazel::Ref<Hazel::VertexArray> m_SquareVertexArray;
 		glm::vec4 m_SquareColor;
 
 		Hazel::OrthographicCamera cam;
