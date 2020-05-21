@@ -5,11 +5,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
+
+#include "Platform/OpenGl/OpenGLShader.h"
+
+
 class ExampleLayer : public Hazel::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("example"), cam(-1.6f, 1.6f, -0.9f, .9f), m_SquarePos(0)
+		: Layer("example"), cam(-1.6f, 1.6f, -0.9f, .9f), m_SquareColor(1, 0, 1, 1)
 	{
 		m_VertexArray.reset(Hazel::VertexArray::Create());
 
@@ -103,7 +107,7 @@ public:
 			}
 
 		)";
-		m_Shader.reset(new Hazel::Shader(vertexSrc, fragmentSrc));
+		m_Shader.reset(Hazel::Shader::Create(vertexSrc, fragmentSrc));
 
 
 		std::string vertexSrc2 = R"(
@@ -132,15 +136,17 @@ public:
 
 			layout(location = 0) out vec4 color;
 
+			uniform vec4 u_Color;
+
 			in vec3 v_position;
 
 			void main()
 			{
-				color = vec4(0.2, 0.3, 0.8, 1.0);
+				color = u_Color;//vec4(0.2, 0.3, 0.8, 1.0);
 			}
 
 		)";
-		m_squareShader.reset(new Hazel::Shader(vertexSrc2, fragmentSrc2));
+		m_FlatColorShader.reset(Hazel::Shader::Create(vertexSrc2, fragmentSrc2));
 
 		cam.SetPosition({ 0, 0, 0 });
 		cam.SetRotation(0);
@@ -148,6 +154,9 @@ public:
 
 	void OnImGuiRender() override
 	{
+		ImGui::Begin("Settings");
+		ImGui::ColorEdit3("Square color", &m_SquareColor.x);
+		ImGui::End();
 	}
 
 	void OnUpdate(Hazel::Timestep& ts) override
@@ -185,13 +194,16 @@ public:
 		{
 			static auto scale = glm::scale(glm::mat4(1), glm::vec3(.1));
 
+			m_FlatColorShader->Bind();
+			std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat4("u_Color", m_SquareColor);
+
 			for(int y = 0; y < 20; y++)
 			{
 				for (int i = 0; i < 20; i++)
 				{
 					glm::vec3 pos(i * .11f, y * .11f, 0);
 					glm::mat4 transform = glm::translate(glm::mat4(1), pos) * scale;
-					Hazel::Renderer::Submit(m_squareShader, m_SquareVertexArray, transform);
+					Hazel::Renderer::Submit(m_FlatColorShader, m_SquareVertexArray, transform);
 				}
 			}
 
@@ -212,8 +224,9 @@ public:
 		std::shared_ptr<Hazel::Shader> m_Shader;
 		std::shared_ptr<Hazel::VertexArray> m_VertexArray;
 
-		std::shared_ptr<Hazel::Shader> m_squareShader;
+		std::shared_ptr<Hazel::Shader> m_FlatColorShader;
 		std::shared_ptr<Hazel::VertexArray> m_SquareVertexArray;
+		glm::vec4 m_SquareColor;
 
 		Hazel::OrthographicCamera cam;
 };

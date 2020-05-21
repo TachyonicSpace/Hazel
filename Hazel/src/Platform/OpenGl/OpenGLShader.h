@@ -1,5 +1,9 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
+#include "Hazel/Renderer/Shader.h"
+
 
 //namespace Hazel {
 //
@@ -39,15 +43,26 @@
 
 namespace Hazel {
 
-	class Shader
+	class OpenGLShader : public Shader
 	{
 	public:
-		~Shader() = default;
+		OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc);
+		~OpenGLShader();
 
-		virtual void Bind() const = 0;
-		virtual void UnBind() const = 0;
+		void Bind() const override;
+		void UnBind() const override;
 
-		static Shader* Create(const std::string& vertexSrc, const std::string& fragmentSrc);
+		void UploadUniformInt(const std::string& name, const int& val);
+
+		void UploadUniformFloat(const std::string& name, const float& val);
+		void UploadUniformFloat2(const std::string& name, const glm::vec2& vec);
+		void UploadUniformFloat3(const std::string& name, const glm::vec3& vec);
+		void UploadUniformFloat4(const std::string& name, const glm::vec4& vec);
+
+		void UploadUniformMat3(const std::string& name, const glm::mat3& matrix);
+		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
+	private:
+		uint32_t m_RendererId;
 	};
 
 }
