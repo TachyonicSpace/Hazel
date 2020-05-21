@@ -9,7 +9,7 @@ class ExampleLayer : public Hazel::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("example"), cam(-1.6f, 1.6f, -0.9f, .9f), m_SquarePos(0)
+		: Layer("example"), cam(-1.6f, 1.6f, -0.9f, .9f)
 	{
 		m_VertexArray.reset(Hazel::VertexArray::Create());
 
@@ -132,11 +132,13 @@ public:
 
 			layout(location = 0) out vec4 color;
 
+			uniform vec4 u_Color;
+
 			in vec3 v_position;
 
 			void main()
 			{
-				color = vec4(0.2, 0.3, 0.8, 1.0);
+				color = u_Color;//vec4(0.2, 0.3, 0.8, 1.0);
 			}
 
 		)";
@@ -185,12 +187,18 @@ public:
 		{
 			static auto scale = glm::scale(glm::mat4(1), glm::vec3(.1));
 
+			glm::vec4 RedColor(.8, .2, .3, 1);
+			glm::vec4 BlueColor(.2, .3, .8, 1);
 			for(int y = 0; y < 20; y++)
 			{
 				for (int i = 0; i < 20; i++)
 				{
 					glm::vec3 pos(i * .11f, y * .11f, 0);
 					glm::mat4 transform = glm::translate(glm::mat4(1), pos) * scale;
+					if (i % 2 == 0)
+						m_squareShader->UploadUniformVec4("u_Color", RedColor);
+					else
+						m_squareShader->UploadUniformVec4("u_Color", BlueColor);
 					Hazel::Renderer::Submit(m_squareShader, m_SquareVertexArray, transform);
 				}
 			}
