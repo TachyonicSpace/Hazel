@@ -43,18 +43,19 @@ public:
 		m_VertexArray->AddIndexBuffer(ib);
 
 
-		float squareVertices[3 * 4] =
+		float squareVertices[5 * 4] =
 		{
-			-.5f, -.5f, 0.f,
-			 .5f, -.5f, 0.f,
-			 .5f,  .5f, 0.f,
-			-.5f,  .5f, 0.f
+			-.5f, -.5f, 0.f, 0.f, 0.f,
+			 .5f, -.5f, 0.f, 1.f, 0.f,
+			 .5f,  .5f, 0.f, 1.f, 1.f,
+			-.5f,  .5f, 0.f, 0.f, 1.f
 		};
 
 		m_SquareVertexArray.reset((Hazel::VertexArray::Create()));
 
 		Hazel::BufferLayout squareLayout = {
-			{Hazel::ShaderDataType::Float3, "position"}
+			{Hazel::ShaderDataType::Float3, "position"},
+			{Hazel::ShaderDataType::Float2, "a_TextCoord"}
 		};
 
 		Hazel::Ref<Hazel::VertexBuffer> squarevb;
@@ -148,6 +149,54 @@ public:
 		)";
 		m_FlatColorShader.reset(Hazel::Shader::Create(vertexSrc2, fragmentSrc2));
 
+
+
+		std::string TextureShaderVertexSrc = R"(
+
+			#version 330 core
+
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoord;
+
+			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
+
+			out vec2 v_TexCoord;
+
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
+			}
+
+		)";
+
+
+		std::string TextureShaderfragmentSrc = R"(
+
+			#version 330 core
+
+			layout(location = 0) out vec4 color;
+
+			in vec2 v_TexCoord;
+
+			uniform sampler2D u_Texture;
+
+			void main()
+			{
+				
+				color = texture(u_Texture, v_TexCoord);
+			}
+
+		)";
+		m_TextureShader.reset(Hazel::Shader::Create(TextureShaderVertexSrc, TextureShaderfragmentSrc));
+
+		m_Texture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
+		m_ChernoTexture = Hazel::Texture2D::Create("assets/textures/ChernoLogo.png");
+
+		m_TextureShader->Bind();
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Color", 0);
+
 		cam.SetPosition({ 0, 0, 0 });
 		cam.SetRotation(0);
 	}
@@ -161,7 +210,7 @@ public:
 
 	void OnUpdate(Hazel::Timestep& ts) override
 	{
-		HZ_CORE_TRACE("Delta time:{0} seconds, [{1} milliseconds]\n", ts.GetSeconds(), ts.GetMilliseconds());
+		//HZ_CORE_TRACE("Delta time:{0} seconds, [{1} milliseconds]\n", ts.GetSeconds(), ts.GetMilliseconds());
 
 		auto& pos = cam.GetPos();
 		float moveSpeed = 1, rotateSpeed = 180;
@@ -207,7 +256,14 @@ public:
 				}
 			}
 
-			Hazel::Renderer::Submit(m_Shader, m_VertexArray);
+			m_Texture->Bind();
+			Hazel::Renderer::Submit(m_TextureShader, m_SquareVertexArray, glm::scale(glm::mat4(1), glm::vec3(1.5)));
+			m_ChernoTexture->Bind();
+			Hazel::Renderer::Submit(m_TextureShader, m_SquareVertexArray, glm::scale(glm::mat4(1), glm::vec3(1.5)));
+
+
+			//triangle rendering
+			//Hazel::Renderer::Submit(m_Shader, m_VertexArray);
 
 		}
 		Hazel::Renderer::EndScene();
@@ -224,9 +280,11 @@ public:
 		Hazel::Ref<Hazel::Shader> m_Shader;
 		Hazel::Ref<Hazel::VertexArray> m_VertexArray;
 
-		Hazel::Ref<Hazel::Shader> m_FlatColorShader;
+		Hazel::Ref<Hazel::Shader> m_FlatColorShader, m_TextureShader;
 		Hazel::Ref<Hazel::VertexArray> m_SquareVertexArray;
 		glm::vec4 m_SquareColor;
+
+		Hazel::Ref <Hazel::Texture2D> m_Texture, m_ChernoTexture;
 
 		Hazel::OrthographicCamera cam;
 };
@@ -235,7 +293,6 @@ class Sandbox : public Hazel::Application {
 public:
 	Sandbox() {
 		PushLayer(new ExampleLayer());
-		//PushOverlay(new Hazel::ImGuiLayer());
 	}
 
 	~Sandbox() {

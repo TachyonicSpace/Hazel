@@ -7,6 +7,11 @@ namespace Hazel {
 	class RenderCommand
 	{
 	public:
+		inline static void Init(bool blend = false)
+		{
+			s_RendererAPI->Init(blend);
+		}
+
 		inline static void SetClearColor(const glm::vec4& color)
 		{
 			s_RendererAPI->SetClearColor(color);

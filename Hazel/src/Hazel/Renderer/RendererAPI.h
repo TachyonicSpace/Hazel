@@ -15,6 +15,8 @@ namespace Hazel {
 		};
 
 	public:
+		virtual void Init(bool blend = false) = 0;
+
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 		virtual void Clear() = 0;
 

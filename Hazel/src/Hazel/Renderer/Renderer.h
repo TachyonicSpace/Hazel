@@ -12,6 +12,8 @@ namespace Hazel
 	class Renderer
 	{
 	public:
+		static void Init(bool blend = true);
+
 		static void BeginScene(OrthographicCamera& camera);
 		static void EndScene();
 
