@@ -7,6 +7,8 @@ namespace Hazel
 {
 	Renderer::SceneData* Renderer::m_sceneData = new SceneData();
 
+	Ref<ShaderLibrary> Renderer::m_Library = std::make_shared<ShaderLibrary>();
+
 	void Renderer::Init(bool blend)
 	{
 		RenderCommand::Init(blend);
@@ -28,6 +30,11 @@ namespace Hazel
 
 		va->Bind();
 		RenderCommand::DrawIndexed(va);
+	}
+
+	Ref<ShaderLibrary> Renderer::GetShaderLibrary()
+	{
+		return m_Library;
 	}
 
 }
