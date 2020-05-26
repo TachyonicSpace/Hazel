@@ -27,17 +27,17 @@ namespace Hazel {
 
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
-		glCreateVertexArrays(1, &m_RendererId);
+		glCreateVertexArrays(1, &m_RendererID);
 	}
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
-		glDeleteVertexArrays(1, &m_RendererId);
+		glDeleteVertexArrays(1, &m_RendererID);
 	}
 
 
 	void OpenGLVertexArray::Bind() const
 	{
-		glBindVertexArray(m_RendererId);
+		glBindVertexArray(m_RendererID);
 	}
 	void OpenGLVertexArray::Unbind() const
 	{
@@ -47,7 +47,7 @@ namespace Hazel {
 	{
 		HZ_CORE_ASSERT(vb->GetLayout().GetElements().size(), "Vertex buffer has no layout");
 
-		glBindVertexArray(m_RendererId);
+		glBindVertexArray(m_RendererID);
 		vb->Bind();
 
 		int i = 0;
@@ -66,7 +66,7 @@ namespace Hazel {
 	}
 	void OpenGLVertexArray::AddIndexBuffer(const Ref<IndexBuffer>& ib)
 	{
-		glBindVertexArray(m_RendererId);
+		glBindVertexArray(m_RendererID);
 		ib->Bind();
 
 		m_IndexBuffers = ib;

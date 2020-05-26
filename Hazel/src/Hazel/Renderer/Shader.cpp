@@ -17,4 +17,16 @@ namespace Hazel {
 		HZ_CORE_ASSERT(false, "unknown API");
 		return nullptr;
 	}
+
+	Shader* Shader::Create(const std::string& filePath)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported");
+		case RendererAPI::API::OpenGL: return new OpenGLShader(filePath);
+		}
+
+		HZ_CORE_ASSERT(false, "unknown API");
+		return nullptr;
+	}
 }
