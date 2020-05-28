@@ -1,15 +1,22 @@
 #pragma once
 
 #include "Core.h"
+#include "Timestep.h"
 
 #include "Window.h"
-#include "Hazel\LayerStack.h"
-#include "Events\Event.h"
+#include "LayerStack.h"
+#include "Hazel\Events\Event.h"
 #include "Hazel\Events\ApplicationEvent.h"
+
+#include "Hazel/Renderer/Camera.h"
 
 #include "Hazel/ImGui/ImGuiLayer.h"
 
 #include "Hazel/Renderer/Shader.h"
+#include "Hazel/Renderer/Renderer.h"
+
+#include "Hazel/Renderer/Buffer.h"
+#include "Hazel/Renderer/VertexArray.h"
 
 namespace Hazel {
 
@@ -29,16 +36,14 @@ namespace Hazel {
 		inline Window& GetWindow() { return *m_Window; }
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
-
-		std::unique_ptr<Window> m_Window;
+		bool OnWindowResize(WindowResizeEvent& e);
+	private:
+		Ref<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
+		bool m_Minimized = false;
 		LayerStack m_LayerStack;
-
-
-		unsigned int m_VertexBuffer, m_IndexBuffer, m_VertexArray;
-
-		std::unique_ptr<Shader> m_Shader;
+		float m_LastFrameTime = 0;
 	private:
 		static Application* s_Instance;
 	};
