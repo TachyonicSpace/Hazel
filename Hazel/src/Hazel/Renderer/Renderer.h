@@ -12,12 +12,18 @@ namespace Hazel
 	class Renderer
 	{
 	public:
+		static void Init(bool blend = true);
+		static void OnWindowResize(uint32_t width, uint32_t height);
+
 		static void BeginScene(OrthographicCamera& camera);
 		static void EndScene();
 
 		static void Submit(const Ref<Shader>& shader, const Ref<VertexArray>& va, const glm::mat4& transform = glm::mat4(1));
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
+
+		static Ref<ShaderLibrary> GetShaderLibrary();
+
 	private:
 		struct SceneData
 		{
@@ -25,5 +31,6 @@ namespace Hazel
 		};
 
 		static SceneData* m_sceneData;
+		static Ref<ShaderLibrary> m_Library;
 	};
 }

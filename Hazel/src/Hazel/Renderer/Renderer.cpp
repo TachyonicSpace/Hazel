@@ -7,6 +7,18 @@ namespace Hazel
 {
 	Renderer::SceneData* Renderer::m_sceneData = new SceneData();
 
+	Ref<ShaderLibrary> Renderer::m_Library = std::make_shared<ShaderLibrary>();
+
+	void Renderer::Init(bool blend)
+	{
+		RenderCommand::Init(blend);
+	}
+
+	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
+	{
+		RenderCommand::SetViewport(0, 0, width, height);
+	}
+
 	void Renderer::BeginScene(OrthographicCamera& camera)
 	{
 		m_sceneData->viewProjectionMatrix = camera.GetViewProjectionMatrix();
@@ -23,6 +35,11 @@ namespace Hazel
 
 		va->Bind();
 		RenderCommand::DrawIndexed(va);
+	}
+
+	Ref<ShaderLibrary> Renderer::GetShaderLibrary()
+	{
+		return m_Library;
 	}
 
 }
