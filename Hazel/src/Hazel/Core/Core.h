@@ -35,6 +35,9 @@
 
 #define HZ_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 
+//make sure to use dispatch as the name of the dispatcher
+#define HZ_DISPATCH_EVENT(class, eType) dispatch.Dispatch<eType##Event>(HZ_BIND_EVENT_FN(class##::##On##eType))
+
 namespace Hazel
 {
 	template <typename T>
