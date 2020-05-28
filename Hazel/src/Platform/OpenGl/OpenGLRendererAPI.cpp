@@ -25,4 +25,8 @@ namespace Hazel {
 	{
 		glDrawElements(GL_TRIANGLES, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
+	void OpenGLRendererAPI::SetViewport(uint32_t xMin, uint32_t yMin, uint32_t xMax, uint32_t yMax)
+	{
+		glViewport(xMin, yMin, xMax, yMax);
+	}
 }

@@ -2,7 +2,7 @@
 
 #include "hzpch.h"
 
-#include "Hazel\Core.h"
+#include "Hazel/Core/Core.h"
 #include "Hazel\Events\Event.h"
 
 namespace Hazel {
@@ -33,6 +33,7 @@ namespace Hazel {
 
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
+		virtual float GetAspectRatio() const = 0;
 
 		//window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
