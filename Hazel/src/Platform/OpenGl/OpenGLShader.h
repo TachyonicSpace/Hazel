@@ -43,14 +43,23 @@
 
 namespace Hazel {
 
+	//a struct to allow us to return multiple return types
+	struct ShaderProgramSource {
+		std::string VertexSource;
+		std::string FragmentSource;
+	};
+
 	class OpenGLShader : public Shader
 	{
 	public:
-		OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc);
+		OpenGLShader(const std::string& filePath);
+		OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
 		~OpenGLShader();
 
 		void Bind() const override;
 		void UnBind() const override;
+
+		virtual const std::string& GetName() const override { return m_Name; }
 
 		void UploadUniformInt(const std::string& name, const int& val);
 
@@ -62,7 +71,12 @@ namespace Hazel {
 		void UploadUniformMat3(const std::string& name, const glm::mat3& matrix);
 		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
 	private:
-		uint32_t m_RendererId;
+		ShaderProgramSource parseShader(const std::string& filepath);
+		unsigned int CompileShader(unsigned int type, const std::string& source);
+		unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
+	private:
+		uint32_t m_RendererID;
+		std::string m_Name;
 	};
 
 }

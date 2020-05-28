@@ -1,41 +1,7 @@
 #pragma once
 
-
-//namespace Hazel {
-//
-//	//a struct to allow us to return multiple return types
-//	struct ShaderProgramSource {
-//		std::string VertexSource;
-//		std::string FragmentSource;
-//	};
-//
-//	class Shader
-//	{
-//	private:
-//		std::string m_FilePath;
-//		unsigned int m_RendererID;
-//		std::unordered_map<std::string, int> m_UniformLocationCache;
-//
-//
-//		int GetUniformLocation(const std::string& name);
-//		ShaderProgramSource parseShader(const std::string& filepath);
-//		unsigned int CompileShader(unsigned int type, const std::string source);
-//		unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
-//	public:
-//		Shader(const std::string& filePath);
-//		~Shader();
-//
-//		void Bind() const;
-//		void UnBind() const;
-//
-//		//set uniforms
-//		void SetUniform1i(const std::string& name, int value);
-//		void SetUniform1f(const std::string& name, float value);
-//		void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
-//		void SetUniformMat4f(const std::string& name, const glm::mat4& mat);
-//	};
-//
-//}
+#include <string>
+#include <unordered_map>
 
 namespace Hazel {
 
@@ -47,7 +13,25 @@ namespace Hazel {
 		virtual void Bind() const = 0;
 		virtual void UnBind() const = 0;
 
-		static Shader* Create(const std::string& vertexSrc, const std::string& fragmentSrc);
+		virtual const std::string& GetName() const = 0;
+
+		static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
+		static Ref<Shader> Create(const std::string& filePath);
+	};
+
+	class ShaderLibrary
+	{
+	public:
+		void Add(const Ref<Shader>& s);
+		void Add(const std::string name, const Ref<Shader>& s);
+		Ref<Shader> Load(const std::string& filePath);
+		Ref<Shader> Load(const std::string& name, const std::string& filePath);
+
+		Ref<Shader> Get(const std::string& name);
+
+		bool Exist(const std::string& name) const;
+	private:
+		std::unordered_map<std::string, Ref<Shader>> m_Shaders;
 	};
 
 }
