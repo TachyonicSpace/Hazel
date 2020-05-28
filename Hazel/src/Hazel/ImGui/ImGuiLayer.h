@@ -1,6 +1,10 @@
 #pragma once
 
-#include "Hazel\Layer.h"
+#include "Hazel\Core\Layer.h"
+
+#include "Hazel\Events\ApplicationEvent.h"
+#include "Hazel\Events\KeyEvent.h"
+#include "Hazel\Events\MouseEvent.h"
 
 namespace Hazel
 {
@@ -11,10 +15,12 @@ namespace Hazel
 		ImGuiLayer();
 		~ImGuiLayer();
 
-		void OnAttatch();
-		void OnDetatch();
-		void OnUpdate();
-		void OnEvent(Event& e);
+		virtual void OnAttatch() override;
+		virtual void OnDetatch() override;
+		virtual void OnImGuiRender() override;
+
+		void Begin();
+		void End();
 	private:
 		float m_Time = 0.f;
 	};
