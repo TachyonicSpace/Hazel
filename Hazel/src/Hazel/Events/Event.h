@@ -1,21 +1,21 @@
 #pragma once
 
 #include "hzpch.h"
-#include "Hazel/Core.h"
+#include "Hazel/Core/Core.h"
 
 
 namespace Hazel {
 
-	//events in hazel are currently blocking, meaning events are immidiatly dealt with 
+	//events in hazel are currently blocking, meaning events are immediately dealt with 
 	//and blocking events that come after it
-	//for the future, a better stratagy would be to buffer events and process them "later"
+	//for the future, a better strategy would be to buffer events and process them "later"
 	
 	enum class EventType
 	{
 		None = 0,
 		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
 		AppTick, AppUpdate, AppRender,
-		KeyPressed, KeyReleased,
+		KeyPressed, KeyReleased, KeyTyped,
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
 
@@ -58,8 +58,8 @@ namespace Hazel {
 		template <typename T>
 		using EventFn = std::function<bool(T&)>;
 	public:
-		EventDispatcher(Event& event)
-			:m_Event(event) {}
+		EventDispatcher(Event& e)
+			:m_Event(e) {}
 
 		template <typename T>
 		bool Dispatch(EventFn<T> func)
