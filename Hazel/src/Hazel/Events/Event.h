@@ -1,7 +1,7 @@
 #pragma once
 
 #include "hzpch.h"
-#include "Hazel/Core.h"
+#include "Hazel/Core/Core.h"
 
 
 namespace Hazel {
@@ -58,8 +58,8 @@ namespace Hazel {
 		template <typename T>
 		using EventFn = std::function<bool(T&)>;
 	public:
-		EventDispatcher(Event& event)
-			:m_Event(event) {}
+		EventDispatcher(Event& e)
+			:m_Event(e) {}
 
 		template <typename T>
 		bool Dispatch(EventFn<T> func)
