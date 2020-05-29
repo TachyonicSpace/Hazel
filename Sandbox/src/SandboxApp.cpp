@@ -225,6 +225,7 @@ public:
 
 	void OnAttatch()
 	{
+		m_checkerboard = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 	}
 
 	void OnDetatch()
@@ -243,6 +244,9 @@ public:
 
 		Hazel::Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, m_SquareColor);
 		Hazel::Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
+
+
+		Hazel::Renderer2D::DrawQuad({ 0, 0, -.1 }, { 50, 50 }, m_checkerboard);
 
 
 		//triangle rendering
@@ -267,6 +271,8 @@ private:
 	Hazel::Ref<Hazel::VertexArray> m_VertexArray;
 
 	Hazel::Ref<Hazel::Shader> m_Shader;
+
+	Hazel::Ref<Hazel::Texture2D> m_checkerboard;
 
 	Hazel::OrthographicCameraController m_Camera;
 
