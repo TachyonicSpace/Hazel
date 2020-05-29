@@ -1,5 +1,6 @@
 #include "hzpch.h"
 #include "Renderer.h"
+#include "Renderer2D.h"
 
 #include "Platform/OpenGl/OpenGLShader.h"
 
@@ -12,6 +13,12 @@ namespace Hazel
 	void Renderer::Init(bool blend)
 	{
 		RenderCommand::Init(blend);
+		Renderer2D::Init();
+	}
+
+	void Renderer::Shutdown()
+	{
+		Renderer2D::Shutdown();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
