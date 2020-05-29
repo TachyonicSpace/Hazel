@@ -47,10 +47,17 @@ namespace Hazel
 	using Ref = std::shared_ptr<T>;
 
 
-	//template <typename T>
-	//using newScope = std::make_unique<T>;
+	
+	template <typename T, typename ... Args>
+	constexpr Scope<T> newScope(Args&& ... args)
+	{
+		return std::make_unique<T>(std::forward<Args>(args)...);
+	}
 
-	//template <typename T>
-	//using newRef = std::make_shared<T>;
+	template <typename T, typename ... Args>
+	constexpr Ref<T> newRef(Args&& ... args)
+	{
+		return std::make_shared<T>(std::forward<Args>(args)...);
+	}
 
 }

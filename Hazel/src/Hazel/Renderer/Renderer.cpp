@@ -8,7 +8,7 @@ namespace Hazel
 {
 	Renderer::SceneData* Renderer::m_sceneData = new SceneData();
 
-	Ref<ShaderLibrary> Renderer::m_Library = std::make_shared<ShaderLibrary>();
+	Ref<ShaderLibrary> Renderer::m_Library = newRef<ShaderLibrary>();
 
 	void Renderer::Init(bool blend)
 	{
