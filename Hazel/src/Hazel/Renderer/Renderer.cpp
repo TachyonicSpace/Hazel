@@ -12,6 +12,8 @@ namespace Hazel
 
 	void Renderer::Init(bool blend)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		RenderCommand::Init(blend);
 		Renderer2D::Init();
 	}

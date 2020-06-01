@@ -57,17 +57,23 @@ namespace Hazel {
 	}
 	void Renderer2D::Shutdown()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		delete s_Data;
 	}
 
 
 	void Renderer2D::BeginScene(const OrthographicCamera& cam)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		s_Data->texShader->Bind();
 		s_Data->texShader->UploadUniformMat4("u_ViewProjection", cam.GetViewProjectionMatrix());
 	}
 	void Renderer2D::EndScene()
 	{
+		HZ_PROFILE_FUNCTION();
+
 
 	}
 
@@ -78,6 +84,8 @@ namespace Hazel {
 	}
 	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, const Ref<Texture>& tex)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		if (!tex)
 			s_Data->whiteTexture->Bind();
 		else
@@ -101,6 +109,8 @@ namespace Hazel {
 	}
 	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const Ref<Texture2D>& tex, const glm::vec4& color)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		s_Data->texShader->Bind();
 
 		//translation * rotation * scale;

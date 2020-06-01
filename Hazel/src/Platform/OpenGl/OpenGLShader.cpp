@@ -154,7 +154,9 @@ namespace Hazel
 
     OpenGLShader::OpenGLShader(const std::string& filePath)
         :m_RendererID(-1)
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         //makes some shader code from the file at this location
         ShaderProgramSource source = parseShader(filePath);
         //compiles the shader and returns the location on the gpu
@@ -172,19 +174,26 @@ namespace Hazel
 
     OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
         :m_Name(name), m_RendererID(-1)
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         m_RendererID = CreateShader(vertexSrc, fragmentSrc);
     }
 
 
     OpenGLShader::~OpenGLShader()
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         glDeleteProgram(m_RendererID);
     }
 
 
     //allows us to parse in shader from files instread of string literals
-    ShaderProgramSource OpenGLShader::parseShader(const std::string& filepath) {
+	ShaderProgramSource OpenGLShader::parseShader(const std::string& filepath) 
+    {
+		HZ_PROFILE_FUNCTION();
+
         std::ifstream stream(filepath);
 
         enum class ShaderType {
@@ -210,7 +219,10 @@ namespace Hazel
     }
 
     /*compile a shader (gpu program) from a string*/
-    unsigned int OpenGLShader::CompileShader(unsigned int type, const std::string& source) {
+    unsigned int OpenGLShader::CompileShader(unsigned int type, const std::string& source) 
+	{
+		HZ_PROFILE_FUNCTION();
+
         //creates a shader of specified type
         unsigned int id = glCreateShader(type);
         //stores the source code as a string
@@ -239,7 +251,10 @@ namespace Hazel
     }
 
     //create the shaders from strings
-    unsigned int OpenGLShader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
+    unsigned int OpenGLShader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader) 
+	{
+		HZ_PROFILE_FUNCTION();
+
         //makes a new gpu program, and both shaders compiled code
         unsigned int program = glCreateProgram();
         unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
@@ -260,50 +275,68 @@ namespace Hazel
 
 
     void OpenGLShader::Bind() const
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         glUseProgram(m_RendererID);
     }
 
     void OpenGLShader::UnBind() const
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         glUseProgram(0);
     }
 
     void OpenGLShader::UploadUniformInt(const std::string& name, const int& val)
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
         glUniform1i(loc, val);
     }
     void OpenGLShader::UploadUniformFloat(const std::string& name, const float& val)
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
         glUniform1f(loc, val);
     }
     void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& vec)
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
         glUniform2f(loc, vec.x, vec.y);
     }
     void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& vec)
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
         glUniform3f(loc, vec.x, vec.y, vec.z);
     }
 
     void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& vec)
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
         glUniform4f(loc, vec.x, vec.y, vec.z, vec.w);
     }
 
     void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
         glUniformMatrix3fv(loc, 1, GL_FALSE, &matrix[0][0]);
     }
 
     void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
-    {
+	{
+		HZ_PROFILE_FUNCTION();
+
         GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
         glUniformMatrix4fv(loc, 1, GL_FALSE, &matrix[0][0]);
     }

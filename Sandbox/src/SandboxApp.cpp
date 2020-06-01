@@ -2,7 +2,6 @@
 
 #include "imgui/imgui.h"
 
-
 //class ExampleLayer : public Hazel::Layer
 //{
 //public:
@@ -225,34 +224,49 @@ public:
 
 	void OnAttatch()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_checkerboard = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 	}
 
 	void OnDetatch()
 	{
+		HZ_PROFILE_FUNCTION();
+
 	}
 
 	void OnUpdate(Hazel::Timestep& ts)
 
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_Camera.OnUpdate(ts);
 
-		Hazel::RenderCommand::SetClearColor({ .1f, .1f, .2f, 1 });
-		Hazel::RenderCommand::Clear();
+		{
+			HZ_PROFILE_SCOPE("Renderer::setup");
+			Hazel::RenderCommand::SetClearColor({ .1f, .1f, .2f, 1 });
+			Hazel::RenderCommand::Clear();
+		}
 
-		Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
+		{
+			HZ_PROFILE_SCOPE("Renderer::draw");
 
-		Hazel::Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, m_SquareColor);
-		Hazel::Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
+			Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
+
+			Hazel::Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, m_SquareColor);
+			Hazel::Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
 
 
-		Hazel::Renderer2D::DrawQuad({ 0, 0, -.1 }, { 50, 50 }, m_checkerboard);
-
+			Hazel::Renderer2D::DrawQuad({ 0, 0, -.1 }, { 50, 50 }, m_checkerboard);
+		}
 
 		//triangle rendering
 		//Hazel::Renderer::Submit(m_Shader, m_VertexArray);
-		Hazel::Renderer2D::EndScene();
 
+		{
+			HZ_PROFILE_SCOPE("End Scene");
+			Hazel::Renderer2D::EndScene();
+		}
 	}
 
 	void OnImGuiRender()
@@ -268,13 +282,12 @@ public:
 	}
 
 private:
-	Hazel::Ref<Hazel::VertexArray> m_VertexArray;
+	Hazel::OrthographicCameraController m_Camera;
 
+	Hazel::Ref<Hazel::VertexArray> m_VertexArray;
 	Hazel::Ref<Hazel::Shader> m_Shader;
 
 	Hazel::Ref<Hazel::Texture2D> m_checkerboard;
-
-	Hazel::OrthographicCameraController m_Camera;
 
 	glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
 };
