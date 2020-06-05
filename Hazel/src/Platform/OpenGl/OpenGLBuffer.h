@@ -7,6 +7,7 @@ namespace Hazel {
 	class OpenGLVertexBuffer : public VertexBuffer
 	{
 	public:
+		OpenGLVertexBuffer(uint32_t size);
 		OpenGLVertexBuffer(float* vertices, uint32_t size);
 		OpenGLVertexBuffer() {HZ_CORE_ASSERT(false, "please enter arguments for the vertex buffer") }
 		virtual ~OpenGLVertexBuffer();
@@ -16,6 +17,9 @@ namespace Hazel {
 
 		virtual void SetLayout(const BufferLayout& Layout) override {m_Layout = Layout;};
 		virtual const BufferLayout& GetLayout() override { return m_Layout; }
+
+
+		virtual void SetData(const void* data, uint32_t size) override;
 
 	private:
 		uint32_t m_RendererID;

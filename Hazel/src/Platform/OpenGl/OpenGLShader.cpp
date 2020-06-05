@@ -295,6 +295,11 @@ namespace Hazel
         GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
         glUniform1i(loc, val);
     }
+    void OpenGLShader::UploadUniformIntArray(const std::string& name, int* vals, uint32_t count)
+    {
+		GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
+        glUniform1iv(loc, count, vals);
+    }
     void OpenGLShader::UploadUniformFloat(const std::string& name, const float& val)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -309,7 +314,14 @@ namespace Hazel
         GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
         glUniform2f(loc, vec.x, vec.y);
     }
-    void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& vec)
+	void OpenGLShader::UploadUniformFloat2(const std::string& name, const float*& vec)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform2f(loc, vec[0], vec[1]);
+	}
+	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& vec)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -317,7 +329,14 @@ namespace Hazel
         glUniform3f(loc, vec.x, vec.y, vec.z);
     }
 
-    void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& vec)
+	void OpenGLShader::UploadUniformFloat3(const std::string& name, const float*& vec)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform3f(loc, vec[0], vec[1], vec[2]);
+	}
+	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& vec)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -325,7 +344,21 @@ namespace Hazel
         glUniform4f(loc, vec.x, vec.y, vec.z, vec.w);
     }
 
-    void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
+	void OpenGLShader::UploadUniformFloat4(const std::string& name, const float*& vec)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform4f(loc, vec[0], vec[1], vec[2], vec[3]);
+	}
+    void OpenGLShader::UploadUniformFloat4(const std::string& name, const Color& vec)
+    {
+		HZ_PROFILE_FUNCTION();
+
+		GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform4f(loc, vec.GetRBGA()[0], vec.GetRBGA()[1], vec.GetRBGA()[2], vec.GetRBGA()[3]);
+    }
+	void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
 	{
 		HZ_PROFILE_FUNCTION();
 

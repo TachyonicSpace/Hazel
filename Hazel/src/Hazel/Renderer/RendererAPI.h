@@ -23,7 +23,7 @@ namespace Hazel {
 		virtual void SetViewport(uint32_t xMin, uint32_t yMin, uint32_t xMax, uint32_t yMax) = 0;
 		virtual void Clear() = 0;
 
-		virtual void DrawIndexed(const Ref<VertexArray>& va) = 0;
+		virtual void DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount = 0) = 0;
 
 		inline static API GetAPI() { return s_API; }
 	private:

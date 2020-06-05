@@ -244,7 +244,7 @@ public:
 
 		{
 			HZ_PROFILE_SCOPE("Renderer::setup");
-			Hazel::RenderCommand::SetClearColor({ .1f, .1f, .2f, 1 });
+			Hazel::RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
 			Hazel::RenderCommand::Clear();
 		}
 
@@ -253,11 +253,11 @@ public:
 
 			Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
 
-			Hazel::Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, m_SquareColor);
+			Hazel::Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, {1, 0, 0});
 			Hazel::Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
 
 
-			Hazel::Renderer2D::DrawQuad({ 0, 0, -.1 }, { 50, 50 }, m_checkerboard);
+			Hazel::Renderer2D::DrawQuad({ 0, 0, -.1 }, { 10, 10 }, m_angle, m_checkerboard, 10.f);
 		}
 
 		//triangle rendering
@@ -272,7 +272,7 @@ public:
 	void OnImGuiRender()
 	{
 		ImGui::Begin("Settings");
-		ImGui::ColorEdit4("color", &m_SquareColor.x);
+		ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416);
 		ImGui::End();
 	}
 
@@ -290,6 +290,9 @@ private:
 	Hazel::Ref<Hazel::Texture2D> m_checkerboard;
 
 	glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
+
+	float m_angle = 0;
+	float color = 0;
 };
 
 
