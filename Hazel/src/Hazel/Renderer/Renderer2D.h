@@ -37,6 +37,17 @@ namespace Hazel {
 			Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& color = { 1, 1, 1, 1 });
 		static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle,
 			Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& color = { 1, 1, 1, 1 });
+
+		//stats
+
+		struct Statistics
+		{
+			uint32_t drawCalls = 0;
+			uint32_t quadCount = 0;
+		};
+
+		static void ResetStats();
+		static Statistics& GetStats();
 	};
 
 }

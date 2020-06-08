@@ -242,6 +242,7 @@ public:
 
 		m_Camera.OnUpdate(ts);
 
+		Hazel::Renderer2D::ResetStats();
 		{
 			HZ_PROFILE_SCOPE("Renderer::setup");
 			Hazel::RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
@@ -253,11 +254,21 @@ public:
 
 			Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
 
+			Hazel::Renderer2D::DrawQuad({ 0, 0, -.1 }, { 10, 10 }, m_angle, m_checkerboard, 10.f);
+
+
 			Hazel::Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, {1, 0, 0});
 			Hazel::Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
 
+			for (float y = -5; y <= 5; y += delta)
+			{
+				for (float x = -5; x <= 5; x += delta)
+				{
+					Hazel::Renderer2D::DrawQuad({ x, y, 0 }, { delta*.9, delta*.9 }, 
+						{ (x + 5)/10.f, .5, (x + 5) / 10.f , .7});
+				}
+			}
 
-			Hazel::Renderer2D::DrawQuad({ 0, 0, -.1 }, { 10, 10 }, m_angle, m_checkerboard, 10.f);
 		}
 
 		//triangle rendering
@@ -273,6 +284,11 @@ public:
 	{
 		ImGui::Begin("Settings");
 		ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416);
+		ImGui::SliderFloat("delta", &delta, 0.01, 1);
+
+		ImGui::TextColored({ .8, .2, .2, 1 }, "number of draw calls: %d", Hazel::Renderer2D::GetStats().drawCalls);
+		ImGui::TextColored({ .8, .2, .2, 1 }, "number of quads: %d", Hazel::Renderer2D::GetStats().quadCount);
+
 		ImGui::End();
 	}
 
@@ -292,7 +308,7 @@ private:
 	glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
 
 	float m_angle = 0;
-	float color = 0;
+	float color = 0, delta = .39;
 };
 
 
