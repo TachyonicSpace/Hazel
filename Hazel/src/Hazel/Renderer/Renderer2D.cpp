@@ -122,7 +122,6 @@ namespace Hazel {
 		s_Data.texShader->Bind();
 		s_Data.texShader->UploadUniformMat4("u_ViewProjection", cam.GetViewProjectionMatrix());
 
-		s_Data.stats.quadCount = 0;
 		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
 
 		s_Data.TextureSlotIndex = 1;
@@ -151,6 +150,7 @@ namespace Hazel {
 	{
 		Renderer2D::EndScene();
 
+		s_Data.stats.quadCount = 0;
 		s_Data.quadIndexCount = 0;
 		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
 
@@ -263,6 +263,11 @@ namespace Hazel {
 	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle,
 		Ref<Texture2D>& tex, float tilingFactor, const Color& color)
 	{
+		if (radianAngle == 0) {
+			DrawQuad(pos, size, tex, tilingFactor, color);
+			return;
+		}
+
 		HZ_PROFILE_FUNCTION();
 
 		if (!tex)

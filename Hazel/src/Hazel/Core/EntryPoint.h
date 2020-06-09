@@ -4,6 +4,8 @@
 	
 extern Hazel::Application* Hazel::CreateApplication();
 
+#ifdef HZ_MAIN
+
 int main(int argc, char** argv) {
 
 	Hazel::log::Init();
@@ -20,5 +22,7 @@ int main(int argc, char** argv) {
 	delete app;
 	HZ_PROFILE_END_SESSION();
 }
+
+#endif //HZ_MAIN
 
 #endif // HZ_PLATFORM_WINDOWS

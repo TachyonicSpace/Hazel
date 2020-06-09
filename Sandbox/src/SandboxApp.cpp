@@ -1,6 +1,9 @@
+#define HZ_MAIN
 #include <Hazel.h>
 
 #include "imgui/imgui.h"
+
+#include "ParticleSystem.h"
 
 //class ExampleLayer : public Hazel::Layer
 //{
@@ -227,6 +230,14 @@ public:
 		HZ_PROFILE_FUNCTION();
 
 		m_checkerboard = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
+
+		m_Particle.ColorBegin = { 254, 212, 123, 1 };
+		m_Particle.ColorEnd = { 254, 109, 41, 1 };
+		m_Particle.SizeBegin = .5, m_Particle.SizeVariation = .3, m_Particle.SizeEnd = 0;
+		m_Particle.LifeTime = 1;
+		m_Particle.Velocity = { 0, 0 };
+		m_Particle.VelocityVariation = { 3, 1 };
+		m_Particle.Position = { 0, 0 };
 	}
 
 	void OnDetatch()
@@ -278,6 +289,24 @@ public:
 			HZ_PROFILE_SCOPE("End Scene");
 			Hazel::Renderer2D::EndScene();
 		}
+
+		if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
+		{
+			auto [x, y] = Hazel::Input::GetMousePos();
+			auto width = Hazel::Application::Get().GetWindow().GetWidth();
+			auto height = Hazel::Application::Get().GetWindow().GetHeight();
+
+			auto bounds = m_Camera.GetBounds();
+			auto pos = m_Camera.GetCamera().GetPos();
+			x = (x / width) * bounds.GetWidth() - bounds.GetWidth() * 0.5f;
+			y = bounds.GetHeight() * 0.5f - (y / height) * bounds.GetHeight();
+			m_Particle.Position = { x + pos.x, y + pos.y };
+			for (int i = 0; i < 5; i++)
+				m_ParticleSystem.Emit(m_Particle);
+		}
+
+		m_ParticleSystem.OnUpdate(ts);
+		m_ParticleSystem.OnRender(m_Camera.GetCamera());
 	}
 
 	void OnImGuiRender()
@@ -286,8 +315,10 @@ public:
 		ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416);
 		ImGui::SliderFloat("delta", &delta, 0.01, 1);
 
-		ImGui::TextColored({ .8, .2, .2, 1 }, "number of draw calls: %d", Hazel::Renderer2D::GetStats().drawCalls);
-		ImGui::TextColored({ .8, .2, .2, 1 }, "number of quads: %d", Hazel::Renderer2D::GetStats().quadCount);
+		auto& stats = Hazel::Renderer2D::GetStats();
+
+		ImGui::TextColored({ .8, .2, .2, 1 }, "number of draw calls: %d", stats.drawCalls);
+		ImGui::TextColored({ .8, .2, .2, 1 }, "number of quads: %d", stats.quadCount);
 
 		ImGui::End();
 	}
@@ -309,6 +340,9 @@ private:
 
 	float m_angle = 0;
 	float color = 0, delta = .39;
+
+	ParticleSystem m_ParticleSystem;
+	ParticleProps m_Particle;
 };
 
 
