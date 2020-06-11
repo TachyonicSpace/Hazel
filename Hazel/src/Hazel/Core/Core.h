@@ -42,7 +42,6 @@ namespace Hazel
 {
 	template <typename T>
 	using Scope = std::unique_ptr<T>;
-
 	template <typename T>
 	using Ref = std::shared_ptr<T>;
 
@@ -53,11 +52,22 @@ namespace Hazel
 	{
 		return std::make_unique<T>(std::forward<Args>(args)...);
 	}
-
 	template <typename T, typename ... Args>
 	constexpr Ref<T> newRef(Args&& ... args)
 	{
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 
+
+
+	template <typename T, typename ... Args>
+	constexpr Scope<T> ScopeCast(Args&& ... args)
+	{
+		return std::static_pointer_cast<T>(std::forward<Args>(args)...);
+	}
+	template <typename T, typename ... Args>
+	constexpr Ref<T> RefCast(Args&& ... args)
+	{
+		return std::static_pointer_cast<T>(std::forward<Args>(args)...);
+	}
 }

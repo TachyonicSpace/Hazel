@@ -34,7 +34,7 @@ namespace Hazel {
 
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		}
-			HZ_CORE_ASSERT(data, "Image Path Not Found in - [ {0} ]!!", path.c_str());
+			HZ_CORE_ASSERT(data, "Image Path Not Found in - {0}!!", path.c_str());
 		m_Width = width;
 		m_Height = height;
 
@@ -77,6 +77,32 @@ namespace Hazel {
 		glBindTextureUnit(slot, m_RendererID);
 	}
 
+	void OpenGLTexture2D::subTexture(const int& xIndex, const int& yIndex,
+		const int& xSpriteWidth /*= 128*/, const int& ySpriteHeight /*= 128*/)
+	{
+
+		m_TexIndicies = { xIndex, yIndex };
+		auto x = m_TexIndicies[0], y = m_TexIndicies[1];
+
+		if (x != -1)
+		{
+			m_TexCoords[0][0] = ((x + 0) * xSpriteWidth) / m_Width;
+			m_TexCoords[1][0] = ((x + 1) * xSpriteWidth) / m_Width;
+			m_TexCoords[2][0] = ((x + 1) * xSpriteWidth) / m_Width;
+			m_TexCoords[3][0] = ((x + 0) * xSpriteWidth) / m_Width;
+		}
+
+		if (y != -1)
+		{
+			m_TexCoords[0][1] = ((y + 0) * ySpriteHeight) / m_Height;
+			m_TexCoords[1][1] = ((y + 0) * ySpriteHeight) / m_Height;
+			m_TexCoords[2][1] = ((y + 1) * ySpriteHeight) / m_Height;
+			m_TexCoords[3][1] = ((y + 1) * ySpriteHeight) / m_Height;
+		}
+	}
+	const glm::mat4x2& OpenGLTexture2D::GetTextureCoordinates() const
+	{return m_TexCoords;
+	}
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
 		HZ_PROFILE_FUNCTION();

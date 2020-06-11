@@ -5,6 +5,22 @@
 
 #include "ParticleSystem.h"
 
+static const uint32_t s_MapWidth = 24;
+
+static const char* s_MapTiles = 
+"000000000000000000000000"
+"0000000dddd0000000000000"
+"0000dddddddddddd00000000"
+"000dd00ddddddddddddd0000"
+"00dd000ddddddddddddddd00"
+"0000ddddddddddddddddd000"
+"000000dddddddddddddd0000"
+"000000000dddddddd0000000"
+"000000000000000000000000"
+;
+
+
+
 //class ExampleLayer : public Hazel::Layer
 //{
 //public:
@@ -230,6 +246,10 @@ public:
 		HZ_PROFILE_FUNCTION();
 
 		m_checkerboard = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
+		m_SpriteSheet = Hazel::Texture2D::Create("assets/game/RPGpack_sheet_2X.png");
+
+		m_TextureMap['d'] = { 6, 11 };
+		m_TextureMap['0'] = { 11, 11 };
 
 		m_Particle.ColorBegin = { 254, 212, 123, 1 };
 		m_Particle.ColorEnd = { 254, 109, 41, 1 };
@@ -260,7 +280,7 @@ public:
 			Hazel::RenderCommand::Clear();
 		}
 
-		{
+		/*{
 			HZ_PROFILE_SCOPE("Renderer::draw");
 
 			Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
@@ -280,15 +300,42 @@ public:
 				}
 			}
 
-		}
+		}*/
 
-		//triangle rendering
-		//Hazel::Renderer::Submit(m_Shader, m_VertexArray);
+		Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
+		m_SpriteSheet->subTexture(texCoordX, texCoordY);
+		Hazel::Renderer2D::DrawQuad({ 0, 0 }, { 1, 1 }, m_SpriteSheet);
 
 		{
 			HZ_PROFILE_SCOPE("End Scene");
 			Hazel::Renderer2D::EndScene();
 		}
+		
+		Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
+
+		uint32_t mapHeight = strlen(s_MapTiles) / s_MapWidth;
+		for (uint32_t y = 0; y < mapHeight; y++)
+		{
+			for (uint32_t x = 0; x < s_MapWidth; x++)
+			{
+				char tile = s_MapTiles[x + y * s_MapWidth];
+				glm::vec2 tilePos = { x - s_MapWidth / 2.0, mapHeight - y - mapHeight / 2.0 };
+				glm::vec2 tileSize = { 1, 1 };
+
+				if (m_TextureMap.find(tile) != m_TextureMap.end())
+				{
+					auto subTextureCoords = m_TextureMap[tile];
+					m_SpriteSheet->subTexture(subTextureCoords.x, subTextureCoords.y);
+					Hazel::Renderer2D::DrawQuad(tilePos, tileSize, m_SpriteSheet);
+
+				}
+				else
+					Hazel::Renderer2D::DrawQuad(tilePos, tileSize, { 1, 0, 1 });
+			}
+		}
+
+
+		Hazel::Renderer2D::EndScene();
 
 		if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
 		{
@@ -307,13 +354,16 @@ public:
 
 		m_ParticleSystem.OnUpdate(ts);
 		m_ParticleSystem.OnRender(m_Camera.GetCamera());
+
+		
 	}
 
 	void OnImGuiRender()
 	{
 		ImGui::Begin("Settings");
 		ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416);
-		ImGui::SliderFloat("delta", &delta, 0.01, 1);
+		ImGui::SliderInt("texture x coord", &texCoordX, -1, m_SpriteSheet->GetWidth() / 128);
+		ImGui::SliderInt("texture y coord", &texCoordY, -1, m_SpriteSheet->GetHeight() / 128);
 
 		auto& stats = Hazel::Renderer2D::GetStats();
 
@@ -335,14 +385,17 @@ private:
 	Hazel::Ref<Hazel::Shader> m_Shader;
 
 	Hazel::Ref<Hazel::Texture2D> m_checkerboard;
+	Hazel::Ref<Hazel::Texture2D> m_SpriteSheet;
 
 	glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
 
 	float m_angle = 0;
-	float color = 0, delta = .39;
+	int texCoordX = -1, texCoordY = -1;
 
 	ParticleSystem m_ParticleSystem;
 	ParticleProps m_Particle;
+
+	std::unordered_map<char, glm::vec2> m_TextureMap;
 };
 
 
