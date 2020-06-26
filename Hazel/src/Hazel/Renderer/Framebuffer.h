@@ -1,0 +1,28 @@
+#pragma once
+
+#include "Hazel/core/Core.h"
+
+namespace Hazel
+{
+	struct FramebufferSpecs
+	{
+		uint32_t Width, Height;
+		uint32_t samples = 1;
+
+		bool SwapChainTarget = false;
+	};
+
+	class Framebuffer
+	{
+	public:
+		static Ref<Framebuffer> Create(const FramebufferSpecs& specs);
+
+
+		virtual const FramebufferSpecs& GetSpecs() const = 0;
+		virtual uint32_t GetColorAttachmentID() const = 0;
+
+		virtual void Bind() = 0;
+		virtual void UnBind() = 0;
+	};
+
+}
