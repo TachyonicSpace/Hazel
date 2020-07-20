@@ -52,6 +52,14 @@ namespace Hazel {
 		HZ_DISPATCH_EVENT(OrthographicCameraController, WindowResize);
 	}
 
+	void OrthographicCameraController::OnResize(float width, float height)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		m_AspectRatio = width / height;
+		CalculateView();
+	}
+
 	void OrthographicCameraController::CalculateView()
 	{
 		m_Bounds = { -m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel };

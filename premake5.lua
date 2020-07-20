@@ -13,7 +13,7 @@ workspace "Hazel"
 		"MultiProcessorCompile"
 	}
 	
-	startproject "Sandbox"
+	startproject "Hazel-Nut"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 

@@ -72,7 +72,7 @@ namespace Hazel
 	}
 	void EditorLayer::OnImGuiRender()
 	{
-		if (dockSpaceOpen)
+		if (dockSpaceOpen == true)
 		{
 			static bool opt_fullscreen_persistant = true;
 			bool opt_fullscreen = opt_fullscreen_persistant;
@@ -148,10 +148,6 @@ namespace Hazel
 		static float windowScalar = 1;
 		ImGui::SliderFloat("windowSize", &windowScalar, 1, 10);
 
-		ImGui::Image((void*)m_FrameBuffer->GetColorAttachmentID(),
-			{ m_FrameBuffer->GetSpecs().Width / windowScalar, m_FrameBuffer->GetSpecs().Height / windowScalar });
-
-
 		if (ImGui::Button("enable dockspace?", { 150, 20 }))
 		{
 			dockSpaceOpen = !dockSpaceOpen;
@@ -163,6 +159,22 @@ namespace Hazel
 
 		if (dockSpaceOpen)
 			ImGui::End();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
+		ImGui::Begin("viewPort");
+		auto viewPortSize = ImGui::GetContentRegionAvail();
+
+		if (viewPortSize.x != m_ViewPortSize.x || viewPortSize.y != m_ViewPortSize.y) 
+		{
+			m_FrameBuffer->Resize((uint32_t)viewPortSize.x, (uint32_t)viewPortSize.y);
+			m_ViewPortSize = { viewPortSize.x, viewPortSize.y };
+
+			m_Camera.OnResize(viewPortSize.x, viewPortSize.y);
+		}
+		ImGui::Image((void*)m_FrameBuffer->GetColorAttachmentID(),
+			{ m_ViewPortSize.x, m_ViewPortSize.y });
+		ImGui::PopStyleVar();
+		ImGui::End();
 	}
 	void EditorLayer::OnEvent(Event& e)
 	{

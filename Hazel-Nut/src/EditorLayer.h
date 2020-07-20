@@ -29,9 +29,11 @@ namespace Hazel
 
 		glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
 
+		glm::vec2 m_ViewPortSize = { -1, -1 };
+
 		float m_angle = 0, m_Delta = .5;
 
-		bool dockSpaceOpen = false;
+		bool dockSpaceOpen = true;
 
 	};
 
