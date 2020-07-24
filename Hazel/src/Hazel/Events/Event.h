@@ -19,7 +19,7 @@ namespace Hazel {
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
 
-	enum EventCategory
+	enum class EventCategory : int
 	{
 		None = 0,
 		EventCategoryApplication = BIT(0),
@@ -48,7 +48,7 @@ namespace Hazel {
 
 		inline bool IsInCategory(EventCategory category) 
 		{
-			return GetCategoryFlags() & category;
+			return GetCategoryFlags() & (int)category;
 		}
 	protected:
 	};

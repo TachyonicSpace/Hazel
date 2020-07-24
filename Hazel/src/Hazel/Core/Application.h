@@ -37,6 +37,8 @@ namespace Hazel {
 
 		void Close() { m_Running = false; }
 
+		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);

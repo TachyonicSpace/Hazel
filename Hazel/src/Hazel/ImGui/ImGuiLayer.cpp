@@ -66,6 +66,16 @@ namespace Hazel {
 		ImGui::DestroyContext();
 	}
 
+	void ImGuiLayer::OnEvent(Event& e)
+	{
+		if (m_BlockEvents)
+		{
+			auto io = ImGui::GetIO();
+			e.handled |= e.IsInCategory(EventCategory::EventCategoryMouse) & io.WantCaptureMouse;
+			e.handled |= e.IsInCategory(EventCategory::EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		}
+	}
+
 	void ImGuiLayer::OnImGuiRender()
 	{
 		//static bool show = true;
@@ -80,7 +90,6 @@ namespace Hazel {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
-
 
 	void ImGuiLayer::End()
 	{

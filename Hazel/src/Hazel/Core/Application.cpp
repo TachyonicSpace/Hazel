@@ -97,8 +97,8 @@ namespace Hazel {
 				}
 				m_ImGuiLayer->End();
 
-				m_Window->OnUpdate();
 			}
+			m_Window->OnUpdate();
 		}
 	}
 

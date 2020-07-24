@@ -33,7 +33,8 @@ namespace Hazel
 
 		float m_angle = 0, m_Delta = .5;
 
-		bool dockSpaceOpen = true;
+		bool m_ViewPortFocused = false;
+		bool m_ViewPortHovered = false;
 
 	};
 

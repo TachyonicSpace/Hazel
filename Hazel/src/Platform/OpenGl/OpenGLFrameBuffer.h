@@ -20,8 +20,7 @@ namespace Hazel
         { glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID); glViewport(0, 0, m_Specs.Width, m_Specs.Height);}
 		virtual void UnBind() override {	glBindFramebuffer(GL_FRAMEBUFFER, 0);}
 
-        virtual void Resize(uint32_t width, uint32_t height) override 
-            { m_Specs.Height = height; m_Specs.Width = width; Invalidate(); };
+        virtual void Resize(uint32_t width, uint32_t height) override;
 
         void Invalidate();
 

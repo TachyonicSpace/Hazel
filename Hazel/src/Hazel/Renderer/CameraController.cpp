@@ -31,10 +31,10 @@ namespace Hazel {
 
 		if (m_Rotation) {
 			if (Input::IsKeyPressed(HZ_KEY_Q))
-				m_Rotation += m_RotationSpeed * ts;
+				m_CameraRotation += m_RotationSpeed * ts;
 
 			if (Input::IsKeyPressed(HZ_KEY_E))
-				m_Rotation -= m_RotationSpeed * ts;
+				m_CameraRotation -= m_RotationSpeed * ts;
 
 			m_Camera.SetRotation(m_Rotation);
 		}

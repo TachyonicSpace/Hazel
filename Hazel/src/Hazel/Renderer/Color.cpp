@@ -49,7 +49,7 @@ Hazel::Color::Color(const std::initializer_list<float>& Element)
 	if (delta == 0)
 		m_HSBA[0] = 0;
 	else if (cmax == m_RGBA[0])
-		m_HSBA[0] = 60 * fmod((m_RGBA[1] - m_RGBA[2]) / delta, 6);
+		m_HSBA[0] = 60 * (float)fmod((m_RGBA[1] - m_RGBA[2]) / delta, 6);
 	else if (cmax == m_RGBA[1])
 		m_HSBA[0] = 60 * ((m_RGBA[2] - m_RGBA[0]) / delta + 2);
 	else if (cmax == m_RGBA[2])
@@ -83,7 +83,7 @@ Hazel::Color::Color(glm::vec3 color)
 	if (delta == 0)
 		m_HSBA[0] = 0;
 	else if (cmax == color.r)
-		m_HSBA[0] = 60 * fmod((color.g - color.b) / delta, 6);
+		m_HSBA[0] = 60 * (float)fmod((color.g - color.b) / delta, 6);
 	else if (cmax == color.g)
 		m_HSBA[0] = 60 * ((color.b - color.r) / delta + 2);
 	else if (cmax == color.b)
@@ -118,7 +118,7 @@ Hazel::Color::Color(glm::vec4 color)
 	if (delta == 0)
 		m_HSBA[0] = 0;
 	else if (cmax == color.r)
-		m_HSBA[0] = 60 * fmod((color.g - color.b) / delta, 6);
+		m_HSBA[0] = 60 * (float)fmod((color.g - color.b) / delta, 6);
 	else if (cmax == color.g)
 		m_HSBA[0] = 60 * ((color.b - color.r) / delta + 2);
 	else if (cmax == color.b)
@@ -191,7 +191,7 @@ Hazel::Color& Hazel::Color::SetHsb(const std::initializer_list<float>& Element)
 	float s = m_HSBA[1], b = m_HSBA[2];
 
 	float C = s * b;
-	float X = C * (1 - abs(fmod((h / 60.f), 2) - 1));
+	float X = C * (1 - abs((float)fmod((h / 60.f), 2) - 1));
 	float m = b - C;
 
 	if (0 <= h && h < 60)
@@ -252,7 +252,7 @@ Hazel::Color& Hazel::Color::SetHsb(glm::vec4 m_HSBA)
 	float s = m_HSBA[1], b = m_HSBA[2];
 
 	float C = s * b;
-	float X = C * (1 - abs(fmod((h / 60.f), 2) - 1));
+	float X = C * (1 - abs((float)fmod((h / 60.f), 2) - 1));
 	float m = b - C;
 
 	if (0 <= h && h < 60)
@@ -355,7 +355,7 @@ Hazel::Color& Hazel::Color::SetRgb(const std::initializer_list<float>& Element)
 	if (delta == 0)
 		m_HSBA[0] = 0;
 	else if (cmax == m_RGBA[0])
-		m_HSBA[0] = 60 * fmod((m_RGBA[1] - m_RGBA[2]) / delta, 6);
+		m_HSBA[0] = 60 * (float)fmod((m_RGBA[1] - m_RGBA[2]) / delta, 6);
 	else if (cmax == m_RGBA[1])
 		m_HSBA[0] = 60 * ((m_RGBA[2] - m_RGBA[0]) / delta + 2);
 	else if (cmax == m_RGBA[2])
@@ -390,7 +390,7 @@ Hazel::Color& Hazel::Color::SetRgb(glm::vec4 color)
 	if (delta == 0)
 		m_HSBA[0] = 0;
 	else if (cmax == color.r)
-		m_HSBA[0] = 60 * fmod((color.g - color.b) / delta, 6);
+		m_HSBA[0] = 60 * (float)fmod((color.g - color.b) / delta, 6);
 	else if (cmax == color.g)
 		m_HSBA[0] = 60 * ((color.b - color.r) / delta + 2);
 	else if (cmax == color.b)
@@ -424,7 +424,7 @@ Hazel::Color& Hazel::Color::SetRgb(glm::vec3 color)
 	if (delta == 0)
 		m_HSBA[0] = 0;
 	else if (cmax == color.r)
-		m_HSBA[0] = 60 * fmod((color.g - color.b) / delta, 6);
+		m_HSBA[0] = 60 * (float)fmod((color.g - color.b) / delta, 6);
 	else if (cmax == color.g)
 		m_HSBA[0] = 60 * ((color.b - color.r) / delta + 2);
 	else if (cmax == color.b)
