@@ -2,13 +2,9 @@
 #include "Renderer.h"
 #include "Renderer2D.h"
 
-#include "Platform/OpenGl/OpenGLShader.h"
-
 namespace Hazel
 {
-	Renderer::SceneData* Renderer::m_sceneData = new SceneData();
-
-	Ref<ShaderLibrary> Renderer::m_Library = newRef<ShaderLibrary>();
+	Scope<Renderer::SceneData> Renderer::m_sceneData = NewScope<Renderer::SceneData>();
 
 	void Renderer::Init(bool blend)
 	{
@@ -39,16 +35,11 @@ namespace Hazel
 	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& va, const glm::mat4& transform)
 	{
 		shader->Bind();
-		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", m_sceneData->viewProjectionMatrix);
-		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
+		shader->UploadUniformMat4("u_ViewProjection", m_sceneData->viewProjectionMatrix);
+		shader->UploadUniformMat4("u_Transform", transform);
 
 		va->Bind();
 		RenderCommand::DrawIndexed(va);
-	}
-
-	Ref<ShaderLibrary> Renderer::GetShaderLibrary()
-	{
-		return m_Library;
 	}
 
 }

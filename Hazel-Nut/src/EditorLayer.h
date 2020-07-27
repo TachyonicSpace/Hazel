@@ -11,8 +11,8 @@ namespace Hazel
 		EditorLayer();
 		virtual ~EditorLayer() = default;
 
-		virtual void OnAttatch() override;
-		virtual void OnDetatch() override;
+		virtual void OnAttach() override;
+		virtual void OnDetach() override;
 
 		virtual void OnUpdate(Timestep & ts) override;
 		virtual void OnImGuiRender() override;

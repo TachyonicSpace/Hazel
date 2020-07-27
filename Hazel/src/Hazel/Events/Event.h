@@ -50,13 +50,12 @@ namespace Hazel {
 		{
 			return GetCategoryFlags() & (int)category;
 		}
-	protected:
 	};
 
 	class EventDispatcher
 	{
-		template <typename T>
-		using EventFn = std::function<bool(T&)>;
+		template <typename F>
+		using EventFn = std::function<bool(F&)>;
 	public:
 		EventDispatcher(Event& e)
 			:m_Event(e) {}

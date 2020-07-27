@@ -45,17 +45,17 @@ namespace Hazel {
 		{
 			switch (type)
 			{
-			case Hazel::ShaderDataType::Float:		return 1;
-			case Hazel::ShaderDataType::Float2:		return 2;
-			case Hazel::ShaderDataType::Float3:		return 3;
-			case Hazel::ShaderDataType::Float4:		return 4;
-			case Hazel::ShaderDataType::Mat3:		return 3 * 3;
-			case Hazel::ShaderDataType::Mat4:		return 4 * 4;
-			case Hazel::ShaderDataType::Int:		return 1;
-			case Hazel::ShaderDataType::Int2:		return 2;
-			case Hazel::ShaderDataType::Int3:		return 3;
-			case Hazel::ShaderDataType::Int4:		return 4;
-			case Hazel::ShaderDataType::Bool:		return 1;
+			case ShaderDataType::Float:   return 1;
+			case ShaderDataType::Float2:  return 2;
+			case ShaderDataType::Float3:  return 3;
+			case ShaderDataType::Float4:  return 4;
+			case ShaderDataType::Mat3:    return 3; // 3* float3
+			case ShaderDataType::Mat4:    return 4; // 4* float4
+			case ShaderDataType::Int:     return 1;
+			case ShaderDataType::Int2:    return 2;
+			case ShaderDataType::Int3:    return 3;
+			case ShaderDataType::Int4:    return 4;
+			case ShaderDataType::Bool:    return 1;
 			}
 			HZ_CORE_ASSERT(false, "unknown shaderdatatype")
 			return 0;
@@ -72,8 +72,8 @@ namespace Hazel {
 		}
 		BufferLayout() {}
 
-		inline uint32_t GetStride() const { return m_Stride; }
-		inline std::vector<BufferElements> GetElements() const { return m_Element; }
+		uint32_t GetStride() const { return m_Stride; }
+		const std::vector<BufferElements>& GetElements() const { return m_Element; }
 
 		std::vector<BufferElements>::iterator begin() { return m_Element.begin(); }
 		std::vector<BufferElements>::iterator end() { return m_Element.end(); }

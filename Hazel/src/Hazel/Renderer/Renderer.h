@@ -23,15 +23,12 @@ namespace Hazel
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 
-		static Ref<ShaderLibrary> GetShaderLibrary();
-
 	private:
 		struct SceneData
 		{
 			glm::mat4 viewProjectionMatrix;
 		};
 
-		static SceneData* m_sceneData;
-		static Ref<ShaderLibrary> m_Library;
+		static Scope<SceneData> m_sceneData;
 	};
 }

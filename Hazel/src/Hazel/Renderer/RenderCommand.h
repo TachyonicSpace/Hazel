@@ -31,7 +31,7 @@ namespace Hazel {
 			s_RendererAPI->DrawIndexed(va, indexCount);
 		}
 	private:
-		static RendererAPI* s_RendererAPI;
+		static Scope<RendererAPI> s_RendererAPI;
 	};
 
 }

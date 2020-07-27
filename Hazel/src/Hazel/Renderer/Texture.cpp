@@ -11,7 +11,7 @@ namespace Hazel
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:    HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::OpenGL:  return newRef<OpenGLTexture2D>(width, height);
+		case RendererAPI::API::OpenGL:  return NewRef<OpenGLTexture2D>(width, height);
 		}
 
 		HZ_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -22,7 +22,7 @@ namespace Hazel
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None:    HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::API::OpenGL:  return newRef<OpenGLTexture2D>(path);
+		case RendererAPI::API::OpenGL:  return NewRef<OpenGLTexture2D>(path);
 		}
 
 		HZ_CORE_ASSERT(false, "Unknown RendererAPI!");

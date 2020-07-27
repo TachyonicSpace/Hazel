@@ -9,7 +9,7 @@
 
 //temp
 #include <GLFW\glfw3.h>
-#include <glad\glad.h>
+//#include <glad\glad.h>
 
 namespace Hazel {
 
@@ -22,7 +22,7 @@ namespace Hazel {
 	{
 	}
 
-	void ImGuiLayer::OnAttatch()
+	void ImGuiLayer::OnAttach()
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -31,7 +31,7 @@ namespace Hazel {
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; //enables keyboard controls
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //enables Gamepad controls
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //enables Gamepad controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; //enables docking
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; //enables multi-viewport / platform windows
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
@@ -57,7 +57,7 @@ namespace Hazel {
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 
-	void ImGuiLayer::OnDetatch()
+	void ImGuiLayer::OnDetach()
 	{
 		HZ_PROFILE_FUNCTION();
 

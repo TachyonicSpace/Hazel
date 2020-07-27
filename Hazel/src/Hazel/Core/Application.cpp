@@ -18,7 +18,7 @@ namespace Hazel {
 		HZ_CORE_ASSERT(!s_Instance, "Application already exist!!");
 		s_Instance = this;
 
-		m_Window = Scope<Window>(Window::Create(props));
+		m_Window = Window::Create(props);
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
 		Renderer::Init();
@@ -32,7 +32,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		m_LayerStack.PushLayer(layer);
-		layer->OnAttatch();
+		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* overlay)
@@ -40,7 +40,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		m_LayerStack.PushOverlay(overlay);
-		overlay->OnAttatch();
+		overlay->OnAttach();
 	}
 
 	void Application::OnEvent(Event& e)

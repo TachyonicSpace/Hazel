@@ -1,5 +1,6 @@
 workspace "Hazel"
 	architecture "x64"
+	startproject "Hazel-Nut"
 
 	configurations{
 		"Debug",
@@ -13,7 +14,6 @@ workspace "Hazel"
 		"MultiProcessorCompile"
 	}
 	
-	startproject "Hazel-Nut"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
@@ -32,11 +32,6 @@ group "Dependencies"
 	include "Hazel/vendor/imgui"
 group ""
 
-
-
-include "Hazel/vendor/GLFW"
-include "Hazel/vendor/Glad"
-include "Hazel/vendor/imgui"
 
 
 project "Hazel"

@@ -5,22 +5,36 @@
 #include <glad/glad.h>
 
 namespace Hazel {
-	OpenGlContext::OpenGlContext(GLFWwindow* window)
+	OpenGLContext::OpenGLContext(GLFWwindow* window)
 		:m_Window(window)
 	{
 		HZ_CORE_ASSERT(window, "Window is null")
 	}
-	void OpenGlContext::Init()
+	void OpenGLContext::Init()
 	{
 		HZ_PROFILE_FUNCTION();
 
 		glfwMakeContextCurrent(m_Window);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		HZ_CORE_ASSERT(status, "failed to initialize glad!");
+
+		HZ_CORE_INFO("OpenGL Info:");
+		HZ_CORE_INFO("  Vendor: {0}", glGetString(GL_VENDOR));
+		HZ_CORE_INFO("  Renderer: {0}", glGetString(GL_RENDERER));
+		HZ_CORE_INFO("  Version: {0}", glGetString(GL_VERSION));
+
+		#ifdef HZ_ENABLE_ASSERTS
+		int versionMajor;
+		int versionMinor;
+		glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
+		glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
+
+		HZ_CORE_ASSERT(versionMajor > 4 || (versionMajor == 4 && versionMinor >= 5), "Hazel requires at least OpenGL version 4.5!");
+		#endif
 	}
 
 
-	void OpenGlContext::SwapBuffers()
+	void OpenGLContext::SwapBuffers()
 	{
 		HZ_PROFILE_FUNCTION();
 

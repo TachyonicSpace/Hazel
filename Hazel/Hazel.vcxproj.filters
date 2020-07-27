@@ -1415,6 +1415,9 @@
     <ClCompile Include="src\Hazel\Core\LayerStack.cpp">
       <Filter>src\Hazel\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hazel\Core\Window.cpp">
+      <Filter>src\Hazel\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Hazel\Core\log.cpp">
       <Filter>src\Hazel\Core</Filter>
     </ClCompile>

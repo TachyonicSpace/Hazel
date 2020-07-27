@@ -241,7 +241,7 @@ public:
 
 	~Sandbox2D() = default;
 
-	void OnAttatch()
+	void OnAttach()
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -264,7 +264,7 @@ public:
 		m_Particle.Position = { 0, 0 };
 	}
 
-	void OnDetatch()
+	void OnDetach()
 	{
 		HZ_PROFILE_FUNCTION();
 

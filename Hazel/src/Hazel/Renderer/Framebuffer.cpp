@@ -13,7 +13,7 @@ namespace Hazel
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported");
-		case RendererAPI::API::OpenGL: return newRef<OpenGLFrameBuffer>(specs);
+		case RendererAPI::API::OpenGL: return NewRef<OpenGLFrameBuffer>(specs);
 		}
 
 		HZ_CORE_ASSERT(false, "unknown API");

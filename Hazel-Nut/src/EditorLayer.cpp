@@ -7,10 +7,10 @@ namespace Hazel
 
 
 	EditorLayer::EditorLayer()
-		:Layer("2D sandbox"), m_Camera(1280.f / 720.f)
+		:Layer("2D sandbox"), m_Camera(1280.f / 720.f, true)
 	{
 	}
-	void EditorLayer::OnAttatch()
+	void EditorLayer::OnAttach()
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -21,7 +21,7 @@ namespace Hazel
 		fbspec.Height = 500;
 		m_FrameBuffer = Framebuffer::Create(fbspec);
 	}
-	void EditorLayer::OnDetatch()
+	void EditorLayer::OnDetach()
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -158,7 +158,7 @@ namespace Hazel
 
 		m_ViewPortFocused = ImGui::IsWindowFocused();
 		m_ViewPortHovered = ImGui::IsWindowHovered();
-		Application::Get().GetImGuiLayer()->SetBlockEvents(!m_ViewPortFocused || !m_ViewPortHovered);
+		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewPortFocused || !m_ViewPortHovered);
 
 		auto viewPortSize = ImGui::GetContentRegionAvail();
 
