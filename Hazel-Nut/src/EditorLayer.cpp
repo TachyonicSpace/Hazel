@@ -20,6 +20,13 @@ namespace Hazel
 		fbspec.Width = 900;
 		fbspec.Height = 500;
 		m_FrameBuffer = Framebuffer::Create(fbspec);
+
+		m_Scene = NewRef<Scene>();
+
+		square = m_Scene->CreateEntity();
+		m_Scene->Reg().emplace<TransformComponent>(square, glm::mat4{ 1 });
+		m_Scene->Reg().emplace<SpriteRendererComponent>(square, Color({ 0, 1, 0 }));
+
 	}
 	void EditorLayer::OnDetach()
 	{
@@ -31,41 +38,21 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		if(m_ViewPortFocused)
+		if (m_ViewPortFocused)
 			m_Camera.OnUpdate(ts);
 
 		Renderer2D::ResetStats();
-		{
-			HZ_PROFILE_SCOPE("Renderer::setup");
 
-			m_FrameBuffer->Bind();
+		m_FrameBuffer->Bind();
 
-			RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
-			RenderCommand::Clear();
-		}
-
-		{
-			HZ_PROFILE_SCOPE("Renderer::draw");
-
-			Renderer2D::BeginScene(m_Camera.GetCamera());
-
-			Renderer2D::DrawQuad({ 0, 0, -.1 }, { 10, 10 }, m_angle, m_checkerboard, 10.f);
+		RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
+		RenderCommand::Clear();
 
 
-			Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, { 1, 0, 0 });
-			Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
+		Renderer2D::BeginScene(m_Camera.GetCamera());
 
-			for (float y = -5; y <= 5; y += m_Delta)
-			{
-				for (float x = -5; x <= 5; x += m_Delta)
-				{
-					Renderer2D::DrawQuad({ x, y, 0 }, { m_Delta * .9, m_Delta * .9 },
-						{ (x + 5) / 10.f, .5f, (x + 5) / 10.f , .7f });
-				}
-			}
 
-		}
-
+		auto group = m_Scene->Reg().group<TransformComponent>(entt::get<SpriteRendererComponent>);
 
 		Renderer2D::EndScene();
 

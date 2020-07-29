@@ -27,7 +27,8 @@
 #include "Hazel\Renderer\CameraController.h"
 #include "Hazel\Renderer\VertexArray.h"
 
-
+#include "Hazel/Scene/Components.h"
+#include "Hazel/Scene/Scene.h"
 
 
 //------Entry Point--------------------------

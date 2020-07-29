@@ -285,7 +285,7 @@ public:
 			Hazel::RenderCommand::Clear();
 		}
 
-		/*{
+		{
 			HZ_PROFILE_SCOPE("Renderer::draw");
 
 			Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
@@ -305,9 +305,9 @@ public:
 				}
 			}
 
-		}*/
+		}
 
-		Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
+	/*	Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
 		m_SpriteSheet->subTexture(texCoordX, texCoordY);
 		Hazel::Renderer2D::DrawQuad({ 0, 0 }, { 1, 1 }, m_SpriteSheet);
 
@@ -337,7 +337,7 @@ public:
 				else
 					Hazel::Renderer2D::DrawQuad(tilePos, tileSize, { 1, 0, 1 });
 			}
-		}
+		}*/
 
 
 		Hazel::Renderer2D::EndScene();
@@ -366,14 +366,10 @@ public:
 		
 		ImGui::Begin("Settings");
 		ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416);
-		ImGui::SliderInt("texture x coord", &texCoordX, -1, m_SpriteSheet->GetWidth() / 128);
-		ImGui::SliderInt("texture y coord", &texCoordY, -1, m_SpriteSheet->GetHeight() / 128);
+		//ImGui::SliderInt("texture x coord", &texCoordX, -1, m_SpriteSheet->GetWidth() / 128);
+		//ImGui::SliderInt("texture y coord", &texCoordY, -1, m_SpriteSheet->GetHeight() / 128);
 
-		auto& stats = Hazel::Renderer2D::GetStats();
-
-		ImGui::TextColored({ .8, .2, .2, 1 }, "number of draw calls: %d", stats.drawCalls);
-		ImGui::TextColored({ .8, .2, .2, 1 }, "number of quads: %d", stats.quadCount);
-
+		ImGui::End();
 	}
 
 	void OnEvent(Hazel::Event& e)
@@ -392,7 +388,7 @@ private:
 
 	glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
 
-	float m_angle = 0;
+	float m_angle = 0, delta = .5;
 	int texCoordX = -1, texCoordY = -1;
 
 	ParticleSystem m_ParticleSystem;
