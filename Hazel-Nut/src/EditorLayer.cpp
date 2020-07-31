@@ -1,6 +1,10 @@
 #include "EditorLayer.h"
 #include "imgui/imgui.h"
 
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Hazel
 {
 
@@ -20,6 +24,15 @@ namespace Hazel
 		fbspec.Width = 900;
 		fbspec.Height = 500;
 		m_FrameBuffer = Framebuffer::Create(fbspec);
+
+
+		m_Scene = NewRef<Scene>();
+
+		auto square = m_Scene->CreateEntity();
+		m_Scene->Reg().emplace<TransformComponent>(square);
+		m_Scene->Reg().emplace<SpriteRendererComponent>(square, glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
+
+		m_SquareEntity = square;
 	}
 	void EditorLayer::OnDetach()
 	{
@@ -31,7 +44,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		if(m_ViewPortFocused)
+		if (m_ViewPortFocused)
 			m_Camera.OnUpdate(ts);
 
 		Renderer2D::ResetStats();
@@ -49,23 +62,30 @@ namespace Hazel
 
 			Renderer2D::BeginScene(m_Camera.GetCamera());
 
-			Renderer2D::DrawQuad({ 0, 0, -.1 }, { 10, 10 }, m_angle, m_checkerboard, 10.f);
 
+			#ifdef drawingQuads
 
-			Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, { 1, 0, 0 });
-			Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
-
-			for (float y = -5; y <= 5; y += m_Delta)
 			{
-				for (float x = -5; x <= 5; x += m_Delta)
+				Renderer2D::DrawQuad({ 0, 0, -.1 }, { 10, 10 }, m_angle, m_checkerboard, 10.f);
+
+
+				Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, { 1, 0, 0 });
+				Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
+
+				for (float y = -5; y <= 5; y += m_Delta)
 				{
-					Renderer2D::DrawQuad({ x, y, 0 }, { m_Delta * .9, m_Delta * .9 },
-						{ (x + 5) / 10.f, .5f, (x + 5) / 10.f , .7f });
+					for (float x = -5; x <= 5; x += m_Delta)
+					{
+						Renderer2D::DrawQuad({ x, y, 0 }, { m_Delta * .9, m_Delta * .9 },
+							{ (x + 5) / 10.f, .5f, (x + 5) / 10.f , .7f });
+					}
 				}
+
 			}
+			#endif // DEBUG
 
 		}
-
+		m_Scene->OnUpdate(ts);
 
 		Renderer2D::EndScene();
 
@@ -146,12 +166,11 @@ namespace Hazel
 		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "number of draw calls: %d", stats.drawCalls);
 		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "number of quads: %d", stats.quadCount);
 
-		static float windowScalar = 1;
-		ImGui::SliderFloat("windowSize", &windowScalar, 1, 10);
-		ImGui::End();
+		auto& squareColor = m_Scene->Reg().get<SpriteRendererComponent>(m_SquareEntity).color.GetVec4();
+		ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
 
-		if (dockSpaceOpen)
-			ImGui::End();
+
+		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 		ImGui::Begin("viewPort");
@@ -171,8 +190,10 @@ namespace Hazel
 		}
 		ImGui::Image((void*)m_FrameBuffer->GetColorAttachmentID(),
 			{ m_ViewPortSize.x, m_ViewPortSize.y });
+		ImGui::End();
 		ImGui::PopStyleVar();
 		ImGui::End();
+
 	}
 	void EditorLayer::OnEvent(Event& e)
 	{

@@ -52,11 +52,11 @@ namespace Hazel
 
 		//disable the following line of code to get project to compile and run
 		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-		/*for (auto entity : group)
+		for (auto entity : group)
 		{
 			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
 			Renderer2D::DrawQuad(transform, sprite.color);
-		}*/
+		}
 	}
 }

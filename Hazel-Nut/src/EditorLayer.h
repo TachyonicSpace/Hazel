@@ -25,6 +25,11 @@ namespace Hazel
 		Ref<Shader> m_Shader;
 		Ref<Framebuffer> m_FrameBuffer;
 
+
+		Ref<Scene> m_Scene;
+		entt::entity m_SquareEntity;
+
+
 		Ref<Texture2D> m_checkerboard;
 
 		glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
