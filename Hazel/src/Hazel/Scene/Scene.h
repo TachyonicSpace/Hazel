@@ -1,9 +1,8 @@
 #pragma once
 
 
-#include <entt.hpp>
-
-#include "Hazel/Scene/Components.h"
+//#define NOMINMAX
+#include "entt.hpp"
 
 #include "Hazel/Core/Timestep.h"
 

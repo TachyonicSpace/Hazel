@@ -76,14 +76,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>hzpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;HZ_PLATFORM_WINDOWS;HZ_BUILD_DLL;GLFW_INCLUDE_NONE;HZ_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;HZ_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -98,7 +98,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>hzpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;HZ_PLATFORM_WINDOWS;HZ_BUILD_DLL;GLFW_INCLUDE_NONE;HZ_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;HZ_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -107,7 +107,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -123,7 +123,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>hzpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;HZ_PLATFORM_WINDOWS;HZ_BUILD_DLL;GLFW_INCLUDE_NONE;HZ_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;HZ_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;vendor\entt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -132,7 +132,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -389,12 +389,16 @@
     <ClInclude Include="vendor\glm\glm\ext\vector_float4.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_float4_precision.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_int1.hpp" />
+    <ClInclude Include="vendor\glm\glm\ext\vector_int1_precision.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_int1_sized.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_int2.hpp" />
+    <ClInclude Include="vendor\glm\glm\ext\vector_int2_precision.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_int2_sized.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_int3.hpp" />
+    <ClInclude Include="vendor\glm\glm\ext\vector_int3_precision.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_int3_sized.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_int4.hpp" />
+    <ClInclude Include="vendor\glm\glm\ext\vector_int4_precision.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_int4_sized.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_integer.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_integer.inl" />
@@ -403,12 +407,16 @@
     <ClInclude Include="vendor\glm\glm\ext\vector_relational.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_relational.inl" />
     <ClInclude Include="vendor\glm\glm\ext\vector_uint1.hpp" />
+    <ClInclude Include="vendor\glm\glm\ext\vector_uint1_precision.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_uint1_sized.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_uint2.hpp" />
+    <ClInclude Include="vendor\glm\glm\ext\vector_uint2_precision.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_uint2_sized.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_uint3.hpp" />
+    <ClInclude Include="vendor\glm\glm\ext\vector_uint3_precision.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_uint3_sized.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_uint4.hpp" />
+    <ClInclude Include="vendor\glm\glm\ext\vector_uint4_precision.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_uint4_sized.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_ulp.hpp" />
     <ClInclude Include="vendor\glm\glm\ext\vector_ulp.inl" />
