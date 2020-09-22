@@ -121,6 +121,20 @@ namespace Hazel {
 
 		s_Data.TextureSlotIndex = 1;
 	}
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
+
+		s_Data.texShader->Bind();
+		s_Data.texShader->UploadUniformMat4("u_ViewProjection", viewProj);
+
+		s_Data.quadIndexCount = 0;
+		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+
+		s_Data.TextureSlotIndex = 1;
+	}
 	void Renderer2D::EndScene()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -129,6 +143,12 @@ namespace Hazel {
 		s_Data.vb->SetData(s_Data.quadVertexBufferBase, dataSize);
 
 		Flush();
+
+		s_Data.stats.quadCount = 0;
+		s_Data.quadIndexCount = 0;
+		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+
+		s_Data.TextureSlotIndex = 1;
 	}
 	void Renderer2D::Flush()
 	{
@@ -136,6 +156,7 @@ namespace Hazel {
 			s_Data.textureSlots[i]->Bind(i);
 
 		RenderCommand::DrawIndexed(s_Data.va, s_Data.stats.quadCount);
+
 
 
 		s_Data.stats.drawCalls++;
@@ -202,7 +223,7 @@ namespace Hazel {
 
 		HZ_PROFILE_FUNCTION();
 
-		if (!tex)
+		/*if (!tex)
 		{
 			tex = s_Data.textureSlots[0];
 		}
@@ -224,7 +245,7 @@ namespace Hazel {
 		{
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.textureSlots[s_Data.TextureSlotIndex++] = tex;
-		}
+		}*/
 
 		glm::mat4 transform;
 		if (radianAngle == 0)
@@ -239,7 +260,8 @@ namespace Hazel {
 				glm::scale(glm::mat4(1), { size.x, size.y, 1 });
 		}
 
-		for (int i = 0; i < 4; i++)
+		DrawQuad(transform, tex, tilingFactor, color);
+		/*for (int i = 0; i < 4; i++)
 		{
 			s_Data.quadVertexBufferPtr->pos = transform * s_Data.quadVertexPositions[i];
 			s_Data.quadVertexBufferPtr->color = color.GetVec4();
@@ -251,7 +273,7 @@ namespace Hazel {
 
 		s_Data.quadIndexCount += 6;
 
-		s_Data.stats.quadCount++;
+		s_Data.stats.quadCount++;*/
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform,

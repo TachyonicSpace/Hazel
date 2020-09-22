@@ -22,8 +22,8 @@ namespace Hazel
 		Color& SetHsb(glm::vec4 hsba);
 		Color& SetHsb(const std::initializer_list<float>& Element);
 
-		const float* GetRBGA() const { return m_RGBA; }
-		float* GetRBGAPointer() { return m_RGBA; }
+		const float* GetRGBA() const { return m_RGBA; }
+		float* GetRGBAPointer() { return m_RGBA; }
 		Color& SetRgb(int greyscale);
 		Color& SetRgb(float greyscale);
 		Color& SetRgb(glm::vec3 rgb);

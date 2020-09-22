@@ -6,7 +6,8 @@ namespace Hazel
 {
 	struct FramebufferSpecs
 	{
-		uint32_t Width, Height;
+		uint32_t Width;
+		uint32_t Height;
 		uint32_t samples = 1;
 
 		bool SwapChainTarget = false;

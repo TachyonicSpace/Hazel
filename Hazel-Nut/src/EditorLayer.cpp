@@ -1,4 +1,5 @@
 #include "EditorLayer.h"
+//#include "Hazel/ImGui/ImGui.h"
 #include "imgui/imgui.h"
 
 
@@ -29,10 +30,57 @@ namespace Hazel
 		m_Scene = NewRef<Scene>();
 
 		auto square = m_Scene->CreateEntity();
-		m_Scene->Reg().emplace<TransformComponent>(square);
-		m_Scene->Reg().emplace<SpriteRendererComponent>(square, glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
+
+		//square.AddComponent<Transform>();
+		square.AddComponent<Component::SpriteRenderer>(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
 
 		m_SquareEntity = square;
+
+		m_CameraEntity = m_Scene->CreateEntity();
+		m_CameraEntity.AddComponent<Component::Cameras>();
+
+		m_SecondCamera = m_Scene->CreateEntity();
+		m_SecondCamera.AddComponent<Component::Cameras>().Primary = false;
+
+		class CameraController : public ScriptableEntity
+		{
+		public:
+			void OnCreate()
+			{
+			}
+
+			void OnDestroy()
+			{
+			}
+
+			void OnUpdate(Timestep ts) override
+			{
+				auto& trans = GetComponent<Component::Transform>().transform;
+				float moveSpeed = 5;
+				float radianSpeed = .2;
+
+				if (Input::IsKeyPressed(HZ_KEY_A))
+				{
+					trans[3][0] -= moveSpeed * ts;
+				}
+
+				else if (Input::IsKeyPressed(HZ_KEY_D))
+				{
+					trans[3][0] += moveSpeed * ts;
+				}
+				if (Input::IsKeyPressed(HZ_KEY_W))
+				{
+					trans[3][1] += moveSpeed * ts;
+				}
+				else if (Input::IsKeyPressed(HZ_KEY_S))
+				{
+					trans[3][1] -= moveSpeed * ts;
+				}
+			}
+
+		};
+
+		m_CameraEntity.AddComponent<Component::NativeScript>().Bind<CameraController>();
 	}
 	void EditorLayer::OnDetach()
 	{
@@ -44,50 +92,27 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
+		if (FramebufferSpecs spec = m_FrameBuffer->GetSpecs();
+			m_ViewPortSize.x > 0.0f && m_ViewPortSize.y > 0.0f && // zero sized framebuffer is invalid
+			(spec.Width != m_ViewPortSize.x || spec.Height != m_ViewPortSize.y))
+		{
+			m_FrameBuffer->Resize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
+			m_Camera.OnResize(m_ViewPortSize.x, m_ViewPortSize.y);
+
+			m_Scene->OnViewportResize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
+		}
+
 		if (m_ViewPortFocused)
 			m_Camera.OnUpdate(ts);
 
-		Renderer2D::ResetStats();
-		{
-			HZ_PROFILE_SCOPE("Renderer::setup");
 
-			m_FrameBuffer->Bind();
+		m_FrameBuffer->Bind();
 
-			RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
-			RenderCommand::Clear();
-		}
-
-		{
-			HZ_PROFILE_SCOPE("Renderer::draw");
-
-			Renderer2D::BeginScene(m_Camera.GetCamera());
+		RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
+		RenderCommand::Clear();
 
 
-			#ifdef drawingQuads
-
-			{
-				Renderer2D::DrawQuad({ 0, 0, -.1 }, { 10, 10 }, m_angle, m_checkerboard, 10.f);
-
-
-				Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, { 1, 0, 0 });
-				Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
-
-				for (float y = -5; y <= 5; y += m_Delta)
-				{
-					for (float x = -5; x <= 5; x += m_Delta)
-					{
-						Renderer2D::DrawQuad({ x, y, 0 }, { m_Delta * .9, m_Delta * .9 },
-							{ (x + 5) / 10.f, .5f, (x + 5) / 10.f , .7f });
-					}
-				}
-
-			}
-			#endif // DEBUG
-
-		}
 		m_Scene->OnUpdate(ts);
-
-		Renderer2D::EndScene();
 
 		m_FrameBuffer->UnBind();
 	}
@@ -163,14 +188,33 @@ namespace Hazel
 
 		auto& stats = Renderer2D::GetStats();
 
-		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "number of draw calls: %d", stats.drawCalls);
-		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "number of quads: %d", stats.quadCount);
+		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "frame buffer width: %d", m_FrameBuffer->GetSpecs().Width);
+		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "framebuffer height: %d", m_FrameBuffer->GetSpecs().Height);
 
-		auto& squareColor = m_Scene->Reg().get<SpriteRendererComponent>(m_SquareEntity).color.GetVec4();
-		ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
+		const auto& squareColor = m_SquareEntity.GetComponent<Component::SpriteRenderer>().color.GetRGBAPointer();
+		ImGui::ColorEdit4("Square Color", squareColor);
+
+		ImGui::Separator();
+
+		ImGui::DragFloat3("Camera Transform",
+			glm::value_ptr(m_CameraEntity.GetComponent<Component::Transform>().transform[3]));
+
+		if (ImGui::Checkbox("Camera A", &m_PrimaryCamera))
+		{
+			m_CameraEntity.GetComponent<Component::Cameras>().Primary = m_PrimaryCamera;
+			m_SecondCamera.GetComponent<Component::Cameras>().Primary = !m_PrimaryCamera;
+		}
+		{
+			auto& camera = m_SecondCamera.GetComponent<Component::Cameras>().camera;
+			float orthoSize = camera.GetOrthographicSize();
+			if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
+				camera.SetOrthographicSize(orthoSize);
+		}
 
 
 		ImGui::End();
+
+
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 		ImGui::Begin("viewPort");
@@ -180,14 +224,9 @@ namespace Hazel
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewPortFocused || !m_ViewPortHovered);
 
 		auto viewPortSize = ImGui::GetContentRegionAvail();
+		m_ViewPortSize = { viewPortSize.x, viewPortSize.y };
 
-		if ((viewPortSize.x != m_ViewPortSize.x || viewPortSize.y != m_ViewPortSize.y) && viewPortSize.x > 0 && viewPortSize.y > 0)
-		{
-			m_FrameBuffer->Resize((uint32_t)viewPortSize.x, (uint32_t)viewPortSize.y);
-			m_ViewPortSize = { viewPortSize.x, viewPortSize.y };
 
-			m_Camera.OnResize(viewPortSize.x, viewPortSize.y);
-		}
 		ImGui::Image((void*)m_FrameBuffer->GetColorAttachmentID(),
 			{ m_ViewPortSize.x, m_ViewPortSize.y });
 		ImGui::End();

@@ -356,7 +356,7 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		GLint loc = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniform4f(loc, vec.GetRBGA()[0], vec.GetRBGA()[1], vec.GetRBGA()[2], vec.GetRBGA()[3]);
+		glUniform4f(loc, vec.GetRGBA()[0], vec.GetRGBA()[1], vec.GetRGBA()[2], vec.GetRGBA()[3]);
     }
 	void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
 	{

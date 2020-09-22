@@ -1,25 +1,90 @@
 #define HZ_MAIN
+#define _USE_MATH_DEFINES
 #include <Hazel.h>
+#include "Rocket.h"
+#include <random>
 
 #include "imgui/imgui.h"
 
-#include "ParticleSystem.h"
-
-static const uint32_t s_MapWidth = 24;
-
-static const char* s_MapTiles =
-"000000000000000000000000"
-"0000000dddd0000000000000"
-"0000dddddddddddd00000000"
-"000dd00ddddddddddddd0000"
-"00dd000ddddddddddddddd00"
-"0000ddddddddddddddddd000"
-"000000dddddddddddddd0000"
-"000000000dddddddd0000000"
-"000000000000000000000000"
-;
 
 
+#define WindowWidth 960.0f
+#define WindowHeight 540.0f
+float rocketW = .065;
+float rocketH = .025;
+float popsize = 1000;
+vec4 obstacle(0, 0, 1, .2);
+
+	int testing = 0;
+
+
+bool restart = false;
+
+struct population {
+	std::vector<Rocket> rockets;
+	std::vector<Rocket> matingPool;
+
+	float prevPopSize;
+
+	population(float width, float height) {
+		Rocket::count = 0;
+		for (int i = 0; i < popsize; i++) {
+			rockets.push_back(*(new Rocket(width, height)));
+		}
+		prevPopSize = popsize;
+	}
+
+	void pos(glm::vec2 pos) {
+		for (Rocket r : rockets) {
+			r.Pos = pos;
+		}
+	}
+
+	float eval() {
+		float bestFit = rockets[0].fitness(&obstacle);
+		for (int i = 0; i < popsize; i++) {
+			bestFit = __min(rockets[i].fitness(&obstacle), bestFit);
+		}
+		for (int i = 0; i < popsize; i++) {
+			//rockets[i].Fitness /= (bestFit + .00000001);
+		}
+		matingPool.resize(0);
+		//matingPool.clear();
+		//matingPool.shrink_to_fit();
+		for (int i = 0; i < popsize; i++) {
+			float fitness = rockets[i].Fitness;
+			auto n = clamp(fitness, 1.f, 150.f);
+			for (int j = 0; j < n; j++) {
+				matingPool.push_back(rockets[i]);
+			}
+		}
+		matingPool.shrink_to_fit();
+		return bestFit;
+	}
+
+	void selection() {
+		/*
+		population* newpop = new population();*/
+		if (matingPool.size() <= 0) {
+			matingPool = rockets;
+			std::cout << "Error: MatingPool empty, making the mating pool equal to the population\n\n";
+		}
+		for (int i = 0; i < popsize; i++) {
+			auto index = Rand((matingPool.size() - 1), 0);
+			auto partnerA = (matingPool[index]);
+
+			index = Rand((matingPool.size() - 1), 0);
+			auto partnerB = (matingPool[index]);
+
+			auto child = partnerA.crossover(partnerB);
+
+			this->rockets[i] = child;
+		}
+		prevPopSize = popsize;
+	}
+
+
+};
 
 //class ExampleLayer : public Hazel::Layer
 //{
@@ -233,6 +298,19 @@ static const char* s_MapTiles =
 
 class Sandbox2D : public Hazel::Layer
 {
+	Hazel::OrthographicCameraController m_Camera;
+
+	population pop = population(rocketW, rocketH);
+
+	float angle = 0;
+
+	int Rolls = 10000;
+	int stars = 500;
+	float mean = 5.0, sd = 2.0;
+	float testValue = -.55;
+	std::default_random_engine gen;
+	std::normal_distribution<double>* dist = new std::normal_distribution<double>(mean, 1/sd);
+
 public:
 	Sandbox2D()
 		:Layer("2D sandbox"), m_Camera(1280.f / 720.f)
@@ -245,23 +323,7 @@ public:
 	{
 		HZ_PROFILE_FUNCTION();
 
-		m_checkerboard = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
-		m_SpriteSheet = Hazel::Texture2D::Create("assets/game/RPGpack_sheet_2X.png");
-
-		Hazel::FramebufferSpecs fbspec;
-		fbspec.Width = 900;
-		fbspec.Height = 500;
-
-		m_TextureMap['d'] = { 6, 11 };
-		m_TextureMap['0'] = { 11, 11 };
-
-		m_Particle.ColorBegin = { 254, 212, 123, 1 };
-		m_Particle.ColorEnd = { 254, 109, 41, 1 };
-		m_Particle.SizeBegin = .5, m_Particle.SizeVariation = .3, m_Particle.SizeEnd = 0;
-		m_Particle.LifeTime = 1;
-		m_Particle.Velocity = { 0, 0 };
-		m_Particle.VelocityVariation = { 3, 1 };
-		m_Particle.Position = { 0, 0 };
+		//Hazel::Application::Get().GetWindow().SetVSync(false);
 	}
 
 	void OnDetach()
@@ -271,108 +333,132 @@ public:
 	}
 
 	void OnUpdate(Hazel::Timestep& ts)
-
 	{
-		HZ_PROFILE_FUNCTION();
+		Hazel::RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
+		Hazel::RenderCommand::Clear();
 
-		m_Camera.OnUpdate(ts);
-
-		Hazel::Renderer2D::ResetStats();
+		if (restart)
 		{
-			HZ_PROFILE_SCOPE("Renderer::setup");
-			
-			Hazel::RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
-			Hazel::RenderCommand::Clear();
-		}
-
-		/*{
-			HZ_PROFILE_SCOPE("Renderer::draw");
-
-			Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
-
-			Hazel::Renderer2D::DrawQuad({ 0, 0, -.1 }, { 10, 10 }, m_angle, m_checkerboard, 10.f);
-
-
-			Hazel::Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, {1, 0, 0});
-			Hazel::Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
-
-			for (float y = -5; y <= 5; y += delta)
-			{
-				for (float x = -5; x <= 5; x += delta)
-				{
-					Hazel::Renderer2D::DrawQuad({ x, y, 0 }, { delta*.9, delta*.9 },
-						{ (x + 5)/10.f, .5, (x + 5) / 10.f , .7});
-				}
-			}
-
-		}*/
-
-		Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
-		m_SpriteSheet->subTexture(texCoordX, texCoordY);
-		Hazel::Renderer2D::DrawQuad({ 0, 0 }, { 1, 1 }, m_SpriteSheet);
-
-		{
-			HZ_PROFILE_SCOPE("End Scene");
-			Hazel::Renderer2D::EndScene();
+			pop = *(new population(rocketW, rocketH));
+			restart = false;
 		}
 
 		Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
 
-		uint32_t mapHeight = strlen(s_MapTiles) / s_MapWidth;
-		for (uint32_t y = 0; y < mapHeight; y++)
+		bool notFinished = false;
+		for (int i = 0; i < pop.prevPopSize; i++)
 		{
-			for (uint32_t x = 0; x < s_MapWidth; x++)
+
+			Rocket& r = pop.rockets[i];
+			Hazel::Renderer2D::DrawQuad(r.pos(), { rocketW, rocketH }, r.angle, r.col);
+
+			if(i != testing)
 			{
-				char tile = s_MapTiles[x + y * s_MapWidth];
-				glm::vec2 tilePos = { x - s_MapWidth / 2.0, mapHeight - y - mapHeight / 2.0 };
-				glm::vec2 tileSize = { 1, 1 };
-
-				if (m_TextureMap.find(tile) != m_TextureMap.end())
-				{
-					auto subTextureCoords = m_TextureMap[tile];
-					m_SpriteSheet->subTexture(subTextureCoords.x, subTextureCoords.y);
-					Hazel::Renderer2D::DrawQuad(tilePos, tileSize, m_SpriteSheet);
-
-				}
-				else
-					Hazel::Renderer2D::DrawQuad(tilePos, tileSize, { 1, 0, 1 });
+				bool tmp = r.update(&obstacle);
+				if (tmp)
+					notFinished = true;
+				//notFinished = r.update(&obstacle) || notFinished;
 			}
+		}
+
+		if (!notFinished)
+			goto Finished;
+
+
+
+		{
+			Rocket target;
+			Hazel::Renderer2D::DrawQuad(target.target, { .01, .01 }, { 0, 1, 1, .8 });
+		}
+
+		{
+			Rocket obstacle;
+			Hazel::Renderer2D::DrawQuad({ 0, 0, -.8 }, { 1, .2 }, { 1, 0, .8 });
+		}
+
+		Rocket::count++;
+		if (Rocket::count >= DNA::lifespan) {
+			Finished:
+			Rocket::count = 0;
+			pop.eval();
+			pop.selection();
 		}
 
 
 		Hazel::Renderer2D::EndScene();
-
-		/*if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
-		{
-			auto [x, y] = Hazel::Input::GetMousePos();
-			auto width = Hazel::Application::Get().GetWindow().GetWidth();
-			auto height = Hazel::Application::Get().GetWindow().GetHeight();
-
-			auto bounds = m_Camera.GetBounds();
-			auto pos = m_Camera.GetCamera().GetPos();
-			x = (x / width) * bounds.GetWidth() - bounds.GetWidth() * 0.5f;
-			y = bounds.GetHeight() * 0.5f - (y / height) * bounds.GetHeight();
-			m_Particle.Position = { x + pos.x, y + pos.y };
-			for (int i = 0; i < 5; i++)
-				m_ParticleSystem.Emit(m_Particle);
-		}
-
-		m_ParticleSystem.OnUpdate(ts);
-		m_ParticleSystem.OnRender(m_Camera.GetCamera());*/
 	}
+
 
 	void OnImGuiRender()
 	{
-		
+		//HZ_CORE_ASSERT(false, "");
 		ImGui::Begin("Settings");
-		ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416);
-		ImGui::SliderInt("texture x coord", &texCoordX, -1, m_SpriteSheet->GetWidth() / 128);
-		ImGui::SliderInt("texture y coord", &texCoordY, -1, m_SpriteSheet->GetHeight() / 128);
+
+		#if needed
+		ImGui::SliderFloat("angle", &angle, 0, 2 * PI);
+
+		ImGui::SliderInt("index", &testing, 0, pop.rockets.size() - 1);
+		ImGui::SliderFloat("popsize", &popsize, 1, 1000);
+		ImGui::Checkbox("restart", &restart);
+
+		auto& rocket = pop.rockets[testing];
+		ImGui::Text("stats of rocket %p:", &rocket);
+		ImGui::SliderFloat2("pos: ", &rocket.Pos.x, -2, 2);
+		ImGui::Text("vel: x~%f, y~%f", rocket.vel.x, rocket.vel.y);
+		ImGui::Text("acc: x~%f, y~%f", rocket.acc.x, rocket.acc.y);
+		ImGui::ColorEdit4("color:", rocket.col.GetRGBAPointer());
+		ImGui::SliderFloat("mutationRate", &Rocket::mutationRate, 0, 1);
+		ImGui::SliderFloat("mutationPow", &Rocket::mutationpow, -1, 2);
+		ImGui::Text("angle: %f", rocket.angle);
+		ImGui::Text("fitness: %f", rocket.fitness(&obstacle));
+
+		ImGui::Separator();
+		#endif
 
 		auto& stats = Hazel::Renderer2D::GetStats();
 
 		ImGui::TextColored({ .8, .2, .2, 1 }, "number of draw calls: %d", stats.drawCalls);
 		ImGui::TextColored({ .8, .2, .2, 1 }, "number of quads: %d", stats.quadCount);
+
+		ImGui::Separator();
+		ImGui::Separator();
+
+		constexpr int range = 50;
+
+
+		ImGui::SliderFloat("mean", &mean, 0, range);
+		ImGui::SliderFloat("standard deviation", &sd, .2, range);
+		if (dist->mean() != mean || dist->sigma() != sd)
+		{
+			free(dist);
+			dist = new std::normal_distribution<double>(mean, 1/sd);
+		}
+			
+
+		std::stringstream normal;
+		int list[range] = {};
+
+		for (int i = 0; i < Rolls; i++)
+		{
+			double number = (*dist)(gen);
+			if ((number >= 0) && (number < range))
+				++list[int(number)];
+		}
+		normal << "normal dist (" << mean << ", " << sd << "):\n";
+
+		for (int i = 0; i < range; i++)
+		{
+			normal << i << '-' << (i + 1) << ": ";
+			normal << std::string(list[i] * stars / Rolls, '*') << "\n";
+		}
+
+		//auto zvalue = (mean - testValue) / sd;
+		//std::string probability = std::to_string(std::erfc(-zvalue * M_SQRT1_2)/2.0);
+		ImGui::SliderFloat("probability", &testValue, 0, range);
+		//ImGui::TextColored(ImVec4(0, 1, 1, 1), probability.c_str());
+		ImGui::TextColored(ImVec4(1, 0, 1, 1), normal.str().c_str());
+
+		ImGui::End();
 
 	}
 
@@ -381,33 +467,14 @@ public:
 		m_Camera.OnEvent(e);
 	}
 
-private:
-	Hazel::OrthographicCameraController m_Camera;
-
-	Hazel::Ref<Hazel::VertexArray> m_VertexArray;
-	Hazel::Ref<Hazel::Shader> m_Shader;
-
-	Hazel::Ref<Hazel::Texture2D> m_checkerboard;
-	Hazel::Ref<Hazel::Texture2D> m_SpriteSheet;
-
-	glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
-
-	float m_angle = 0;
-	int texCoordX = -1, texCoordY = -1;
-
-	ParticleSystem m_ParticleSystem;
-	ParticleProps m_Particle;
-
-	std::unordered_map<char, glm::vec2> m_TextureMap;
-
-	bool dockSpaceOpen = false;
 
 };
 
 
 class Sandbox : public Hazel::Application {
 public:
-	Sandbox() {
+	Sandbox()
+		:Application({ "HazelNut editor" }) {//, 900, 500}) {
 		PushLayer(new Sandbox2D());
 	}
 

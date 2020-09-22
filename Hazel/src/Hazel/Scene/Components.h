@@ -2,31 +2,63 @@
 
 #include <glm/glm.hpp>
 #include <Hazel/Renderer/Color.h>
+#include <Hazel/Renderer/Camera.h>
+
+#include "Entity.h"
 
 namespace Hazel
 {
 
-	struct TransformComponent
+	namespace Component
 	{
-		glm::mat4 Transform{ 1.0f };
+		struct Transform
+		{
+			glm::mat4 transform{ 1.0f };
 
-		TransformComponent() = default;
-		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::mat4& transform)
-			: Transform(transform) {}
+			Transform() = default;
+			Transform(const Transform&) = default;
+			Transform(const glm::mat4& transform)
+				: transform(transform) {}
 
-		operator glm::mat4& () { return Transform; }
-		operator const glm::mat4& () const { return Transform; }
-	};
+			operator glm::mat4& () { return transform; }
+			operator const glm::mat4& () const { return transform; }
+		};
 
-	struct SpriteRendererComponent
-	{
-		Color color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		struct SpriteRenderer
+		{
+			Color color{ 1.0f, 1.0f, 1.0f, 1.0f };
 
-		SpriteRendererComponent() = default;
-		SpriteRendererComponent(const SpriteRendererComponent&) = default;
-		SpriteRendererComponent(const Color& color)
-			: color(color) {}
-	};
+			SpriteRenderer() = default;
+			SpriteRenderer(const SpriteRenderer&) = default;
+			SpriteRenderer(const Color& color)
+				: color(color) {}
+		};
 
+		struct Cameras
+		{
+			SceneCamera camera;
+			bool Primary = true;
+
+			bool fixedAspectRatio = false;
+
+			Cameras() = default;
+			Cameras(const Cameras&) = default;
+		};
+
+		struct NativeScript
+		{
+			ScriptableEntity* Instance = nullptr;
+
+			ScriptableEntity* (*InstantiateScript)();
+			void (*DestroyScript)(NativeScript*);
+
+			template<typename T>
+			void Bind()
+			{
+				InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
+				DestroyScript = [](NativeScript* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+			}
+		};
+
+	}
 }

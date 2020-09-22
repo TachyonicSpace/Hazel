@@ -15,6 +15,8 @@ namespace Hazel {
 		virtual void Clear() override;
 
 		virtual void DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount = 0) override;
+
+		virtual void DrawPixels(uint32_t width, uint32_t height, float* pixels) override;
 	};
 
 }

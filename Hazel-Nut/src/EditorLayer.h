@@ -27,7 +27,11 @@ namespace Hazel
 
 
 		Ref<Scene> m_Scene;
-		entt::entity m_SquareEntity;
+		Entity m_SquareEntity;
+		Entity m_CameraEntity;
+		Entity m_SecondCamera;
+
+		bool m_PrimaryCamera = true;
 
 
 		Ref<Texture2D> m_checkerboard;

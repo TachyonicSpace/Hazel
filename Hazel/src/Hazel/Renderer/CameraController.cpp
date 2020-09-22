@@ -51,8 +51,6 @@ namespace Hazel {
 			else if (m_CameraRotation <= -glm::pi<float>())
 				m_CameraRotation += (glm::pi<float>() * 2.0);
 
-			HZ_INFO("angle {0}", m_CameraRotation);
-
 			m_Camera.SetRotation(m_CameraRotation);
 		}
 

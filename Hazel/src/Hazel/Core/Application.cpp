@@ -80,12 +80,14 @@ namespace Hazel {
 
 			if (!m_Minimized)
 			{
+				
 				{
 					HZ_PROFILE_SCOPE("layerStack update");
 
 					for (Layer* l : m_LayerStack)
 						l->OnUpdate(ts);
 				}
+
 
 
 				m_ImGuiLayer->Begin();
@@ -96,6 +98,7 @@ namespace Hazel {
 						l->OnImGuiRender();
 				}
 				m_ImGuiLayer->End();
+
 
 			}
 			m_Window->OnUpdate();
