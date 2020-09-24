@@ -14,10 +14,17 @@ namespace Hazel
 	{
 	}
 
-
+	Entity Scene::CreateEntity(const std::string& name, const glm::mat4& transform /* = glm::mat4(1) */)
+	{
+		Entity e(m_Registry.create(), this);
+		e.AddComponent<Component::Tag>(name);
+		e.AddComponent<Component::Transform>(transform);
+		return e;
+	}
 	Entity Scene::CreateEntity(const glm::mat4& transform)
 	{
 		Entity e(m_Registry.create(), this);
+		e.AddComponent<Component::Tag>("N/A");
 		e.AddComponent<Component::Transform>(transform);
 		return e;
 	}
@@ -25,6 +32,8 @@ namespace Hazel
 	Entity Scene::CreateEntity()
 	{
 		Entity e(m_Registry.create(), this);
+
+		e.AddComponent<Component::Tag>("N/A");
 		e.AddComponent<Component::Transform>();
 		return e;
 	}

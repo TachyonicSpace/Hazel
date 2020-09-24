@@ -29,17 +29,17 @@ namespace Hazel
 
 		m_Scene = NewRef<Scene>();
 
-		auto square = m_Scene->CreateEntity();
+		auto square = m_Scene->CreateEntity("green square");
 
 		//square.AddComponent<Transform>();
 		square.AddComponent<Component::SpriteRenderer>(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
 
 		m_SquareEntity = square;
 
-		m_CameraEntity = m_Scene->CreateEntity();
+		m_CameraEntity = m_Scene->CreateEntity("first Camera");
 		m_CameraEntity.AddComponent<Component::Cameras>();
 
-		m_SecondCamera = m_Scene->CreateEntity();
+		m_SecondCamera = m_Scene->CreateEntity("Second Camera");
 		m_SecondCamera.AddComponent<Component::Cameras>().Primary = false;
 
 		class CameraController : public ScriptableEntity
@@ -81,6 +81,9 @@ namespace Hazel
 		};
 
 		m_CameraEntity.AddComponent<Component::NativeScript>().Bind<CameraController>();
+		m_SecondCamera.AddComponent<Component::NativeScript>().Bind<CameraController>();
+
+		m_SceneHierarchyPanel.SetContext(m_Scene);
 	}
 	void EditorLayer::OnDetach()
 	{
@@ -181,7 +184,7 @@ namespace Hazel
 			ImGui::EndMenuBar();
 		}
 
-
+		m_SceneHierarchyPanel.OnImGuiRender();
 
 		ImGui::Begin("Settings");
 		ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416f);
