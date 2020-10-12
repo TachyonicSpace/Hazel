@@ -4,7 +4,7 @@
 namespace Hazel
 {
 	bool Color::HSBMode = false;
-	
+
 	const Color Color::Black(0, 0, 0);
 	const Color Color::White(255, 255, 255);
 	const Color Color::Red(255, 0, 0);
@@ -65,179 +65,38 @@ namespace Hazel
 	}
 	Color::Color(const std::initializer_list<float>& Element)
 	{
-		#ifdef old
-		HZ_CORE_ASSERT(Element.size() >= 1 && Element.size() != 2 && Element.size() <= 4, "invalid values for A color");
-
-
-
-		int i = 0;
-		for (float f : Element)
-		{
-			m_RGBA[i++] = f;
-		}
-
-		if (Element.size() == 1)
-			g = r;
-		if (Element.size() < 3)
-			b = r;
-		if (Element.size() < 4)
-			a = 1;
-
-
-		if (r > 1)
-			r /= 255;
-		if (g > 1)
-			g /= 255;
-		if (b > 1)
-			b /= 255;
-		if (a > 1)
-			a /= 255;
-
-
-		float cmin = __min(r, __min(g, b));
-		float cmax = __max(r, __max(g, b));
-		float delta = cmax - cmin;
-
-		if (delta == 0)
-			h = 0;
-		else if (cmax == r)
-			h = 60 * (float)fmod((g - b) / delta, 6);
-		else if (cmax == g)
-			h = 60 * ((b - r) / delta + 2);
-		else if (cmax == b)
-			h = 60 * ((r - g) / delta + 4);
-
-		s = (cmax != 0) ? delta / cmax : 0;
-		m_HSV[2] = cmax;
-
-		#else
 		if (HSBMode)
 			this->SetHsb(Element);
 		else
 			this->SetRgb(Element);
-		#endif
 	}
 	Color::Color(glm::vec3 color)
 	{
-		#ifdef old
-
-		if (color.r > 1)
-			color.r /= 255;
-		if (color.g > 1)
-			color.g /= 255;
-		if (color.b > 1)
-			color.b /= 255;
-
-
-		r = color.r;
-		g = color.g;
-		b = color.b;
-		a = 1;
-
-		float cmin = __min(color.r, __min(color.g, color.b));
-		float cmax = __max(color.r, __max(color.g, color.b));
-		float delta = cmax - cmin;
-
-		if (delta == 0)
-			h = 0;
-		else if (cmax == color.r)
-			h = 60 * (float)fmod((color.g - color.b) / delta, 6);
-		else if (cmax == color.g)
-			h = 60 * ((color.b - color.r) / delta + 2);
-		else if (cmax == color.b)
-			h = 60 * ((color.r - color.g) / delta + 4);
-
-		s = (cmax != 0) ? delta / cmax : 0;
-		m_HSV[2] = cmax;
-
-		#else
 		if (HSBMode)
 			this->SetHsb(color);
 		else
 			this->SetRgb(color);
-		#endif
 	}
 	Color::Color(glm::vec4 color)
 	{
-		#ifdef old
-		if (color.r > 1)
-			color.r /= 255;
-		if (color.g > 1)
-			color.g /= 255;
-		if (color.b > 1)
-			color.b /= 255;
-		if (color.a > 1)
-			color.a /= 255;
-
-		r = color.r;
-		g = color.g;
-		b = color.b;
-		a = color.a;
-
-		float cmin = __min(color.r, __min(color.g, color.b));
-		float cmax = __max(color.r, __max(color.g, color.b));
-		float delta = cmax - cmin;
-
-		if (delta == 0)
-			h = 0;
-		else if (cmax == color.r)
-			h = 60 * (float)fmod((color.g - color.b) / delta, 6);
-		else if (cmax == color.g)
-			h = 60 * ((color.b - color.r) / delta + 2);
-		else if (cmax == color.b)
-			h = 60 * ((color.r - color.g) / delta + 4);
-
-		s = (cmax != 0) ? delta / cmax : 0;
-		m_HSV[2] = cmax;
-
-		#else
 		if (HSBMode)
 			this->SetHsb(color);
 		else
 			this->SetRgb(color);
-		#endif
 	}
 	Color::Color(float greyScale)
 	{
-		#ifdef old
-		if (greyScale > 1)
-			greyScale /= 255;
-
-		r = greyScale;
-		g = greyScale;
-		b = greyScale;
-		a = 1;
-
-		h = 0;
-		s = 0;
-		m_HSV[2] = greyScale;
-		#else
 		if (HSBMode)
 			this->SetHsb(greyScale);
 		else
 			this->SetRgb(greyScale);
-		#endif
 	}
 	Color::Color(int greyScale)
 	{
-		#ifdef old
-		r = (float)(greyScale) / 255.f;
-		g = (float)(greyScale) / 255.f;
-		b = (float)(greyScale) / 255.f;
-		a = 1;
-
-
-		h = 0;
-		s = 0;
-		m_HSV[2] = (float)(greyScale) / 255.f;
-
-		#else
-
 		if (HSBMode)
 			this->SetHsb(greyScale);
 		else
 			this->SetRgb(greyScale);
-		#endif
 	}
 
 
@@ -253,7 +112,10 @@ namespace Hazel
 		int i = 0;
 		for (float f : Element)
 		{
-			m_HSV[i++] = f;
+			if (i == 3)
+				m_RGBA[i] = f;
+			else
+				m_HSV[i++] = f;
 		}
 
 		if (Element.size() == 1)
@@ -265,6 +127,8 @@ namespace Hazel
 			h *= 360;
 
 		h = fmod(h, 360.f);
+		s = __min(1.f, __max(s, 0.f));
+		v = __min(1.f, __max(v, 0.f));
 
 		float C = s * v;
 		float X = C * (1 - abs((float)fmod((h / 60.f), 2) - 1));
@@ -376,7 +240,6 @@ namespace Hazel
 		return *this;
 	}
 
-
 	Color& Color::SetHsb(int R, int G, int B)
 	{
 		this->SetHsb({ (float)R, (float)G, (float)B });
@@ -389,9 +252,11 @@ namespace Hazel
 	}
 	Color& Color::SetHsb(const Color& col)
 	{
-		this->SetHsb(col.h, col.s, col.m_HSV[2]);
+		this->SetHsb({ col.h, col.s, col.m_HSV[2] });
 		return *this;
 	}
+
+
 	Color& Color::SetRgb(int greyScale)
 	{
 		r = (float)(greyScale) / 255.f;
@@ -543,7 +408,6 @@ namespace Hazel
 		return *this;
 	}
 
-
 	Color& Color::SetRgb(int R, int G, int B)
 	{
 		this->SetRgb({ (float)R, (float)G, (float)B });
@@ -559,7 +423,9 @@ namespace Hazel
 		this->SetRgb(col.r, col.g, col.b, col.a);
 		return *this;
 	}
-	const glm::uint32_t Color::GetHex() const
+
+
+	const uint32_t Color::GetHex() const
 	{
 		uint32_t val = 0;
 		val += (uint32_t)(r * 255);
@@ -594,6 +460,26 @@ namespace Hazel
 		else
 			return this->m_RGBA[i];
 	}
+
+
+	Hazel::Color Color::operator-=(const Color& col)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			m_RGBA[i] = m_RGBA[i] - col.m_RGBA[i];
+			m_RGBA[i] = __min(1.f, __max(m_RGBA[i], 0.f));
+		}
+		return *this;
+	}
+	Hazel::Color Color::operator+=(const Color& col)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			m_RGBA[i] = m_RGBA[i] + col.m_RGBA[i];
+			m_RGBA[i] = __min(1.f, __max(m_RGBA[i], 0.f));
+		}
+		return *this;
+	}
 	Color Color::operator+(const Color& col)
 	{
 		float cols[3];
@@ -612,18 +498,44 @@ namespace Hazel
 			cols[i] = m_RGBA[i] - col.m_RGBA[i];
 			cols[i] = __min(1, __max(cols[i], 0));
 		}
-		return Color({ cols[0], cols[1], cols[2], 1.f });
+		return Color({ cols[0], cols[1], cols[2], a });
 	}
 	Color Color::operator-() const
 	{
-		//Color Color::operator-() const
-		//{
-			return Color(1.f) - *this;
-		//}
-		//return (((Color)White - *this).a = this->a);
+		Color tmp = (Color(1.f, 1.f, 1.f, a) - *this);
+		tmp.a = a;
+		return tmp;
 	}
-	template<typename T>
-	Color Color::operator+(T hue)
+
+
+	Hazel::Color Color::operator*=(float hue)
+	{
+		if (v * hue != 0)
+			SetHsb({ h, s, v * hue, a });
+		return *this;
+	}
+	Hazel::Color Color::operator/=(float hue)
+	{
+		if (v / hue != 0)
+			SetHsb({ h, s, v / hue, a });
+		return *this;
+	}
+	Hazel::Color Color::operator*(float hue)
+	{
+		auto tmp = *this;
+		if (v * hue >= 1/255.f)
+			tmp.SetHsb({ h, s, v * hue, a });
+		return tmp;
+	}
+	Hazel::Color Color::operator/(float hue)
+	{
+		auto tmp = Color({ r, g, b, a });
+		if (v / hue != 0)
+			tmp.SetHsb({ h, s, v / hue, a });
+		return tmp;
+	}
+
+	Color Color::operator+(float hue)
 	{
 		auto tmp = Color(*this);
 		tmp.SetHsb((float)fmod(h + hue, 360));
@@ -635,6 +547,17 @@ namespace Hazel
 		tmp.SetHsb(h - hue + 360 * 360);
 		return tmp;
 	}
+	Color Color::operator+=(float hue)
+	{
+		this->SetHsb((float)fmod(h + hue, 360));
+		return *this;
+	}
+	Color Color::operator-=(float hue)
+	{
+		this->SetHsb(h - hue + 360 * 360);
+		return *this;
+	}
+
 	Color Color::operator=(const Color& col)
 	{
 		r = col.r;

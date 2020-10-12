@@ -144,13 +144,8 @@ namespace Hazel
 
 		if (ent.HasComponent<Component::SpriteRenderer>())
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(Component::SpriteRenderer).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
-			{
-				auto& spriteComp = ent.GetComponent<Component::SpriteRenderer>();
-				EditColor(spriteComp.color);
-
-				ImGui::TreePop();
-			}
+			auto& spriteComp = ent.GetComponent<Component::SpriteRenderer>();
+			EditColor(spriteComp.color);
 		}
 
 		if (ent.HasComponent<Component::Quads>())
@@ -162,7 +157,7 @@ namespace Hazel
 				static char buffer[256];
 				//memset(buffer, 0x00, sizeof(buffer));
 				ImGui::InputText("Texture address", buffer, 256);
-				if(ImGui::Button("submit new texture address"))
+				if (ImGui::Button("submit new texture address"))
 					tex = (Texture2D::Create(buffer));
 
 				if (ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component"))
@@ -190,7 +185,7 @@ namespace Hazel
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= (m_SelectedContext == node) ? ImGuiTreeNodeFlags_Selected : 0;
-		bool opened = ImGui::TreeNodeEx((void*)(uint32_t)node, flags, tag.c_str());
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)node, flags, tag.c_str());
 
 		if (ImGui::IsItemClicked())
 		{
@@ -241,10 +236,10 @@ namespace Hazel
 				ImGui::EndCombo();
 			}
 			ImGui::Separator();//finish
-			if (ImGui::DragFloat4("0", &transform[0][0], .01) ||
-				ImGui::DragFloat4("1", &transform[1][0], .01) ||
-				ImGui::DragFloat4("2", &transform[2][0], .01) ||
-				ImGui::DragFloat4("3", &transform[3][0], .01))
+			if (ImGui::DragFloat4("0", &transform[0][0], .01f) ||
+				ImGui::DragFloat4("1", &transform[1][0], .01f) ||
+				ImGui::DragFloat4("2", &transform[2][0], .01f) ||
+				ImGui::DragFloat4("3", &transform[3][0], .01f))
 			{
 				//for (int i = 0; i < 3; i++) {
 				//	for (int j = 0; j < 3; j++) {
@@ -266,7 +261,7 @@ namespace Hazel
 				for (int i = 0; i < 3; i++)
 				{
 					if (newScales[i] <= 0)
-						newScales[i] = .000001;
+						newScales[i] = .000001f;
 
 					transform[i] = (transform[i]) * newScales[i] / (oldScales[i]);
 				}
@@ -302,7 +297,6 @@ namespace Hazel
 			}
 		}
 		//oldScales = glm::vec3(glm::length(rotation[0]), glm::length(rotation[1]), glm::length(rotation[2]));
-		glm::vec3 u;
 
 		if (currentRotationType == "Matrix")
 			goto MATRIX_MODIFYING;
@@ -337,47 +331,47 @@ namespace Hazel
 					if ((xx > yy) && (xx > zz)) { // rotation[0][0] is the largest diagonal term
 						if (xx < epsilon) {
 							x = 0;
-							y = 0.7071;
-							z = 0.7071;
+							y = 0.7071f;
+							z = 0.7071f;
 						}
 						else {
-							x = sqrt(xx);
-							y = xy / x;
-							z = xz / x;
+							x = (float)sqrt(xx);
+							y = (float)xy / x;
+							z = (float)xz / x;
 						}
 					}
 					else if (yy > zz) { // rotation[1][1] is the largest diagonal term
 						if (yy < epsilon) {
-							x = 0.7071;
-							y = 0;
-							z = 0.7071;
+							x = (float)0.7071;
+							y = (float)0;
+							z = (float)0.7071;
 						}
 						else {
-							y = sqrt(yy);
-							x = xy / y;
-							z = yz / y;
+							y = (float)sqrt(yy);
+							x = (float)xy / y;
+							z = (float)yz / y;
 						}
 					}
 					else { // rotation[2][2] is the largest diagonal term so base result on this
 						if (zz < epsilon) {
-							x = 0.7071;
-							y = 0.7071;
-							z = 0;
+							x = 0.7071f;
+							y = 0.7071f;
+							z = 0.f;
 						}
 						else {
-							z = sqrt(zz);
-							x = xz / z;
-							y = yz / z;
+							z = (float)sqrt(zz);
+							x = (float)xz / z;
+							y = (float)yz / z;
 						}
 					}
 				}
-				theta = acos(((double)rotation[0][0] + rotation[1][1] + rotation[2][2] - 1.f) / 2.0f);
+				theta = (float)acos(((double)rotation[0][0] + rotation[1][1] + rotation[2][2] - 1.f) / 2.0f);
 				axis = { x, y, z };
 			}
 			if (degrees)
 				theta *= 180 * glm::pi<float>();
-			if (ImGui::DragFloat3("axis of rotation", &axis[0], .01) ||
-				ImGui::DragFloat("rotation", &theta, .001))
+			if (ImGui::DragFloat3("axis of rotation", &axis[0], .01f) ||
+				ImGui::DragFloat("rotation", &theta, .001f))
 			{
 				if (degrees)
 					theta /= 180 / glm::pi<float>();
@@ -412,35 +406,36 @@ namespace Hazel
 				};
 				float largest = __max(__max(__max(quarter[0], quarter[1]), quarter[2]), quarter[3]);
 
-				#define oppositesP(a, b) ((double)rotation[a-1][b-1] + rotation[b-1][a-1])
-				#define oppositesM(a, b) ((double)rotation[a-1][b-1] - rotation[b-1][a-1])
+				#define oppositesP(a, b, c) (float)(((double)rotation[a-1][b-1] + rotation[b-1][a-1]) / (4.0 * (double)quarter[c]))
+				#define oppositesM(a, b, c) (float)(((double)rotation[a-1][b-1] - rotation[b-1][a-1]) / (4.0 * (double)quarter[c]))
 
 				if (largest == quarter[0])
 				{
-					quarter[1] = oppositesM(3, 2) / (4.0f * quarter[0]);
-					quarter[2] = oppositesM(1, 3) / (4.0f * quarter[0]);
-					quarter[3] = oppositesM(2, 1) / (4.0f * quarter[0]);
+					quarter[1] = oppositesM(3, 2, 0);
+					quarter[2] = oppositesM(1, 3, 0);
+					quarter[3] = oppositesM(2, 1, 0);
 				}
 				else if (largest == quarter[1])
 				{
-					quarter[0] = oppositesM(3, 2) / (4.0f * quarter[1]);
-					quarter[2] = oppositesP(1, 2) / (4.0f * quarter[1]);
-					quarter[3] = oppositesP(1, 3) / (4.0f * quarter[1]);
+					quarter[0] = oppositesM(3, 2, 1);
+					quarter[2] = oppositesP(1, 2, 1);
+					quarter[3] = oppositesP(1, 3, 1);
 				}
 				else if (largest == quarter[2])
 				{
-					quarter[0] = oppositesM(1, 3) / (4.0f * quarter[2]);
-					quarter[1] = oppositesP(1, 2) / (4.0f * quarter[2]);
-					quarter[3] = oppositesP(2, 3) / (4.0f * quarter[2]);
+					quarter[0] = oppositesM(1, 3, 2);
+					quarter[1] = oppositesP(1, 2, 2);
+					quarter[3] = oppositesP(2, 3, 2);
 				}
 				else if (largest == quarter[3])
 				{
-					quarter[0] = oppositesM(2, 1) / (4.0f * quarter[3]);
-					quarter[1] = oppositesP(1, 3) / (4.0f * quarter[3]);
-					quarter[2] = oppositesP(2, 3) / (4.0f * quarter[3]);
+					quarter[0] = oppositesM(2, 1, 3);
+					quarter[1] = oppositesP(1, 3, 3);
+					quarter[2] = oppositesP(2, 3, 3);
 				}
-				#undef oppositesP(a, b)
-				#undef oppositesM(a, b)
+				#undef oppositesP
+
+				#undef oppositesM
 
 			}
 			if
@@ -526,7 +521,7 @@ namespace Hazel
 			if (degrees)
 				angles *= 180.f / glm::pi<float>();
 
-			if (ImGui::DragFloat3("euler angles", &angles[0], .01))
+			if (ImGui::DragFloat3("euler angles", &angles[0], .01f))
 			{
 				if (degrees)
 					angles /= 180.f / glm::pi<float>();
@@ -570,17 +565,22 @@ namespace Hazel
 	}
 	void SceneHierarchyPanel::EditColor(Color& col)
 	{
-		ImGui::ColorEdit4("color", col.GetRGBAPointer());
-		if (ImGui::Button("invert Color?"))
-			col = -col;
-		ImGui::SameLine();
-		if (ImGui::Button("save color?"))
-			m_SavedColor[m_SavedColorIndex] = col;
-		ImGui::SameLine();
-		if (ImGui::Button("load saved color?"))
-			col = m_SavedColor[m_SavedColorIndex];
-		ImGui::SliderInt("saved color index", (int*)&m_SavedColorIndex, 0, 15);
-		ImGui::ColorEdit4("saved color edit", m_SavedColor[m_SavedColorIndex].GetRGBAPointer());
+		if (ImGui::TreeNodeEx((void*)typeid(Component::SpriteRenderer).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+		{
 
+			ImGui::ColorEdit4("color", col.GetRGBAPointer());
+			if (ImGui::Button("invert Color?"))
+				col = -col;
+			ImGui::SameLine();
+			if (ImGui::Button("save color?"))
+				m_SavedColor[m_SavedColorIndex] = col;
+			ImGui::SameLine();
+			if (ImGui::Button("load saved color?"))
+				col = m_SavedColor[m_SavedColorIndex];
+			ImGui::SliderInt("saved color index", (int*)&m_SavedColorIndex, 0, 15);
+			ImGui::ColorEdit4("saved color edit", m_SavedColor[m_SavedColorIndex].GetRGBAPointer());
+
+			ImGui::TreePop();
+		}
 	}
 }

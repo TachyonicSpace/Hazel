@@ -58,19 +58,65 @@ namespace Hazel
 
 		Color operator+(const Color& col);
 		Color operator-(const Color& col);
+		Color operator+=(const Color& col);
+		Color operator-=(const Color& col);
 		Color operator-() const;
 
 		Color operator=(const Color& col);
+		Color operator==(const Color& col) { return !(this->GetVec4() == col.GetVec4()); }
+		Color operator!=(const Color& col) { return !(this->GetVec4() == col.GetVec4()); }
 		float& operator[](int i);
 
-		template<typename T>
-		Color operator+(T hue);
+
+		Color operator+(float hue);
 		Color operator-(float hue);
+		Color operator+(short hue) { return operator+((float)hue); }
+		Color operator-(short hue) {return operator-((float)hue);}
+		Color operator+(int hue) {return operator+((float)hue);}
+		Color operator-(int hue) {return operator-((float)hue);}
+		Color operator+(double hue) {return operator+((float)hue);}
+		Color operator-(double hue) {return operator-((float)hue);}
+		Color operator+(long hue) {return operator+((float)hue);}
+		Color operator-(long hue) {return operator-((float)hue);}
+
+		Color operator+=(float hue);
+		Color operator-=(float hue);
+		Color operator+=(short hue) { return operator+=((float)hue); }
+		Color operator-=(short hue) { return operator-=((float)hue); }
+		Color operator+=(int hue) { return operator+=((float)hue); }
+		Color operator-=(int hue) { return operator-=((float)hue); }
+		Color operator+=(double hue) { return operator+=((float)hue); }
+		Color operator-=(double hue) { return operator-=((float)hue); }
+		Color operator+=(long hue) { return operator+=((float)hue); }
+		Color operator-=(long hue) { return operator-=((float)hue); }
+
+
+		Color operator*(float hue);
+		Color operator/(float hue);
+		Color operator*(short hue) { return operator*((float)hue); }
+		Color operator/(short hue) { return operator/((float)hue); }
+		Color operator*(int hue) { return operator*((float)hue); }
+		Color operator/(int hue) { return operator/((float)hue); }
+		Color operator*(double hue) { return operator*((float)hue); }
+		Color operator/(double hue) { return operator/((float)hue); }
+		Color operator*(long hue) { return operator*((float)hue); }
+		Color operator/(long hue) { return operator/((float)hue); }
+
+		Color operator*=(float hue);
+		Color operator/=(float hue);
+		Color operator*=(short hue) { return operator*=((float)hue); }
+		Color operator/=(short hue) { return operator/=((float)hue); }
+		Color operator*=(int hue) { return operator*=((float)hue); }
+		Color operator/=(int hue) { return operator/=((float)hue); }
+		Color operator*=(double hue) { return operator*=((float)hue); }
+		Color operator/=(double hue) { return operator/=((float)hue); }
+		Color operator*=(long hue) { return operator*=((float)hue); }
+		Color operator/=(long hue) { return operator/=((float)hue); }
 	private:
 		float m_RGBA[4] = { 0, 0, 0, 1 };
 		float m_HSV[3] = { 0, 0, 1 };
 		static bool HSBMode;
-	public:
+
 		float& r = m_RGBA[0];
 		float& g = m_RGBA[1];
 		float& b = m_RGBA[2];

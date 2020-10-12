@@ -34,7 +34,6 @@ namespace Hazel
 
 		auto secondSquare = m_Scene->CreateEntity("blue square");
 		Color c = -(Color::Brown);
-		//c = c + 120.f;
 		Quad q({ 0, 1 }, { 1, 1 }, c);
 		secondSquare.AddComponent<Component::Quads>(q);
 
