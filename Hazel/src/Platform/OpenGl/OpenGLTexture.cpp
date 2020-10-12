@@ -26,6 +26,28 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
+		if (path == "")
+		{
+			m_InternalFormat = GL_RGBA8;
+			m_DataFormat = GL_RGBA;
+
+			m_Width = m_Height = 1;
+
+			glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
+			glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
+
+			glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+			glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+			uint32_t whiteTextureData = 0xffffffff;
+			this->SetData(&whiteTextureData, sizeof(whiteTextureData));
+			return;
+		}
+
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = nullptr;
@@ -108,7 +130,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		uint32_t bytes = (m_DataFormat == GL_RGBA) ? 4 : 3;
-		HZ_CORE_ASSERT(size == m_Width * m_Height * bytes, "Data must be enitre texture");
+		HZ_CORE_ASSERT(size == m_Width * m_Height * bytes, "Data must be entire texture");
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}
 }

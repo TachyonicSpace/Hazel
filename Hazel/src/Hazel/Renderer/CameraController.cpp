@@ -47,9 +47,9 @@ namespace Hazel {
 				m_CameraRotation -= m_RotationSpeed * ts;
 
 			if (m_CameraRotation > glm::pi<float>())
-				m_CameraRotation -= (glm::pi<float>() * 2.0);
+				m_CameraRotation -= (glm::pi<float>() * 2.0f);
 			else if (m_CameraRotation <= -glm::pi<float>())
-				m_CameraRotation += (glm::pi<float>() * 2.0);
+				m_CameraRotation += (glm::pi<float>() * 2.0f);
 
 			m_Camera.SetRotation(m_CameraRotation);
 		}

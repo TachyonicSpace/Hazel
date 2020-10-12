@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "Color.h"
+#include "Shape.h"
 
 namespace Hazel {
 
@@ -44,7 +45,7 @@ namespace Hazel {
 		static void DrawQuad(const glm::mat4& trnasform,
 			Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& color = { 1, 1, 1, 1 });
 
-
+		static void DrawQuad(const Quad& shape);
 		//stats
 
 		struct Statistics

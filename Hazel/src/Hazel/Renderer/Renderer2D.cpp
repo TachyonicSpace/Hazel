@@ -5,7 +5,6 @@
 #include "Shader.h"
 #include "RenderCommand.h"
 
-
 namespace Hazel {
 
 	struct QuadVertex
@@ -330,6 +329,56 @@ namespace Hazel {
 		s_Data.stats.quadCount++;
 	}
 
+	void Renderer2D::DrawQuad(const Quad& shape)
+	{
+		auto tex = shape.tex();
+		auto transform = shape.transform();
+		auto tilingFactor = shape.tilingFactor();
+		auto color = shape.color();
+
+
+		HZ_PROFILE_FUNCTION();
+
+		if (!tex)
+		{
+			tex = s_Data.textureSlots[0];
+		}
+
+		if (s_Data.quadIndexCount >= s_Data.MaxQuads * 6)
+			StartNewBatch();
+
+		float textureIndex = 0;
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
+		{
+			if (*s_Data.textureSlots[i].get() == *tex.get())
+			{
+				textureIndex = (float)i;
+				break;
+			}
+		}
+
+		if (textureIndex == 0)
+		{
+			textureIndex = (float)s_Data.TextureSlotIndex;
+			s_Data.textureSlots[s_Data.TextureSlotIndex++] = tex;
+		}
+
+
+
+		for (int i = 0; i < 4; i++)
+		{
+			s_Data.quadVertexBufferPtr->pos = transform * s_Data.quadVertexPositions[i];
+			s_Data.quadVertexBufferPtr->color = color.GetVec4();
+			s_Data.quadVertexBufferPtr->texCoord = tex->GetTextureCoordinates()[i];
+			s_Data.quadVertexBufferPtr->texIndex = textureIndex;
+			s_Data.quadVertexBufferPtr->TilingFactor = tilingFactor;
+			s_Data.quadVertexBufferPtr++;
+		}
+
+		s_Data.quadIndexCount += 6;
+
+		s_Data.stats.quadCount++;
+	}
 
 	void Renderer2D::ResetStats()
 	{

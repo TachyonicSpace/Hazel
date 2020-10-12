@@ -37,6 +37,8 @@ namespace Hazel {
 
 		void Close() { m_Running = false; }
 
+		void Restart() {/* m_Restart = true; */}
+
 		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
 	private:
@@ -47,6 +49,7 @@ namespace Hazel {
 		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
 		bool m_Minimized = false;
+		bool m_Restart = false;
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0;
 	private:

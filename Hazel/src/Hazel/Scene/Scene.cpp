@@ -88,6 +88,13 @@ namespace Hazel
 
 				Renderer2D::DrawQuad(transform, sprite.color);
 			}
+			auto group0 = m_Registry.group<Component::Quads, Component::Tag>();
+			for (auto entity : group0)
+			{
+				auto& [transform, tag] = group0.get<Component::Quads, Component::Tag>(entity);
+
+				Renderer2D::DrawQuad(transform.q);
+			}
 
 			Renderer2D::EndScene();
 		}

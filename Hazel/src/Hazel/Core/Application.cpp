@@ -71,6 +71,15 @@ namespace Hazel {
 
 		while (m_Running)
 		{
+			if (m_Restart)
+			{
+				for (auto layer : m_LayerStack)
+				{
+					layer->OnAttach();
+				}
+				m_Restart = false;
+			}
+
 			HZ_PROFILE_SCOPE("run Loop");
 
 			float time = (float)glfwGetTime();

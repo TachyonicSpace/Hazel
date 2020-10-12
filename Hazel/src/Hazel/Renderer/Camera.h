@@ -16,7 +16,7 @@ namespace Hazel {
 		virtual ~Camera() = default;
 
 		const glm::mat4& GetProjection() const { return m_Projection; }
-	protected:
+	//protected:
 		glm::mat4 m_Projection = glm::mat4(1.0f);
 	};
 
@@ -51,20 +51,44 @@ namespace Hazel {
 	class SceneCamera : public Camera
 	{
 	public:
-		SceneCamera();
+		enum class ProjectionType { Perspective = 0, Orthographic };
+	public:
+		SceneCamera(ProjectionType type = ProjectionType::Orthographic);
 		virtual ~SceneCamera() = default;
 
-		void SetOrthographic(float size, float nearClip, float farClip);
 
 		void SetViewportSize(uint32_t width, uint32_t height);
 
+		int GetProjectionType() const { return (int)m_ProjectionType; }
+		void SetProjectionType(int type) { (m_ProjectionType = (ProjectionType)type); RecalculateProjection(); }
+
+		void SetPerspective(float verticalFOV, float nearClip, float farClip);
+		void SetOrthographic(float size, float nearClip, float farClip);
+
 		float GetOrthographicSize() const { return m_OrthographicSize; }
 		void SetOrthographicSize(float size) { m_OrthographicSize = size; RecalculateProjection(); }
+		float GetOrthographicNearClip() const { return m_OrthographicNear; }
+		void SetOrthographicNearClip(float i) { (m_OrthographicNear = i);  RecalculateProjection(); }
+		float GetOrthographicFarClip() const { return m_OrthographicFar; }
+		void SetOrthographicFarClip(float i) { (m_OrthographicFar = i);  RecalculateProjection(); }
+
+		float GetPerspectiveVerticalFOV() const { return m_PerspectiveFOV; }
+		void SetPerspectiveVerticalFOV(float size) { m_PerspectiveFOV = size; RecalculateProjection(); }
+		float GetPerspectiveNearClip() const { return m_PerspectiveNear; }
+		void SetPerspectiveNearClip(float i) { (m_PerspectiveNear = i);  RecalculateProjection(); }
+		float GetPerspectiveFarClip() const { return m_PerspectiveFar; }
+		void SetPerspectiveFarClip(float i) { (m_PerspectiveFar = i);  RecalculateProjection(); }
+
 	private:
 		void RecalculateProjection();
 	private:
+		ProjectionType m_ProjectionType;
+
 		float m_OrthographicSize = 10.0f;
 		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
+
+		float m_PerspectiveFOV = glm::radians(45.f);
+		float m_PerspectiveNear = 0.01f, m_PerspectiveFar = 1000.f;
 
 		float m_AspectRatio = 0.0f;
 	};

@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <Hazel/Renderer/Color.h>
 #include <Hazel/Renderer/Camera.h>
+#include <Hazel/Renderer/Shape.h>
 
 #include "Entity.h"
 
@@ -42,6 +43,16 @@ namespace Hazel
 			SpriteRenderer(const SpriteRenderer&) = default;
 			SpriteRenderer(const Color& color)
 				: color(color) {}
+		};
+
+		struct Quads
+		{
+			Quad q;
+
+			Quads() = default;
+			Quads(const Quads& q0) = default;
+			Quads(const Quad& q0)
+				:q(q0) {}
 		};
 
 		struct Cameras
