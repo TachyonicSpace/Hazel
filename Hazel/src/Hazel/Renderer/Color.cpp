@@ -523,8 +523,10 @@ namespace Hazel
 	Hazel::Color Color::operator*(float hue)
 	{
 		auto tmp = *this;
-		if (v * hue >= 1/255.f)
+		if (v * hue >= 1 / 255.f)
 			tmp.SetHsb({ h, s, v * hue, a });
+		else
+			tmp = Black;
 		return tmp;
 	}
 	Hazel::Color Color::operator/(float hue)

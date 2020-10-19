@@ -11,14 +11,15 @@ int main(int argc, char** argv) {
 	Hazel::Log::Init();
 
 	HZ_PROFILE_BEGIN_SESSION("startup", "HazelProfile-Startup.json");
-	Hazel::CreateApplication();
+	auto app = Hazel::CreateApplication();
 	HZ_PROFILE_END_SESSION();
 
 	HZ_PROFILE_BEGIN_SESSION("runTime", "HazelProfile-runTime.json");
-	Hazel::Application::Get().Run();
+	app->Run();
 	HZ_PROFILE_END_SESSION();
 
 	HZ_PROFILE_BEGIN_SESSION("shutdown", "HAzelProfile-shutdown.json");
+	delete app;
 	HZ_PROFILE_END_SESSION();
 }
 

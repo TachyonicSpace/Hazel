@@ -3,6 +3,8 @@
 #include "Hazel.h"
 #include "Panels/SceneHierarchyPanel.h"
 
+#include <Hazel/vendor/NumC++/include/NumCpp.hpp>
+
 namespace Hazel
 {
 

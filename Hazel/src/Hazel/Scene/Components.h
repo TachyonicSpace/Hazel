@@ -64,6 +64,8 @@ namespace Hazel
 
 			Cameras() = default;
 			Cameras(const Cameras&) = default;
+			Cameras(const SceneCamera& Cam)
+				:camera(Cam) {}
 		};
 
 		struct NativeScript

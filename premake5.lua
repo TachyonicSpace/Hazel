@@ -21,9 +21,11 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"
 IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
 IncludeDir["ImGui"] = "Hazel/vendor/imgui"
-IncludeDir["glm"] = "Hazel/vendor/glm"
 IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
 IncludeDir["entt"] = "Hazel/vendor/entt/include"
+IncludeDir["boost"] = "Hazel/vendor/boost"
+IncludeDir["NumC++"] = "Hazel/vendor/NumC++/include"
+IncludeDir["glm"] = "Hazel/vendor/glm"
 
 group "Dependencies"
 	include "Hazel/vendor/GLFW"
@@ -53,7 +55,14 @@ project "Hazel"
 		"%{prj.name}/vendor/stb_image/**.cpp"
 		,
 		"%{prj.name}/vendor/glm/glm/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/vendor/glm/glm/**.inl"
+		,
+		"%{prj.name}/vendor/boost/**.hpp",
+		"%{prj.name}/vendor/boost/**.inl"
+		,
+		"%{prj.name}/vendor/NumC++/include/**.hpp",
+		"%{prj.name}/vendor/NumC++/include/**.inl"
+		
 	}
 
 	defines
@@ -69,9 +78,11 @@ project "Hazel"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.boost}",
+		"%{IncludeDir.NumCpp}",
+		"%{IncludeDir.glm}"
 	}
 
 	links 
@@ -173,8 +184,10 @@ project "Hazel-Nut"
 		"Hazel/vendor/spdlog/include",
 		"Hazel/src",
 		"Hazel/vendor",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.boost}",
+		"%{IncludeDir.NumCpp}",
+		"%{IncludeDir.glm}"
 	}
 
 	links
