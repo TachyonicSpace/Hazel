@@ -69,7 +69,7 @@ namespace Hazel {
 				ShaderdataTypeToGLEnum(Element.type),
 				Element.normalized ? GL_TRUE : GL_FALSE,
 				layout.GetStride(),
-				(const void*)Element.offset);
+				(const void*)(uint64_t)Element.offset);
 			i++;
 		}
 		m_VertexBuffers.push_back(vb);

@@ -11,14 +11,14 @@ namespace Hazel {
 
 	Application* Application::s_Instance = nullptr;
 
-	Hazel::Application::Application()
+	Hazel::Application::Application(const WindowProps& props)
 	{
 		HZ_PROFILE_FUNCTION();
 
 		HZ_CORE_ASSERT(!s_Instance, "Application already exist!!");
 		s_Instance = this;
 
-		m_Window = Scope<Window>(Window::Create());
+		m_Window = Window::Create(props);
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
 		Renderer::Init();
@@ -32,7 +32,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		m_LayerStack.PushLayer(layer);
-		layer->OnAttatch();
+		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* overlay)
@@ -40,7 +40,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		m_LayerStack.PushOverlay(overlay);
-		overlay->OnAttatch();
+		overlay->OnAttach();
 	}
 
 	void Application::OnEvent(Event& e)
@@ -71,6 +71,15 @@ namespace Hazel {
 
 		while (m_Running)
 		{
+			if (m_Restart)
+			{
+				for (auto layer : m_LayerStack)
+				{
+					layer->OnAttach();
+				}
+				m_Restart = false;
+			}
+
 			HZ_PROFILE_SCOPE("run Loop");
 
 			float time = (float)glfwGetTime();
@@ -80,12 +89,14 @@ namespace Hazel {
 
 			if (!m_Minimized)
 			{
+				
 				{
 					HZ_PROFILE_SCOPE("layerStack update");
 
 					for (Layer* l : m_LayerStack)
 						l->OnUpdate(ts);
 				}
+
 
 
 				m_ImGuiLayer->Begin();
@@ -97,8 +108,9 @@ namespace Hazel {
 				}
 				m_ImGuiLayer->End();
 
-				m_Window->OnUpdate();
+
 			}
+			m_Window->OnUpdate();
 		}
 	}
 

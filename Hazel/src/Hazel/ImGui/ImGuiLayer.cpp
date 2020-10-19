@@ -2,6 +2,8 @@
 #include "ImGuiLayer.h"
 
 #define IMGUI_IMPL_API
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#include "imgui.h"
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 
@@ -9,7 +11,7 @@
 
 //temp
 #include <GLFW\glfw3.h>
-#include <glad\glad.h>
+//#include <glad\glad.h>
 
 namespace Hazel {
 
@@ -22,7 +24,7 @@ namespace Hazel {
 	{
 	}
 
-	void ImGuiLayer::OnAttatch()
+	void ImGuiLayer::OnAttach()
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -31,7 +33,7 @@ namespace Hazel {
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; //enables keyboard controls
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //enables Gamepad controls
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //enables Gamepad controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; //enables docking
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; //enables multi-viewport / platform windows
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
@@ -57,13 +59,23 @@ namespace Hazel {
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 
-	void ImGuiLayer::OnDetatch()
+	void ImGuiLayer::OnDetach()
 	{
 		HZ_PROFILE_FUNCTION();
 
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui::DestroyContext();
+	}
+
+	void ImGuiLayer::OnEvent(Event& e)
+	{
+		if (m_BlockEvents)
+		{
+			auto io = ImGui::GetIO();
+			e.handled |= e.IsInCategory(EventCategory::EventCategoryMouse) & io.WantCaptureMouse;
+			e.handled |= e.IsInCategory(EventCategory::EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		}
 	}
 
 	void ImGuiLayer::OnImGuiRender()
@@ -80,7 +92,6 @@ namespace Hazel {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
-
 
 	void ImGuiLayer::End()
 	{

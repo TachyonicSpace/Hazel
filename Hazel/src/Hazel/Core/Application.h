@@ -20,9 +20,9 @@
 
 namespace Hazel {
 
-	class HAZEL_API Application {
+	class  Application {
 	public:
-		Application();
+		Application(const WindowProps& props = {});
 		virtual ~Application();
 
 		void Run();
@@ -32,8 +32,15 @@ namespace Hazel {
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
-		inline static Application& Get() { return *s_Instance; }
-		inline Window& GetWindow() { return *m_Window; }
+		static Application& Get() { return *s_Instance; }
+		Window& GetWindow() { return *m_Window; }
+
+		void Close() { m_Running = false; }
+
+		void Restart() {/* m_Restart = true; */}
+
+		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
@@ -42,6 +49,7 @@ namespace Hazel {
 		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
 		bool m_Minimized = false;
+		bool m_Restart = false;
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0;
 	private:

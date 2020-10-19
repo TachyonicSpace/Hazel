@@ -7,10 +7,10 @@ struct GLFWwindow;
 namespace Hazel {
 
 
-	class OpenGlContext : public GraphicsContext
+	class OpenGLContext : public GraphicsContext
 	{
 	public:
-		OpenGlContext(GLFWwindow* window);
+		OpenGLContext(GLFWwindow* window);
 
 		void Init() override;
 		void SwapBuffers() override;

@@ -19,7 +19,7 @@ namespace Hazel {
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
 
-	enum EventCategory
+	enum class EventCategory : int
 	{
 		None = 0,
 		EventCategoryApplication = BIT(0),
@@ -35,7 +35,7 @@ namespace Hazel {
 
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
-	class HAZEL_API Event
+	class  Event
 	{
 		friend class EventDispatcher;
 	public:
@@ -48,15 +48,14 @@ namespace Hazel {
 
 		inline bool IsInCategory(EventCategory category) 
 		{
-			return GetCategoryFlags() & category;
+			return GetCategoryFlags() & (int)category;
 		}
-	protected:
 	};
 
 	class EventDispatcher
 	{
-		template <typename T>
-		using EventFn = std::function<bool(T&)>;
+		template <typename F>
+		using EventFn = std::function<bool(F&)>;
 	public:
 		EventDispatcher(Event& e)
 			:m_Event(e) {}
