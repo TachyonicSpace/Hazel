@@ -23,9 +23,10 @@ IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
 IncludeDir["ImGui"] = "Hazel/vendor/imgui"
 IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
 IncludeDir["entt"] = "Hazel/vendor/entt/include"
-IncludeDir["boost"] = "Hazel/vendor/boost"
-IncludeDir["NumC++"] = "Hazel/vendor/NumC++/include"
 IncludeDir["glm"] = "Hazel/vendor/glm"
+
+--IncludeDir["boost"] = "Hazel/vendor/boost"
+--IncludeDir["NumC++"] = "Hazel/vendor/NumC++/include"
 
 group "Dependencies"
 	include "Hazel/vendor/GLFW"
@@ -56,12 +57,12 @@ project "Hazel"
 		,
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl"
-		,
-		"%{prj.name}/vendor/boost/**.hpp",
-		"%{prj.name}/vendor/boost/**.inl"
-		,
-		"%{prj.name}/vendor/NumC++/include/**.hpp",
-		"%{prj.name}/vendor/NumC++/include/**.inl"
+		--,
+		--"%{prj.name}/vendor/boost/**.hpp",
+		--"%{prj.name}/vendor/boost/**.inl"
+		--,
+		--"%{prj.name}/vendor/NumC++/include/**.hpp",
+		--"%{prj.name}/vendor/NumC++/include/**.inl"
 		
 	}
 
@@ -80,8 +81,8 @@ project "Hazel"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.boost}",
-		"%{IncludeDir.NumCpp}",
+		--"%{IncludeDir.boost}",
+		--"%{IncludeDir.NumCpp}",
 		"%{IncludeDir.glm}"
 	}
 
@@ -185,8 +186,8 @@ project "Hazel-Nut"
 		"Hazel/src",
 		"Hazel/vendor",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.boost}",
-		"%{IncludeDir.NumCpp}",
+		--"%{IncludeDir.boost}",
+		--"%{IncludeDir.NumCpp}",
 		"%{IncludeDir.glm}"
 	}
 

@@ -1,6 +1,7 @@
 #include "SceneHierarchyPanel.h"
 
 #include "imgui/imgui.h"
+#include <imgui/imgui_internal.h>
 
 #include "Hazel/Scene/Components.h"
 
@@ -32,6 +33,16 @@ namespace Hazel
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			m_SelectedContext = {};
 
+		// Right-click on blank space
+		if (ImGui::BeginPopupContextWindow(0, 1, false))
+		{
+			if (ImGui::MenuItem("Create Empty Entity"))
+				m_context->CreateEntity("Empty Entity");
+
+			ImGui::EndPopup();
+		}
+
+
 		ImGui::End();
 
 		ImGui::Begin("properties");
@@ -39,11 +50,82 @@ namespace Hazel
 		if (m_SelectedContext)
 		{
 			DrawComponents(m_SelectedContext);
+
+			if (ImGui::Button("Add Component"))
+				ImGui::OpenPopup("AddComponent");
+
+			if (ImGui::BeginPopup("AddComponent"))
+			{
+				if (ImGui::MenuItem("Camera"))
+				{
+					m_SelectedContext.AddComponent<Component::Cameras>();
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("Sprite Renderer"))
+				{
+					m_SelectedContext.AddComponent<Component::SpriteRenderer>();
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("Quads"))
+				{
+					Quad q = { { 0, 0 }, { 1, 1 }, Color::White };
+					m_SelectedContext.AddComponent<Component::Quads>(q);
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::EndPopup();
+			}
+
 		}
+
+
 
 		ImGui::End();
 	}
 
+	void SceneHierarchyPanel::DrawEntityNode(Entity node, bool displayAllEntities)
+	{
+		auto& tag = node.GetComponent<Component::Tag>().name;
+		if (!displayAllEntities)
+			if (tag == "N/A")
+				return;
+
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+		flags |= (m_SelectedContext == node) ? ImGuiTreeNodeFlags_Selected : 0;
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)node, flags, tag.c_str());
+
+		if (ImGui::IsItemClicked())
+		{
+			m_SelectedContext = node;
+		}
+
+		bool entityDeleted = false;
+		if (ImGui::BeginPopupContextItem())
+		{
+			if (ImGui::MenuItem("Delete Entity"))
+				entityDeleted = true;
+
+			ImGui::EndPopup();
+		}
+
+		if (opened)
+		{
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+			bool opened = ImGui::TreeNodeEx((void*)9817239, flags, tag.c_str());
+			if (opened)
+				ImGui::TreePop();
+			ImGui::TreePop();
+		}
+
+		if (entityDeleted)
+		{
+			m_context->DestroyEntity(node);
+			if (m_SelectedContext == node)
+				m_SelectedContext = {};
+		}
+	}
 	void SceneHierarchyPanel::DrawComponents(Entity ent)
 	{
 		if (ent.HasComponent<Component::Tag>())
@@ -59,24 +141,47 @@ namespace Hazel
 			}
 		}
 
-		if (ent.HasComponent<Component::Transform>() && !ent.HasComponent<Component::Quads>())
-		{
-			if (ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component"))
-			{
-				auto& transform = ent.GetComponent<Component::Transform>().transform;
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap;
 
-				EditTransformMatrix(transform);
+		if (ent.HasComponent<Component::Transform>() /*&& !ent.HasComponent<Component::Quads>()*/)
+		{
+			bool open = ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), treeNodeFlags, "Transform");
+
+			if (open) {
+				if (ent.HasComponent<Component::Quads>())
+				{
+					EditTransformMatrix(ent.GetComponent<Component::Quads>().q.transformRef());
+				}
+				else
+				{
+					auto& transform = ent.GetComponent<Component::Transform>();
+					EditTransformVec("translation", transform.Translation);
+					static bool degrees = true;
+					if (ImGui::Checkbox("degrees?", &degrees))
+					{
+						transform.Rotation = glm::degrees(transform.Rotation);
+						EditTransformVec("Rotation", transform.Rotation);
+						transform.Rotation = glm::radians(transform.Rotation);
+					}
+					else
+						EditTransformVec("Rotation", transform.Rotation);
+					EditTransformVec("Scale", transform.Scale, 1.0f);
+				}
 
 				ImGui::TreePop();
+
+				//ImGui::TreePop();
 			}
 		}
 
 		if (ent.HasComponent<Component::Cameras>())
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(Component::Cameras).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			if (ImGui::TreeNodeEx((void*)typeid(Component::Cameras).hash_code(), treeNodeFlags, "Camera"))
 			{
 				auto& CameraComp = ent.GetComponent<Component::Cameras>();
 				auto& camera = CameraComp.camera;
+
+				ImGui::Checkbox("Primary", &CameraComp.Primary);
 
 				const char* projectionTypeString[] = { "Perspective", "Orthographic" };
 				const char* currentProjectionTypeString = projectionTypeString[CameraComp.camera.GetProjectionType()];
@@ -136,6 +241,9 @@ namespace Hazel
 					{
 						camera.SetOrthographicFarClip(orthofarclip);
 					}
+
+
+					ImGui::Checkbox("Fixed Aspect Ratio", &CameraComp.fixedAspectRatio);
 				}
 
 				ImGui::TreePop();
@@ -144,14 +252,56 @@ namespace Hazel
 
 		if (ent.HasComponent<Component::SpriteRenderer>())
 		{
-			auto& spriteComp = ent.GetComponent<Component::SpriteRenderer>();
-			EditColor(spriteComp.color);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			bool open = ImGui::TreeNodeEx((void*)typeid(Component::SpriteRenderer).hash_code(), treeNodeFlags, "Sprite Renderer");
+			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
+			if (ImGui::Button("+", ImVec2{ 20, 20 }))
+			{
+				ImGui::OpenPopup("ComponentSettings");
+			}
+			ImGui::PopStyleVar();
+
+			bool removeComponent = false;
+			if (ImGui::BeginPopup("ComponentSettings"))
+			{
+				if (ImGui::MenuItem("Remove component"))
+					removeComponent = true;
+
+				ImGui::EndPopup();
+			}
+
+			if (open)
+			{
+				auto& src = ent.GetComponent<Component::SpriteRenderer>();
+				EditColor(src.color);
+				ImGui::TreePop();
+			}
+
+			if (removeComponent)
+				ent.RemoveComponent<Component::SpriteRenderer>();
 		}
 
 		if (ent.HasComponent<Component::Quads>())
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(Component::Quads).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "quad render info"))
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			bool open = ImGui::TreeNodeEx((void*)typeid(Component::Quads).hash_code(), treeNodeFlags, "quads");
+			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
+			if (ImGui::Button("+", ImVec2{ 20, 20 }))
 			{
+				ImGui::OpenPopup("ComponentSettings");
+			}
+			ImGui::PopStyleVar();
+
+			bool removeComponent = false;
+			if (ImGui::BeginPopup("ComponentSettings"))
+			{
+				if (ImGui::MenuItem("Remove component"))
+					removeComponent = true;
+
+				ImGui::EndPopup();
+			}
+
+			if (open) {
 				auto& quad = ent.GetComponent<Component::Quads>().q;
 				auto& tex = quad.texRef();
 				static char buffer[256];
@@ -160,13 +310,13 @@ namespace Hazel
 				if (ImGui::Button("submit new texture address"))
 					tex = (Texture2D::Create(buffer));
 
-				if (ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component"))
-				{
-					auto& trans = quad.transformRef();
-					EditTransformMatrix(trans);
+				//if (ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component"))
+				//{
+				//	auto& trans = quad.transformRef();
+				//	EditTransformMatrix(trans);
 
-					ImGui::TreePop();
-				}
+				//	ImGui::TreePop();
+				//}
 				float& tile = quad.tilingFactorRef();
 				ImGui::DragFloat("tiling factor", &tile);
 				EditColor(quad.colorRef());
@@ -174,41 +324,23 @@ namespace Hazel
 
 				ImGui::TreePop();
 			}
-		}
-	}
-	void SceneHierarchyPanel::DrawEntityNode(Entity node, bool displayAllEntities)
-	{
-		auto& tag = node.GetComponent<Component::Tag>().name;
-		if (!displayAllEntities)
-			if (tag == "N/A")
-				return;
 
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-		flags |= (m_SelectedContext == node) ? ImGuiTreeNodeFlags_Selected : 0;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)node, flags, tag.c_str());
-
-		if (ImGui::IsItemClicked())
-		{
-			m_SelectedContext = node;
-		}
-
-		if (opened)
-		{
-			ImGui::TreePop();
+			if (removeComponent)
+				ent.RemoveComponent<Component::Quads>();
 		}
 	}
 	void SceneHierarchyPanel::EditTransformMatrix(glm::mat4& transform, bool details)
 	{
 		if (!details)
 		{
-			ImGui::DragFloat3("Position", &transform[3][0], .1f);
+			EditTransformVec("Position", (glm::vec3)transform[3]);
 			return;
 		}
 
 		static bool degrees = false;
 
-		const char* rotationType[4] = { "Matrix", "Quarterneon", "Axis-angle", "euler angles" };
-		static const char* currentRotationType = rotationType[3];
+		const char* rotationType[3] = { "Matrix", "Axis-angle", "euler angles" };
+		static const char* currentRotationType = rotationType[2];
 
 		glm::vec3 oldScales = glm::vec3(glm::length(transform[0]), glm::length(transform[1]), glm::length(transform[2]));
 
@@ -251,12 +383,12 @@ namespace Hazel
 		}
 
 		//display and allow edit of the position in x, y, z;
-		ImGui::DragFloat3("Position", &transform[3][0], .1f);
+		EditTransformVec("Position", (glm::vec3&)transform[3]);
 
 		//allow edit of the scales in all three directions
 		{
 			glm::vec3 newScales = oldScales;
-			if (ImGui::DragFloat3("Scale", &newScales[0], .1f))
+			if (EditTransformVec("Scale", newScales, 1.f))
 			{
 				for (int i = 0; i < 3; i++)
 				{
@@ -274,7 +406,7 @@ namespace Hazel
 		ImGui::Separator();
 		if (ImGui::BeginCombo("rotation type", currentRotationType))
 		{
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < 3; i++)
 			{
 				bool isSelected = currentRotationType == rotationType[i];
 				if (ImGui::Selectable(rotationType[i], isSelected))
@@ -370,7 +502,7 @@ namespace Hazel
 			}
 			if (degrees)
 				theta *= 180 * glm::pi<float>();
-			if (ImGui::DragFloat3("axis of rotation", &axis[0], .01f) ||
+			if (EditTransformVec("axis of rotation", axis) ||
 				ImGui::DragFloat("rotation", &theta, .001f))
 			{
 				if (degrees)
@@ -393,85 +525,11 @@ namespace Hazel
 				transform[2][2] = oldScales[2] * (t * z * z + c);
 			}
 		}
-		else if (currentRotationType == "Quarterneon")
-		{
-			glm::vec4 quarter;
-			{
-				quarter =
-				{
-					sqrt((1.0 + (double)rotation[0][0] + rotation[1][1] + rotation[2][2]) / 4.0),
-					sqrt((1 + (double)rotation[0][0] - rotation[1][1] - rotation[2][2]) / 4.0),
-					sqrt((1 - (double)rotation[0][0] + rotation[1][1] - rotation[2][2]) / 4.0),
-					sqrt((1 - (double)rotation[0][0] - rotation[1][1] + rotation[2][2]) / 4.0)
-				};
-				float largest = __max(__max(__max(quarter[0], quarter[1]), quarter[2]), quarter[3]);
-
-				#define oppositesP(a, b, c) (float)(((double)rotation[a-1][b-1] + rotation[b-1][a-1]) / (4.0 * (double)quarter[c]))
-				#define oppositesM(a, b, c) (float)(((double)rotation[a-1][b-1] - rotation[b-1][a-1]) / (4.0 * (double)quarter[c]))
-
-				if (largest == quarter[0])
-				{
-					quarter[1] = oppositesM(3, 2, 0);
-					quarter[2] = oppositesM(1, 3, 0);
-					quarter[3] = oppositesM(2, 1, 0);
-				}
-				else if (largest == quarter[1])
-				{
-					quarter[0] = oppositesM(3, 2, 1);
-					quarter[2] = oppositesP(1, 2, 1);
-					quarter[3] = oppositesP(1, 3, 1);
-				}
-				else if (largest == quarter[2])
-				{
-					quarter[0] = oppositesM(1, 3, 2);
-					quarter[1] = oppositesP(1, 2, 2);
-					quarter[3] = oppositesP(2, 3, 2);
-				}
-				else if (largest == quarter[3])
-				{
-					quarter[0] = oppositesM(2, 1, 3);
-					quarter[1] = oppositesP(1, 3, 3);
-					quarter[2] = oppositesP(2, 3, 3);
-				}
-				#undef oppositesP
-
-				#undef oppositesM
-
-			}
-			if
-				(ImGui::DragFloat4("quaternion", &quarter[0]))
-			{
-				{
-					auto tmp = quarter[1];
-					auto quarter0 = quarter / glm::length(quarter);
-					auto mult = [](glm::vec4& q, int a, int b) {return q[a] * q[b] * 2.0f; };
-					glm::vec3 r1{ pow(quarter0[0], 2) + pow(quarter0[1], 2) - pow(quarter0[2], 2) - pow(quarter0[3], 2),
-								 mult(quarter0, 1, 2) - mult(quarter0, 0, 3), mult(quarter0, 1, 3) + mult(quarter0, 0, 2) };
-
-					glm::vec3 r2{ mult(quarter0, 1, 2) + mult(quarter0, 0, 3),
-								  pow(quarter0[0], 2) - pow(quarter0[1], 2) + pow(quarter0[2], 2) - pow(quarter0[3], 2),
-								  mult(quarter0, 2, 3) - mult(quarter0, 0, 1) };
-					glm::vec3 r3{ mult(quarter0, 1, 3) - mult(quarter0, 0, 2), mult(quarter0, 2, 3) + mult(quarter0, 0, 1),
-								  pow(quarter0[0], 2) - pow(quarter0[1], 2) - pow(quarter0[2], 2) + pow(quarter0[3], 2)
-					};
-					rotation = { r1, r2, r3 };
-				}
-				for (int i = 0; i < 3; i++)
-				{
-					for (int j = 0; j < 3; j++)
-					{
-						//float precise = 10E-15f;
-						transform[i][j] = oldScales[i] * rotation[i][j];
-						//transform[i][j] = ((int)((oldScales[i] * rotation[i][j])/precise))*precise;
-					}
-				}
-			}
-		}
-		//maybe add support for more than zyx
 		else if (currentRotationType == "euler angles")
 		{
 			glm::vec3 angles;
-			float& z = angles[0], & y = angles[1], & x = angles[2];
+			//float& z = angles[0], & y = angles[1], & x = angles[2];
+			float& x = angles[0], & y = angles[1], & z = angles[2];
 			ImGui::Checkbox("angles in degrees?", &degrees);
 
 			{
@@ -521,7 +579,7 @@ namespace Hazel
 			if (degrees)
 				angles *= 180.f / glm::pi<float>();
 
-			if (ImGui::DragFloat3("euler angles", &angles[0], .01f))
+			if (EditTransformVec("euler angles", angles))
 			{
 				if (degrees)
 					angles /= 180.f / glm::pi<float>();
@@ -534,15 +592,15 @@ namespace Hazel
 				//	z = ((z > 0) ? -1 : 1) * 1.568f;
 
 				glm::mat3 X = { {1,	0,				0},
-										{0, cos(angles[2]), -sin(angles[2])},
-										{0, sin(angles[2]),  cos(angles[2])} };
+										{0, cos(x), -sin(x)},
+										{0, sin(x),  cos(x)} };
 
-				glm::mat3 Y = { {cos(angles[1]),    0,      sin(angles[1])},
+				glm::mat3 Y = { {cos(y),    0,      sin(y)},
 										{0,                1,      0, },
-										{-sin(angles[1]),   0,      cos(angles[1])} };
+										{-sin(y),   0,      cos(y)} };
 
-				glm::mat3 Z = { {cos(angles[0]), -sin(angles[0]), 0},
-								{sin(angles[0]),  cos(angles[0]), 0},
+				glm::mat3 Z = { {cos(z), -sin(z), 0},
+								{sin(z),  cos(z), 0},
 								{0,				  0,			  1} };
 
 				rotation = X * Y * Z;
@@ -562,6 +620,74 @@ namespace Hazel
 		{
 			HZ_CORE_ASSERT(false, "INVALID Rotation Type: {0}", currentRotationType);
 		}
+	}
+	bool SceneHierarchyPanel::EditTransformVec(const std::string& label, glm::vec3& values, float resetValue, float columnWidth)
+	{
+		bool changed = false;
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, columnWidth);
+		ImGui::Text(label.c_str());
+		ImGui::NextColumn();
+
+		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		if (ImGui::Button("X", buttonSize))
+		{
+			values.x = resetValue;
+			changed = true;
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		changed |= ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		if (ImGui::Button("Y", buttonSize))
+		{
+			values.y = resetValue;
+			changed = true;
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		changed |= ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		if (ImGui::Button("Z", buttonSize))
+		{
+			values.z = resetValue;
+			changed = true;
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		changed |= ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+
+		ImGui::PopStyleVar();
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+
+		return changed;
 	}
 	void SceneHierarchyPanel::EditColor(Color& col)
 	{

@@ -21,7 +21,9 @@ namespace Hazel
 		{
 			HZ_CORE_ASSERT(!HasComponent<T>(), "already has this component");
 
-			return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			m_Scene->OnComponentAdded<T>(*this, component);
+			return component;
 		}
 
 		template <typename T>
@@ -46,7 +48,30 @@ namespace Hazel
 			return item;
 		}
 
+		template <typename T>
+		static T& GetComponent(const Scene& scene, entt::entity ent)
+		{
+			HZ_CORE_ASSERT(HasComponent<T>(scene, ent), "Component not found");
+			T tmp = T();
+			return (T&)( scene.m_Registry.get<T>(ent));
+		}
+
+		template <typename T>
+		static bool HasComponent(const Scene& scene, entt::entity ent)
+		{
+			return scene.m_Registry.has<T>(ent);
+		}
+
+		template <typename T>
+		static T& RemoveComponent(const Scene& scene, entt::entity ent)
+		{
+			auto item = GetComponent<T>(scene, ent);
+			scene.m_Registry.remove<T>(ent);
+			return item;
+		}
+
 		operator bool() const { return m_EntityHandle != entt::null; }
+		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 
 		bool operator==(const Entity& other) const {

@@ -18,7 +18,8 @@ namespace Hazel {
 		void DrawComponents(Entity ent);
 	private:
 		void DrawEntityNode(Entity node, bool displayAllEntities = false);
-		void EditTransformMatrix(glm::mat4& transform, bool details = true);
+		void EditTransformMatrix(glm::mat4& transform, bool details = true); 
+		bool EditTransformVec(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
 		void EditColor(Color& col);
 	private:
 		Ref<Scene> m_context;

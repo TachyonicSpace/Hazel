@@ -51,12 +51,13 @@ namespace Hazel {
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = nullptr;
-		{		
+		{
 			HZ_PROFILE_SCOPE("OpenGLTexture2D::OpenGLTexture2D(const std::string&): loading texture");
 
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		}
-			HZ_CORE_ASSERT(data, "Image Path Not Found in - {0}!!", path.c_str());
+		if (!data)
+			HZ_CORE_WARN("Image Path Not Found: {0}!!", path.c_str());
 		m_Width = width;
 		m_Height = height;
 
@@ -123,7 +124,8 @@ namespace Hazel {
 		}
 	}
 	const glm::mat4x2& OpenGLTexture2D::GetTextureCoordinates() const
-	{return m_TexCoords;
+	{
+		return m_TexCoords;
 	}
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{

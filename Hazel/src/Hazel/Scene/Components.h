@@ -1,6 +1,10 @@
 #pragma once
 
 #include <glm/glm.hpp>
+
+
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <Hazel/Renderer/Color.h>
 #include <Hazel/Renderer/Camera.h>
 #include <Hazel/Renderer/Shape.h>
@@ -24,15 +28,30 @@ namespace Hazel
 
 		struct Transform
 		{
-			glm::mat4 transform{ 1.0f };
+			glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
+			glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+			glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
 			Transform() = default;
 			Transform(const Transform&) = default;
-			Transform(const glm::mat4& transform)
-				: transform(transform) {}
+			Transform(const glm::vec3& pos,
+					  const glm::vec3& rotation = glm::vec3(0),
+					  const glm::vec3& scale = glm::vec3(1))
+				: Translation(pos), Rotation(rotation), Scale(scale) {}
 
-			operator glm::mat4& () { return transform; }
-			operator const glm::mat4& () const { return transform; }
+			glm::mat4 GetTransform() const
+			{
+				glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), Rotation.x, { 1, 0, 0 })
+					* glm::rotate(glm::mat4(1.0f), Rotation.y, { 0, 1, 0 })
+					* glm::rotate(glm::mat4(1.0f), Rotation.z, { 0, 0, 1 });
+
+				return glm::translate(glm::mat4(1.0f), Translation)
+					* rotation
+					* glm::scale(glm::mat4(1.0f), Scale);
+			}
+
+			operator glm::mat4& () { return GetTransform(); }
+			operator const glm::mat4& () const { return GetTransform(); }
 		};
 
 		struct SpriteRenderer

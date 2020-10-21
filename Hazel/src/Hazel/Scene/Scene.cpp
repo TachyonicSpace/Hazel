@@ -1,7 +1,7 @@
 #include "hzpch.h"
 //#include "Scene.h"
 
-#include "Components.h"
+#include <Hazel/Scene/Components.h>
 #include "Entity.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
@@ -14,18 +14,22 @@ namespace Hazel
 	{
 	}
 
-	Entity Scene::CreateEntity(const std::string& name, const glm::mat4& transform /* = glm::mat4(1) */)
+	Entity Scene::CreateEntity(const std::string& name, const glm::vec3& translation /* = glm::vec3(0) */, 
+														const glm::vec3& rotation /* = glm::vec3(0) */, 
+														const glm::vec3& scale /* = glm::vec3(1) */)
 	{
 		Entity e(m_Registry.create(), this);
 		e.AddComponent<Component::Tag>(name);
-		e.AddComponent<Component::Transform>(transform);
+		e.AddComponent<Component::Transform>(translation, rotation, scale);
 		return e;
 	}
-	Entity Scene::CreateEntity(const glm::mat4& transform)
+	Entity Scene::CreateEntity(const glm::vec3& translation /* = glm::vec3(0) */,
+							   const glm::vec3& rotation /* = glm::vec3(0) */,
+							   const glm::vec3& scale /* = glm::vec3(1) */)
 	{
 		Entity e(m_Registry.create(), this);
 		e.AddComponent<Component::Tag>("N/A");
-		e.AddComponent<Component::Transform>(transform);
+		e.AddComponent<Component::Transform>(translation, rotation, scale);
 		return e;
 	}
 
@@ -38,7 +42,10 @@ namespace Hazel
 		return e;
 	}
 
-
+	void Scene::DestroyEntity(Entity entity)
+	{
+		m_Registry.destroy(entity);
+	}
 
 
 	void Scene::OnUpdate(Timestep& t)
@@ -62,7 +69,7 @@ namespace Hazel
 
 		// Render 2D
 		Camera* mainCamera = nullptr;
-		glm::mat4* cameraTransform = nullptr;
+		glm::mat4 cameraTransform;
 		{
 			auto view = m_Registry.view<Component::Transform, Component::Cameras>();
 			for (auto entity : view)
@@ -72,21 +79,21 @@ namespace Hazel
 				if (camera.Primary)
 				{
 					mainCamera = &camera.camera;
-					cameraTransform = &transform.transform;
+					cameraTransform = transform.GetTransform();
 					break;
 				}
 			}
 		}
 		if (mainCamera)
 		{
-			Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
+			Renderer2D::BeginScene(mainCamera->GetProjection(), cameraTransform);
 
 			auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
 			for (auto entity : group)
 			{
 				auto& [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
 
-				Renderer2D::DrawQuad(transform, sprite.color);
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite.color);
 			}
 			auto group0 = m_Registry.group<Component::Quads, Component::Tag>();
 			for (auto entity : group0)
@@ -116,4 +123,40 @@ namespace Hazel
 
 	}
 
+	template<typename T>
+	void Scene::OnComponentAdded(Entity entity, T& component)
+	{
+		//static_assert(false);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::Transform>(Entity entity, Component::Transform& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::Cameras>(Entity entity, Component::Cameras& component)
+	{
+		component.camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::SpriteRenderer>(Entity entity, Component::SpriteRenderer& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::Tag>(Entity entity, Component::Tag& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::NativeScript>(Entity entity, Component::NativeScript& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::Quads>(Entity entity, Component::Quads& component)
+	{
+	}
 }
