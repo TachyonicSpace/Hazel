@@ -5,23 +5,44 @@ namespace Hazel
 {
 	bool Color::HSBMode = false;
 
-	const Color Color::Black(0, 0, 0);
-	const Color Color::White(255, 255, 255);
-	const Color Color::Red(255, 0, 0);
-	const Color Color::Lime(0, 255, 0);
-	const Color Color::Blue(0, 0, 255);
-	const Color Color::Yellow(255, 255, 0);
-	const Color Color::Cyan(0, 255, 255);
-	const Color Color::Magenta(255, 0, 255);
-	const Color Color::Silver(192, 192, 192);
-	const Color Color::Grey(128, 128, 128);
-	const Color Color::Maroon(128, 0, 0);
-	const Color Color::Olive(128, 128, 0);
-	const Color Color::Green(0, 128, 0);
-	const Color Color::Purple(128, 0, 128);
-	const Color Color::Teal(0, 128, 128);
-	const Color Color::Navy(0, 0, 128);
-	const Color Color::Brown(139, 69, 19);
+	Color Color::ColorPallete[17] = { 
+		Color(255.f, 255.f, 255.f),
+		Color(000.f, 000.f, 000.f),
+		Color(255.f, 000.f, 000.f),
+		Color(000.f, 255.f, 000.f),
+		Color(000.f, 000.f, 255.f),
+		Color(255.f, 255.f, 000.f),
+		Color(000.f, 255.f, 255.f),
+		Color(255.f, 000.f, 255.f),
+		Color(192.f, 192.f, 192.f),
+		Color(128.f, 128.f, 128.f),
+		Color(128.f, 000.f, 000.f),
+		Color(128.f, 128.f, 000.f),
+		Color(000.f, 128.f, 000.f),
+		Color(128.f, 000.f, 128.f),
+		Color(000.f, 128.f, 128.f),
+		Color(000.f, 000.f, 128.f),
+		Color(139.f, 069.f, 019.f)
+	};
+
+	const Color& Color::White = Color::ColorPallete[0];
+	const Color& Color::Black = Color::ColorPallete[1];
+	const Color& Color::Red = Color::ColorPallete[2];
+	const Color& Color::Lime = Color::ColorPallete[3];
+	const Color& Color::Blue = Color::ColorPallete[4];
+	const Color& Color::Yellow = Color::ColorPallete[5];
+	const Color& Color::Cyan = Color::ColorPallete[6];
+	const Color& Color::Magenta = Color::ColorPallete[7];
+	const Color& Color::Silver = Color::ColorPallete[8];
+	const Color& Color::Grey = Color::ColorPallete[9];
+	const Color& Color::Maroon = Color::ColorPallete[10];
+	const Color& Color::Olive = Color::ColorPallete[11];
+	const Color& Color::Green = Color::ColorPallete[12];
+	const Color& Color::Purple = Color::ColorPallete[13];
+	const Color& Color::Teal = Color::ColorPallete[14];
+	const Color& Color::Navy = Color::ColorPallete[15];
+	const Color& Color::Brown = Color::ColorPallete[16];
+
 
 
 
@@ -420,7 +441,7 @@ namespace Hazel
 	}
 	Color& Color::SetRgb(const Color& col)
 	{
-		this->SetRgb(col.r, col.g, col.b, col.a);
+		this->SetRgb({ col.r, col.g, col.b, col.a });
 		return *this;
 	}
 
@@ -502,7 +523,7 @@ namespace Hazel
 	}
 	Color Color::operator-() const
 	{
-		Color tmp = (Color(1.f, 1.f, 1.f, a) - *this);
+		Color tmp = (Color({ 1.f, 1.f, 1.f, a}) - *this);
 		tmp.a = a;
 		return tmp;
 	}

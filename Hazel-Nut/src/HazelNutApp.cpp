@@ -11,7 +11,7 @@ namespace Hazel
 	class HazelNut : public Application {
 	public:
 		HazelNut()
-			:Application({"HazelNut editor"})
+			:Application(Hazel::WindowProps("Hazelnut Editor", 1500, 700))
 		{
 			PushLayer(new EditorLayer());
 		}

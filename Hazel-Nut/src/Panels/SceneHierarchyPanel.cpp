@@ -8,7 +8,7 @@
 
 namespace Hazel
 {
-	Color* SceneHierarchyPanel::m_SavedColor = new Color[16]();
+	Color* SceneHierarchyPanel::m_SavedColor = (Color*)&Color::White;
 	short SceneHierarchyPanel::m_SavedColorIndex = 0;
 
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
@@ -50,39 +50,53 @@ namespace Hazel
 		if (m_SelectedContext)
 		{
 			DrawComponents(m_SelectedContext);
-
-			if (ImGui::Button("Add Component"))
-				ImGui::OpenPopup("AddComponent");
-
-			if (ImGui::BeginPopup("AddComponent"))
-			{
-				if (ImGui::MenuItem("Camera"))
-				{
-					m_SelectedContext.AddComponent<Component::Cameras>();
-					ImGui::CloseCurrentPopup();
-				}
-
-				if (ImGui::MenuItem("Sprite Renderer"))
-				{
-					m_SelectedContext.AddComponent<Component::SpriteRenderer>();
-					ImGui::CloseCurrentPopup();
-				}
-
-				if (ImGui::MenuItem("Quads"))
-				{
-					Quad q = { { 0, 0 }, { 1, 1 }, Color::White };
-					m_SelectedContext.AddComponent<Component::Quads>(q);
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-
 		}
 
 
 
 		ImGui::End();
+	}
+
+	template<typename T, typename UIFunction>
+	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
+	{
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAllAvailWidth |
+			ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+		if (entity.HasComponent<T>())
+		{
+			auto& component = entity.GetComponent<T>();
+			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			ImGui::Separator();
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+			ImGui::PopStyleVar(
+			);
+			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+			{
+				ImGui::OpenPopup("ComponentSettings");
+			}
+
+			bool removeComponent = false;
+			if (ImGui::BeginPopup("ComponentSettings"))
+			{
+				if (ImGui::MenuItem("Remove component"))
+					removeComponent = true;
+
+				ImGui::EndPopup();
+			}
+
+			if (open)
+			{
+				uiFunction(component);
+				ImGui::TreePop();
+			}
+
+			if (removeComponent)
+				entity.RemoveComponent<T>();
+		}
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity node, bool displayAllEntities)
@@ -94,6 +108,7 @@ namespace Hazel
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= (m_SelectedContext == node) ? ImGuiTreeNodeFlags_Selected : 0;
+		flags |= ImGuiTreeNodeFlags_SpanAllAvailWidth;
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)node, flags, tag.c_str());
 
 		if (ImGui::IsItemClicked())
@@ -112,7 +127,6 @@ namespace Hazel
 
 		if (opened)
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 			bool opened = ImGui::TreeNodeEx((void*)9817239, flags, tag.c_str());
 			if (opened)
 				ImGui::TreePop();
@@ -141,44 +155,48 @@ namespace Hazel
 			}
 		}
 
-		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap;
+		ImGui::SameLine();
+		ImGui::PushItemWidth(-1);
 
-		if (ent.HasComponent<Component::Transform>() /*&& !ent.HasComponent<Component::Quads>()*/)
+		if (ImGui::Button("Add Component"))
+			ImGui::OpenPopup("AddComponent");
+
+		if (ImGui::BeginPopup("AddComponent"))
 		{
-			bool open = ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), treeNodeFlags, "Transform");
-
-			if (open) {
-				if (ent.HasComponent<Component::Quads>())
-				{
-					EditTransformMatrix(ent.GetComponent<Component::Quads>().q.transformRef());
-				}
-				else
-				{
-					auto& transform = ent.GetComponent<Component::Transform>();
-					EditTransformVec("translation", transform.Translation);
-					static bool degrees = true;
-					if (ImGui::Checkbox("degrees?", &degrees))
-					{
-						transform.Rotation = glm::degrees(transform.Rotation);
-						EditTransformVec("Rotation", transform.Rotation);
-						transform.Rotation = glm::radians(transform.Rotation);
-					}
-					else
-						EditTransformVec("Rotation", transform.Rotation);
-					EditTransformVec("Scale", transform.Scale, 1.0f);
-				}
-
-				ImGui::TreePop();
-
-				//ImGui::TreePop();
+			if (ImGui::MenuItem("Camera"))
+			{
+				m_SelectedContext.AddComponent<Component::Cameras>();
+				ImGui::CloseCurrentPopup();
 			}
+
+			if (ImGui::MenuItem("Sprite Renderer"))
+			{
+				m_SelectedContext.AddComponent<Component::SpriteRenderer>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
 		}
 
-		if (ent.HasComponent<Component::Cameras>())
-		{
-			if (ImGui::TreeNodeEx((void*)typeid(Component::Cameras).hash_code(), treeNodeFlags, "Camera"))
+		ImGui::PopItemWidth();
+
+		DrawComponent<Component::Transform>("Transform", ent, [&](auto& transform)
 			{
-				auto& CameraComp = ent.GetComponent<Component::Cameras>();
+				EditTransformVec("translation", transform.Translation);
+				static bool degrees = true;
+				if (ImGui::Checkbox("degrees?", &degrees))
+				{
+					transform.Rotation = glm::degrees(transform.Rotation);
+					EditTransformVec("Rotation", transform.Rotation);
+					transform.Rotation = glm::radians(transform.Rotation);
+				}
+				else
+					EditTransformVec("Rotation", transform.Rotation);
+				EditTransformVec("Scale", transform.Scale, 1.0f);
+			});
+
+		DrawComponent<Component::Cameras>("Camera", ent, [&](auto& CameraComp)
+			{
 				auto& camera = CameraComp.camera;
 
 				ImGui::Checkbox("Primary", &CameraComp.Primary);
@@ -246,42 +264,32 @@ namespace Hazel
 					ImGui::Checkbox("Fixed Aspect Ratio", &CameraComp.fixedAspectRatio);
 				}
 
-				ImGui::TreePop();
-			}
-		}
 
-		if (ent.HasComponent<Component::SpriteRenderer>())
-		{
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-			bool open = ImGui::TreeNodeEx((void*)typeid(Component::SpriteRenderer).hash_code(), treeNodeFlags, "Sprite Renderer");
-			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
-			if (ImGui::Button("+", ImVec2{ 20, 20 }))
+			});
+
+		DrawComponent<Component::SpriteRenderer>("Sprite", ent, [&](auto& src)
 			{
-				ImGui::OpenPopup("ComponentSettings");
-			}
-			ImGui::PopStyleVar();
+				static char buffer[256];
+				//memset(buffer, 0x00, sizeof(buffer));
+				ImGui::InputText("Texture address", buffer, 256);
+				if (ImGui::Button("submit new texture address"))
+					src.Tex = (Texture2D::Create(buffer));
 
-			bool removeComponent = false;
-			if (ImGui::BeginPopup("ComponentSettings"))
-			{
-				if (ImGui::MenuItem("Remove component"))
-					removeComponent = true;
+				//if (ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component"))
+				//{
+				//	auto& trans = quad.transformRef();
+				//	EditTransformMatrix(trans);
 
-				ImGui::EndPopup();
-			}
-
-			if (open)
-			{
-				auto& src = ent.GetComponent<Component::SpriteRenderer>();
+				//	ImGui::TreePop();
+				//}
+				float& tile = src.TilingFactor;
+				ImGui::DragFloat("tiling factor", &tile);
 				EditColor(src.color);
-				ImGui::TreePop();
-			}
 
-			if (removeComponent)
-				ent.RemoveComponent<Component::SpriteRenderer>();
-		}
 
-		if (ent.HasComponent<Component::Quads>())
+			});
+
+		/*if (ent.HasComponent<Component::Quads>())
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 			bool open = ImGui::TreeNodeEx((void*)typeid(Component::Quads).hash_code(), treeNodeFlags, "quads");
@@ -327,7 +335,7 @@ namespace Hazel
 
 			if (removeComponent)
 				ent.RemoveComponent<Component::Quads>();
-		}
+		}*/
 	}
 	void SceneHierarchyPanel::EditTransformMatrix(glm::mat4& transform, bool details)
 	{
@@ -623,6 +631,9 @@ namespace Hazel
 	}
 	bool SceneHierarchyPanel::EditTransformVec(const std::string& label, glm::vec3& values, float resetValue, float columnWidth)
 	{
+		ImGuiIO& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+
 		bool changed = false;
 		ImGui::PushID(label.c_str());
 
@@ -640,11 +651,13 @@ namespace Hazel
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("X", buttonSize))
 		{
 			values.x = resetValue;
 			changed = true;
 		}
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -655,11 +668,13 @@ namespace Hazel
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Y", buttonSize))
 		{
 			values.y = resetValue;
 			changed = true;
 		}
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -670,11 +685,13 @@ namespace Hazel
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Z", buttonSize))
 		{
 			values.z = resetValue;
 			changed = true;
 		}
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();

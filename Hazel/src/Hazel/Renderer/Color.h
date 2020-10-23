@@ -125,23 +125,24 @@ namespace Hazel
 		float& s = m_HSV[1];
 		float& v = m_HSV[2];
 	public:
-		static const Color Black	;//(0, 0, 0);
-		static const Color White	;//(255, 255, 255);
-		static const Color Red		;//(255, 0, 0);
-		static const Color Lime		;//(0, 255, 0);
-		static const Color Blue		;//(0, 0, 255);
-		static const Color Yellow	;//(255, 255, 0);
-		static const Color Cyan		;//(0, 255, 255);
-		static const Color Magenta	;//(255, 0, 255);
-		static const Color Silver	;//(192, 192, 192);
-		static const Color Grey		;//(128, 128, 128);
-		static const Color Maroon	;//(128, 0, 0);
-		static const Color Olive	;//(128, 128, 0);
-		static const Color Green	;//(0, 128, 0);
-		static const Color Purple	;//(128, 0, 128);
-		static const Color Teal		;//(0, 128, 128);
-		static const Color Navy		;//(0, 0, 128);
-		static const Color Brown	;//(139, 69, 19);
+		static Color ColorPallete[17];
+		static const Color& White	;//(255, 255, 255);
+		static const Color& Black	;//(0, 0, 0);
+		static const Color& Red		;//(255, 0, 0);
+		static const Color& Lime		;//(0, 255, 0);
+		static const Color& Blue		;//(0, 0, 255);
+		static const Color& Yellow	;//(255, 255, 0);
+		static const Color& Cyan		;//(0, 255, 255);
+		static const Color& Magenta	;//(255, 0, 255);
+		static const Color& Silver	;//(192, 192, 192);
+		static const Color& Grey		;//(128, 128, 128);
+		static const Color& Maroon	;//(128, 0, 0);
+		static const Color& Olive	;//(128, 128, 0);
+		static const Color& Green	;//(0, 128, 0);
+		static const Color& Purple	;//(128, 0, 128);
+		static const Color& Teal		;//(0, 128, 128);
+		static const Color& Navy		;//(0, 0, 128);
+		static const Color& Brown	;//(139, 69, 19);
 
 
 

@@ -31,7 +31,7 @@ namespace Hazel
 		m_Delta = 1 / m_Delta;
 
 
-		m_CameraEntity = m_Scene->CreateEntity("first Camera", { .5, .5, 1.5 });
+		m_CameraEntity = m_Scene->CreateEntity("first Camera", { .5, .5, 5 });
 		m_CameraEntity.AddComponent<Component::Cameras>(SceneCamera::ProjectionType::Perspective);
 
 
@@ -89,6 +89,13 @@ namespace Hazel
 
 		m_CameraEntity.AddComponent<Component::NativeScript>().Bind<CameraController>();
 		m_SecondCamera.AddComponent<Component::NativeScript>().Bind<CameraController>();
+
+		m_SquareEntity = m_Scene->CreateEntity("Blue rect", { 0, 0, 0 });
+		m_SquareEntity.AddComponent<Component::SpriteRenderer>(Color{ 0, 0, 1 });
+
+
+		auto secondEntity = m_Scene->CreateEntity("red rect", { 0, 1.2, 0 });
+		secondEntity.AddComponent<Component::SpriteRenderer>(Color{ 1, 0, 0 });
 
 		m_SceneHierarchyPanel.SetContext(m_Scene);
 
@@ -172,11 +179,16 @@ namespace Hazel
 
 			// DockSpace
 			ImGuiIO& io = ImGui::GetIO();
+			ImGuiStyle& style = ImGui::GetStyle();
+			float minWinSizeX = style.WindowMinSize.x;
+			style.WindowMinSize.x = 370.0f;
 			if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
 				ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 				ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 			}
+
+			style.WindowMinSize.x = minWinSizeX;
 
 			if (ImGui::BeginMenuBar())
 			{

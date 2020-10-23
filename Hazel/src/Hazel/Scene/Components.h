@@ -56,22 +56,21 @@ namespace Hazel
 
 		struct SpriteRenderer
 		{
+			Ref<Texture2D> Tex;
+			float TilingFactor;
 			Color color{ 1.0f, 1.0f, 1.0f, 1.0f };
 
-			SpriteRenderer() = default;
+
 			SpriteRenderer(const SpriteRenderer&) = default;
-			SpriteRenderer(const Color& color)
-				: color(color) {}
-		};
-
-		struct Quads
-		{
-			Quad q;
-
-			Quads() = default;
-			Quads(const Quads& q0) = default;
-			Quads(const Quad& q0)
-				:q(q0) {}
+			//SpriteRenderer(const Color& col,                  const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f)
+			//	: color(col), Tex(tex), TilingFactor(tilingFactor)
+			//{}
+			SpriteRenderer(const Color& col = { 1, 1, 1, 1 }, const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f)
+				: color(col), Tex(tex), TilingFactor(tilingFactor)
+			{}
+			SpriteRenderer(Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& col = { 1, 1, 1, 1 })
+				:color(col), Tex(tex), TilingFactor(tilingFactor)
+			{}
 		};
 
 		struct Cameras
