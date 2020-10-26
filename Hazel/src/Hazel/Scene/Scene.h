@@ -1,9 +1,9 @@
 #pragma once
 
 
-
+#pragma warning(push, 0)
 #include "entt.hpp"
-
+#pragma warning(pop)
 #include "Hazel/Core/Timestep.h"
 
 #include <glm/glm.hpp>
@@ -16,6 +16,7 @@ namespace Hazel
 	{
 	public:
 		Scene();
+		~Scene() = default;
 
 		Entity CreateEntity();
 		Entity CreateEntity(const glm::vec3& transform = glm::vec3(0),
@@ -44,6 +45,7 @@ namespace Hazel
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 		friend class Entity;
+		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;
 	};
 

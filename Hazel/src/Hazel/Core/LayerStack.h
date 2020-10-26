@@ -7,7 +7,7 @@ namespace Hazel {
 	class  LayerStack : public Layer
 	{
 	public:
-		LayerStack();
+		LayerStack() = default;
 		~LayerStack();
 
 		void PushLayer(Layer* layer);

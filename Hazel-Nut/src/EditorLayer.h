@@ -18,7 +18,12 @@ namespace Hazel
 		virtual void OnUpdate(Timestep & ts) override;
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event & e) override;
+	private:
+		bool OnKeyPressed(KeyPressedEvent& e);
 
+		void NewScene();
+		void OpenScene();
+		void SaveSceneAs();
 	private:
 		OrthographicCameraController m_Camera;
 
@@ -28,11 +33,6 @@ namespace Hazel
 
 
 		Ref<Scene> m_Scene;
-		Entity m_SquareEntity;
-		Entity m_CameraEntity;
-		Entity m_SecondCamera;
-
-		bool m_PrimaryCamera = true;
 
 
 		Ref<Texture2D> m_checkerboard;

@@ -39,6 +39,17 @@ namespace Hazel
 			if (ImGui::MenuItem("Create Empty Entity"))
 				m_context->CreateEntity("Empty Entity");
 
+			if (ImGui::MenuItem("Create New Camera Entity"))
+			{
+				auto newCamera = m_context->CreateEntity("New Camera");
+				newCamera.AddComponent<Component::Cameras>();
+			}
+
+			if (ImGui::MenuItem("Create New Sprite Entity"))
+			{
+				auto newSprite = m_context->CreateEntity("New Sprite");
+				newSprite.AddComponent<Component::SpriteRenderer>();
+			}
 			ImGui::EndPopup();
 		}
 
@@ -116,14 +127,16 @@ namespace Hazel
 			m_SelectedContext = node;
 		}
 
-		bool entityDeleted = false;
+
 		if (ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Delete Entity"))
-				entityDeleted = true;
+				node.deleted = true;
 
 			ImGui::EndPopup();
 		}
+
+
 
 		if (opened)
 		{
@@ -133,13 +146,29 @@ namespace Hazel
 			ImGui::TreePop();
 		}
 
-		if (entityDeleted)
+		if (node.deleted)
 		{
 			m_context->DestroyEntity(node);
 			if (m_SelectedContext == node)
 				m_SelectedContext = {};
 		}
 	}
+
+	void SceneHierarchyPanel::AddComponentsPopup()
+	{
+		if (ImGui::MenuItem("Camera"))
+		{
+			m_SelectedContext.AddComponent<Component::Cameras>();
+			ImGui::CloseCurrentPopup();
+		}
+
+		if (ImGui::MenuItem("Sprite Renderer"))
+		{
+			m_SelectedContext.AddComponent<Component::SpriteRenderer>();
+			ImGui::CloseCurrentPopup();
+		}
+	}
+
 	void SceneHierarchyPanel::DrawComponents(Entity ent)
 	{
 		if (ent.HasComponent<Component::Tag>())
@@ -161,19 +190,19 @@ namespace Hazel
 		if (ImGui::Button("Add Component"))
 			ImGui::OpenPopup("AddComponent");
 
+		// Right-click on blank space
+		if (ImGui::BeginPopupContextWindow(0, 1, false))
+		{
+			if (ImGui::MenuItem("Delete entity?"))
+				ent.deleted = true;
+
+			AddComponentsPopup();
+			ImGui::EndPopup();
+		}
+
 		if (ImGui::BeginPopup("AddComponent"))
 		{
-			if (ImGui::MenuItem("Camera"))
-			{
-				m_SelectedContext.AddComponent<Component::Cameras>();
-				ImGui::CloseCurrentPopup();
-			}
-
-			if (ImGui::MenuItem("Sprite Renderer"))
-			{
-				m_SelectedContext.AddComponent<Component::SpriteRenderer>();
-				ImGui::CloseCurrentPopup();
-			}
+			AddComponentsPopup();
 
 			ImGui::EndPopup();
 		}
@@ -289,53 +318,12 @@ namespace Hazel
 
 			});
 
-		/*if (ent.HasComponent<Component::Quads>())
+		if (ent.deleted)
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-			bool open = ImGui::TreeNodeEx((void*)typeid(Component::Quads).hash_code(), treeNodeFlags, "quads");
-			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
-			if (ImGui::Button("+", ImVec2{ 20, 20 }))
-			{
-				ImGui::OpenPopup("ComponentSettings");
-			}
-			ImGui::PopStyleVar();
-
-			bool removeComponent = false;
-			if (ImGui::BeginPopup("ComponentSettings"))
-			{
-				if (ImGui::MenuItem("Remove component"))
-					removeComponent = true;
-
-				ImGui::EndPopup();
-			}
-
-			if (open) {
-				auto& quad = ent.GetComponent<Component::Quads>().q;
-				auto& tex = quad.texRef();
-				static char buffer[256];
-				//memset(buffer, 0x00, sizeof(buffer));
-				ImGui::InputText("Texture address", buffer, 256);
-				if (ImGui::Button("submit new texture address"))
-					tex = (Texture2D::Create(buffer));
-
-				//if (ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component"))
-				//{
-				//	auto& trans = quad.transformRef();
-				//	EditTransformMatrix(trans);
-
-				//	ImGui::TreePop();
-				//}
-				float& tile = quad.tilingFactorRef();
-				ImGui::DragFloat("tiling factor", &tile);
-				EditColor(quad.colorRef());
-
-
-				ImGui::TreePop();
-			}
-
-			if (removeComponent)
-				ent.RemoveComponent<Component::Quads>();
-		}*/
+			m_context->DestroyEntity(ent);
+			if (m_SelectedContext == ent)
+				m_SelectedContext = {};
+		}
 	}
 	void SceneHierarchyPanel::EditTransformMatrix(glm::mat4& transform, bool details)
 	{
@@ -626,7 +614,7 @@ namespace Hazel
 
 		else
 		{
-			HZ_CORE_ASSERT(false, "INVALID Rotation Type: {0}", currentRotationType);
+			HZ_ASSERT(false, "INVALID Rotation Type: {0}");
 		}
 	}
 	bool SceneHierarchyPanel::EditTransformVec(const std::string& label, glm::vec3& values, float resetValue, float columnWidth)

@@ -1,6 +1,8 @@
 #pragma once
 
-#include "hzpch.h"
+#include <functional>
+
+#include "Hazel/Debug/Instrumentor.h"
 #include "Hazel/Core/Core.h"
 
 
@@ -9,7 +11,7 @@ namespace Hazel {
 	//events in hazel are currently blocking, meaning events are immediately dealt with 
 	//and blocking events that come after it
 	//for the future, a better strategy would be to buffer events and process them "later"
-	
+
 	enum class EventType
 	{
 		None = 0,
@@ -29,28 +31,30 @@ namespace Hazel {
 		EventCategoryMouseButton = BIT(4)
 	};
 
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::##type; }\
+	#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::##type; }\
 								virtual EventType GetEventType() const override{ return GetStaticType(); }\
 								virtual const char* GetName() const override {return #type; }
 
-#define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
+	#define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
-	class  Event
+	class Event
 	{
-		friend class EventDispatcher;
 	public:
+		virtual ~Event() = default;
+
 		bool handled = false;
-		
+
 		virtual EventType GetEventType() const = 0;
 		virtual const char* GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
 		virtual std::string ToString() const { return GetName(); }
 
-		inline bool IsInCategory(EventCategory category) 
+		bool IsInCategory(EventCategory category)
 		{
 			return GetCategoryFlags() & (int)category;
 		}
 	};
+
 
 	class EventDispatcher
 	{

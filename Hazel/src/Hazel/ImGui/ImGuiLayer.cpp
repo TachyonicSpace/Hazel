@@ -20,10 +20,6 @@ namespace Hazel {
 	{
 	}
 
-	ImGuiLayer::~ImGuiLayer()
-	{
-	}
-
 	void ImGuiLayer::OnAttach()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -46,7 +42,7 @@ namespace Hazel {
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
 
-		//when viewports are enabled we teak wondowrounding so platform window looks identical
+		//when viewports are enabled we teak WindowRounding so platform window looks identical
 		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -81,12 +77,6 @@ namespace Hazel {
 			e.handled |= e.IsInCategory(EventCategory::EventCategoryMouse) & io.WantCaptureMouse;
 			e.handled |= e.IsInCategory(EventCategory::EventCategoryKeyboard) & io.WantCaptureKeyboard;
 		}
-	}
-
-	void ImGuiLayer::OnImGuiRender()
-	{
-		//static bool show = true;
-		//ImGui::ShowDemoWindow(&show);
 	}
 
 	void ImGuiLayer::Begin()

@@ -1,10 +1,11 @@
 #include "hzpch.h"
-#include "log.h"
+#include "Hazel/Core/Log.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
 namespace Hazel {
+
 	Ref<spdlog::logger> Log::s_CoreLogger;
 	Ref<spdlog::logger> Log::s_ClientLogger;
 
@@ -27,4 +28,5 @@ namespace Hazel {
 		s_ClientLogger->set_level(spdlog::level::trace);
 		s_ClientLogger->flush_on(spdlog::level::trace);
 	}
+
 }

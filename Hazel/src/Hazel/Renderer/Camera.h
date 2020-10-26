@@ -16,7 +16,7 @@ namespace Hazel {
 		virtual ~Camera() = default;
 
 		const glm::mat4& GetProjection() const { return m_Projection; }
-	//protected:
+	protected:
 		glm::mat4 m_Projection = glm::mat4(1.0f);
 	};
 
@@ -61,6 +61,7 @@ namespace Hazel {
 
 		int GetProjectionType() const { return (int)m_ProjectionType; }
 		void SetProjectionType(int type) { (m_ProjectionType = (ProjectionType)type); RecalculateProjection(); }
+		void SetProjectionType(ProjectionType type) { (m_ProjectionType = type); RecalculateProjection(); }
 
 		void SetPerspective(float verticalFOV, float nearClip, float farClip);
 		void SetOrthographic(float size, float nearClip, float farClip);

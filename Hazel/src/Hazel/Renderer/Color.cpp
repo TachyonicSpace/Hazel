@@ -6,23 +6,23 @@ namespace Hazel
 	bool Color::HSBMode = false;
 
 	Color Color::ColorPallete[17] = { 
-		Color(255.f, 255.f, 255.f),
-		Color(000.f, 000.f, 000.f),
-		Color(255.f, 000.f, 000.f),
-		Color(000.f, 255.f, 000.f),
-		Color(000.f, 000.f, 255.f),
-		Color(255.f, 255.f, 000.f),
-		Color(000.f, 255.f, 255.f),
-		Color(255.f, 000.f, 255.f),
-		Color(192.f, 192.f, 192.f),
-		Color(128.f, 128.f, 128.f),
-		Color(128.f, 000.f, 000.f),
-		Color(128.f, 128.f, 000.f),
-		Color(000.f, 128.f, 000.f),
-		Color(128.f, 000.f, 128.f),
-		Color(000.f, 128.f, 128.f),
-		Color(000.f, 000.f, 128.f),
-		Color(139.f, 069.f, 019.f)
+		Color({255.f, 255.f, 255.f}),
+		Color({000.f, 000.f, 000.f}),
+		Color({255.f, 000.f, 000.f}),
+		Color({000.f, 255.f, 000.f}),
+		Color({000.f, 000.f, 255.f}),
+		Color({255.f, 255.f, 000.f}),
+		Color({000.f, 255.f, 255.f}),
+		Color({255.f, 000.f, 255.f}),
+		Color({192.f, 192.f, 192.f}),
+		Color({128.f, 128.f, 128.f}),
+		Color({128.f, 000.f, 000.f}),
+		Color({128.f, 128.f, 000.f}),
+		Color({000.f, 128.f, 000.f}),
+		Color({128.f, 000.f, 128.f}),
+		Color({000.f, 128.f, 128.f}),
+		Color({000.f, 000.f, 128.f}),
+		Color({139.f, 069.f, 019.f})
 	};
 
 	const Color& Color::White = Color::ColorPallete[0];

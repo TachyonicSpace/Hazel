@@ -62,9 +62,6 @@ namespace Hazel
 
 
 			SpriteRenderer(const SpriteRenderer&) = default;
-			//SpriteRenderer(const Color& col,                  const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f)
-			//	: color(col), Tex(tex), TilingFactor(tilingFactor)
-			//{}
 			SpriteRenderer(const Color& col = { 1, 1, 1, 1 }, const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f)
 				: color(col), Tex(tex), TilingFactor(tilingFactor)
 			{}

@@ -1,22 +1,15 @@
 #pragma once
 
 #include "Core.h"
-#include "Timestep.h"
 
-#include "Window.h"
-#include "LayerStack.h"
-#include "Hazel\Events\Event.h"
-#include "Hazel\Events\ApplicationEvent.h"
+#include "Hazel/Core/Window.h"
+#include "Hazel/Core/LayerStack.h"
+#include "Hazel/Events/Event.h"
+#include "Hazel/Events/ApplicationEvent.h"
 
-#include "Hazel/Renderer/Camera.h"
+#include "Hazel/Core/Timestep.h"
 
 #include "Hazel/ImGui/ImGuiLayer.h"
-
-#include "Hazel/Renderer/Shader.h"
-#include "Hazel/Renderer/Renderer.h"
-
-#include "Hazel/Renderer/Buffer.h"
-#include "Hazel/Renderer/VertexArray.h"
 
 namespace Hazel {
 

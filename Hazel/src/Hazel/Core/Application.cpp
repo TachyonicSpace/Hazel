@@ -1,6 +1,8 @@
 #include "hzpch.h"
 #include "Application.h"
 
+#include "Hazel/Renderer/Renderer.h"
+
 #include "input.h"
 
 #include "GLFW/glfw3.h"
@@ -27,6 +29,13 @@ namespace Hazel {
 		PushOverlay(m_ImGuiLayer);
 	}
 
+	Hazel::Application::~Application()
+	{
+		HZ_PROFILE_FUNCTION();
+
+		Renderer::Shutdown();
+	}
+
 	void Application::PushLayer(Layer* layer)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -51,18 +60,12 @@ namespace Hazel {
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
 
-		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
+		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
-			(*--it)->OnEvent(e);
 			if (e.handled)
 				break;
+			(*it)->OnEvent(e);
 		}
-	}
-
-	Hazel::Application::~Application()
-	{
-		HZ_PROFILE_FUNCTION();
-
 	}
 
 	void Hazel::Application::Run()
@@ -71,14 +74,6 @@ namespace Hazel {
 
 		while (m_Running)
 		{
-			if (m_Restart)
-			{
-				for (auto layer : m_LayerStack)
-				{
-					layer->OnAttach();
-				}
-				m_Restart = false;
-			}
 
 			HZ_PROFILE_SCOPE("run Loop");
 

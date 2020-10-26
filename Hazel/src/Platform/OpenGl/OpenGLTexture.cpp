@@ -56,7 +56,7 @@ namespace Hazel {
 
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		}
-		HZ_CORE_ASSERT(data, "Image Path Not Found: {0}!!", path.c_str());
+		HZ_CORE_ASSERT(data, "Image Path Not Found: ");
 		m_Width = width;
 		m_Height = height;
 

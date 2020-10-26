@@ -1,10 +1,6 @@
 #include "hzpch.h"
 #include "LayerStack.h"
 
-Hazel::LayerStack::LayerStack()
-{
-}
-
 Hazel::LayerStack::~LayerStack()
 {
 	for (Layer* l : m_Layers)

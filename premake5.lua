@@ -24,6 +24,7 @@ IncludeDir["ImGui"] = "Hazel/vendor/imgui"
 IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
 IncludeDir["entt"] = "Hazel/vendor/entt/include"
 IncludeDir["glm"] = "Hazel/vendor/glm"
+IncludeDir["yaml_cpp"] = "Hazel/vendor/yaml-cpp/include"
 
 --IncludeDir["boost"] = "Hazel/vendor/boost"
 --IncludeDir["NumC++"] = "Hazel/vendor/NumC++/include"
@@ -32,6 +33,7 @@ group "Dependencies"
 	include "Hazel/vendor/GLFW"
 	include "Hazel/vendor/Glad"
 	include "Hazel/vendor/imgui"
+	include "Hazel/vendor/yaml-cpp"
 group ""
 
 project "Hazel"
@@ -78,12 +80,13 @@ project "Hazel"
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
+		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.entt}",
 		--"%{IncludeDir.boost}",
 		--"%{IncludeDir.NumCpp}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.yaml_cpp}"
 	}
 
 	links 
@@ -91,6 +94,7 @@ project "Hazel"
 		"GLFW",
 		"Glad",
 		"ImGui",
+		"yaml-cpp",
 		"opengl32.lib"
 	}
 

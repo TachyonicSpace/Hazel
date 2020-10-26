@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Scene.h"
+#pragma warning(push, 0)
 #include "entt.hpp"
+#pragma warning(pop)
 #include "Hazel/Core/log.h"
 
 namespace Hazel
@@ -81,6 +83,9 @@ namespace Hazel
 		bool operator!=(const Entity& other) const {
 			return !operator==(other);
 		}
+
+		bool deleted = false;
+
 	private:
 		entt::entity m_EntityHandle{ entt::null };
 		Scene* m_Scene = nullptr;

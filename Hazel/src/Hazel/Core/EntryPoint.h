@@ -1,12 +1,15 @@
 #pragma once
 
-#ifdef HZ_PLATFORM_WINDOWS
-	
-extern Hazel::Application* Hazel::CreateApplication();
+#include "Hazel/Core/Core.h"
 
 #ifdef HZ_MAIN
 
-int main(int argc, char** argv) {
+#ifdef HZ_PLATFORM_WINDOWS
+
+extern Hazel::Application* Hazel::CreateApplication();
+
+int main(int argc, char** argv)
+{
 
 	Hazel::Log::Init();
 

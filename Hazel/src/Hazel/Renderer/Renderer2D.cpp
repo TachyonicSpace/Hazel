@@ -18,7 +18,7 @@ namespace Hazel {
 
 	struct Renderer2DData
 	{
-		static const uint32_t MaxQuads = 20000;
+		static const uint32_t MaxQuads = 150;
 		static const uint32_t MaxVerticies = MaxQuads * 4;
 		static const uint32_t Maxindicies = MaxQuads * 6;
 		static const uint32_t MaxTexture = 32;
@@ -108,6 +108,16 @@ namespace Hazel {
 		delete[] s_Data.quadVertexBufferBase;
 	}
 
+	static void StartNewBatch()
+	{
+		Renderer2D::EndScene();
+
+		s_Data.quadIndexCount = 0;
+		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+
+		s_Data.TextureSlotIndex = 1;
+	}
+
 
 	void Renderer2D::BeginScene(const OrthographicCamera& cam)
 	{
@@ -115,7 +125,9 @@ namespace Hazel {
 
 		s_Data.texShader->Bind();
 		s_Data.texShader->UploadUniformMat4("u_ViewProjection", cam.GetViewProjectionMatrix());
-
+		s_Data.stats.drawCalls = 0;
+		s_Data.stats.quadCount = 0;
+		s_Data.quadIndexCount = 0;
 		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
 
 		s_Data.TextureSlotIndex = 1;
@@ -128,7 +140,8 @@ namespace Hazel {
 
 		s_Data.texShader->Bind();
 		s_Data.texShader->UploadUniformMat4("u_ViewProjection", viewProj);
-
+		s_Data.stats.drawCalls = 0;
+		s_Data.stats.quadCount = 0;
 		s_Data.quadIndexCount = 0;
 		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
 
@@ -138,86 +151,54 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.quadVertexBufferPtr - (uint8_t*)s_Data.quadVertexBufferBase);
-		s_Data.vb->SetData(s_Data.quadVertexBufferBase, dataSize);
-
 		Flush();
-
-		s_Data.stats.quadCount = 0;
-		s_Data.quadIndexCount = 0;
-		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
-
-		s_Data.TextureSlotIndex = 1;
 	}
 	void Renderer2D::Flush()
 	{
+		if (s_Data.quadIndexCount == 0)
+			return; // Nothing to draw
+
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.quadVertexBufferPtr - (uint8_t*)s_Data.quadVertexBufferBase);
+		s_Data.vb->SetData(s_Data.quadVertexBufferBase, dataSize);
+
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			s_Data.textureSlots[i]->Bind(i);
 
 		RenderCommand::DrawIndexed(s_Data.va, s_Data.stats.quadCount);
 
-
-
 		s_Data.stats.drawCalls++;
 	}
 
-	static void StartNewBatch()
-	{
-		Renderer2D::EndScene();
 
-		s_Data.stats.quadCount = 0;
-		s_Data.quadIndexCount = 0;
-		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
-
-		s_Data.TextureSlotIndex = 1;
-	}
-
-
-	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size,
-		const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
 	{
 		DrawQuad({ pos.x, pos.y, 0 }, size, color, tex, tilingFactor);
 	}
-	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size,
-		const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
 	{
 		DrawQuad(pos, size, (Ref<Texture2D>)tex, tilingFactor, color);
 	}
-
-
-	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size,
-		Ref<Texture2D>& tex, float tilingFactor, const Color& color)
+	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
 	{
 		DrawQuad({ pos.x, pos.y, 0 }, size, tex, tilingFactor, color);
 	}
-	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size,
-		Ref<Texture2D>& tex, float tilingFactor, const Color& color)
+	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
 	{
 		DrawQuad(pos, size, 0, tex, tilingFactor, color);
 	}
-
-
-
-
-	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const float& radianAngle,
-		const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const float& radianAngle, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
 	{
 		DrawQuad({ pos.x, pos.y, 0 }, size, radianAngle, color, tex, tilingFactor);
 	}
-	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle,
-		const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
 	{
 		DrawQuad(pos, size, radianAngle, (Ref<Texture2D>)tex, tilingFactor, color);
 	}
-
-
-	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const float& radianAngle,
-		Ref<Texture2D>& tex, float tilingFactor, const Color& color)
+	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const float& radianAngle, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
 	{
 		DrawQuad({ pos.x, pos.y, 0 }, size, radianAngle, tex, tilingFactor, color);
 	}
-	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle,
-		Ref<Texture2D>& tex, float tilingFactor, const Color& color)
+	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
 	{
 
 		HZ_PROFILE_FUNCTION();
@@ -274,15 +255,13 @@ namespace Hazel {
 
 		s_Data.stats.quadCount++;*/
 	}
-
-	void Renderer2D::DrawQuad(const glm::mat4& transform,
-		const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
 	{
 		DrawQuad(transform, (Ref<Texture2D>)tex, tilingFactor, color);
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform,
-		Ref<Texture2D>& tex, float tilingFactor, const Color& color)
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
 	{
 
 
@@ -293,8 +272,10 @@ namespace Hazel {
 			tex = s_Data.textureSlots[0];
 		}
 
-		if (s_Data.quadIndexCount >= s_Data.MaxQuads * 6)
+		if (s_Data.quadIndexCount >= s_Data.Maxindicies)
+		{
 			StartNewBatch();
+		}
 
 		float textureIndex = 0;
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
@@ -313,57 +294,6 @@ namespace Hazel {
 		}
 
 		
-
-		for (int i = 0; i < 4; i++)
-		{
-			s_Data.quadVertexBufferPtr->pos = transform * s_Data.quadVertexPositions[i];
-			s_Data.quadVertexBufferPtr->color = color.GetVec4();
-			s_Data.quadVertexBufferPtr->texCoord = tex->GetTextureCoordinates()[i];
-			s_Data.quadVertexBufferPtr->texIndex = textureIndex;
-			s_Data.quadVertexBufferPtr->TilingFactor = tilingFactor;
-			s_Data.quadVertexBufferPtr++;
-		}
-
-		s_Data.quadIndexCount += 6;
-
-		s_Data.stats.quadCount++;
-	}
-
-	void Renderer2D::DrawQuad(const Quad& shape)
-	{
-		auto tex = shape.tex();
-		auto transform = shape.transform();
-		auto tilingFactor = shape.tilingFactor();
-		auto color = shape.color();
-
-
-		HZ_PROFILE_FUNCTION();
-
-		if (!tex)
-		{
-			tex = s_Data.textureSlots[0];
-		}
-
-		if (s_Data.quadIndexCount >= s_Data.MaxQuads * 6)
-			StartNewBatch();
-
-		float textureIndex = 0;
-		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
-		{
-			if (*s_Data.textureSlots[i].get() == *tex.get())
-			{
-				textureIndex = (float)i;
-				break;
-			}
-		}
-
-		if (textureIndex == 0)
-		{
-			textureIndex = (float)s_Data.TextureSlotIndex;
-			s_Data.textureSlots[s_Data.TextureSlotIndex++] = tex;
-		}
-
-
 
 		for (int i = 0; i < 4; i++)
 		{
