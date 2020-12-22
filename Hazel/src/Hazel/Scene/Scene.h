@@ -30,7 +30,7 @@ namespace Hazel
 
 		void DestroyEntity(Entity entity);
 
-		void OnUpdateRuntime(Timestep& t);
+		bool OnUpdateRuntime(Timestep& t);
 		void OnUpdateEditor(Timestep& ts, EditorCamera& camera);
 		void OnViewportResize(uint32_t width, uint32_t height);
 

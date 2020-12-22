@@ -142,7 +142,6 @@ namespace Hazel{
 				MouseZoom((glm::length(mouse - m_MousePositionBeforeMovingMouse) - glm::length(m_InitialMousePosition - m_MousePositionBeforeMovingMouse)) * 0.003f);
 				//MouseZoom(delta.y);
 			}
-			HZ_WARN("{0}, {1}", mouse.x, mouse.y);
 			m_InitialMousePosition = mouse;
 		}
 		else

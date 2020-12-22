@@ -48,7 +48,7 @@ namespace Hazel
 	}
 
 
-	void Scene::OnUpdateRuntime(Timestep& t)
+	bool Scene::OnUpdateRuntime(Timestep& t)
 	{
 		//update scripts
 		{
@@ -97,7 +97,10 @@ namespace Hazel
 			}
 
 			Renderer2D::EndScene();
+			return true;
 		}
+		else 
+			return false;
 	}
 
 	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera)

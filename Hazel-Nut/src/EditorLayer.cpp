@@ -146,9 +146,17 @@ namespace Hazel
 		RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
 		RenderCommand::Clear();
 
-
-		m_Scene->OnUpdateEditor(ts, m_EditorCamera);
-
+		if (m_UsingEditorCamera)
+			m_Scene->OnUpdateEditor(ts, m_EditorCamera);
+		else
+		{
+			if(!m_Scene->OnUpdateRuntime(ts))
+			{
+				m_Scene->OnUpdateEditor(ts, m_EditorCamera);
+				m_UsingEditorCamera = true;
+				HZ_ERROR("Tried Rendering without a primary scene camera");
+			}
+		}
 		m_FrameBuffer->UnBind();
 		timeStep = ts.GetSeconds();
 	}
@@ -255,7 +263,8 @@ namespace Hazel
 		}
 
 		ImGui::Begin("Settings");
-		ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416f);
+		//ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416f);
+		ImGui::Checkbox("using editor camera", &m_UsingEditorCamera);
 
 		auto& stats = Renderer2D::GetStats();
 

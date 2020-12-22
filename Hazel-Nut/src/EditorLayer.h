@@ -44,7 +44,7 @@ namespace Hazel
 
 		float m_angle = 0, m_Delta = .5;
 
-		bool m_ViewPortFocused = false, m_ViewPortHovered = false;
+		bool m_ViewPortFocused = false, m_ViewPortHovered = false, m_UsingEditorCamera = true;
 		int m_GizmoType = 0;
 
 		//panels
