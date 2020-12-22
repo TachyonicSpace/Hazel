@@ -22,7 +22,7 @@ namespace Hazel
 		bool OnKeyPressed(KeyPressedEvent& e);
 
 		void NewScene();
-		void OpenScene();
+		void OpenScene(std::string filepath = "");
 		void SaveSceneAs();
 	private:
 		OrthographicCameraController m_Camera;
@@ -31,6 +31,7 @@ namespace Hazel
 		Ref<Shader> m_Shader;
 		Ref<Framebuffer> m_FrameBuffer;
 
+		EditorCamera m_EditorCamera;
 
 		Ref<Scene> m_Scene;
 
@@ -43,8 +44,8 @@ namespace Hazel
 
 		float m_angle = 0, m_Delta = .5;
 
-		bool m_ViewPortFocused = false;
-		bool m_ViewPortHovered = false;
+		bool m_ViewPortFocused = false, m_ViewPortHovered = false;
+		int m_GizmoType = 0;
 
 		//panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;

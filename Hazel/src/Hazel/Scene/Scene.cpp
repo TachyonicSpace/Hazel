@@ -48,7 +48,7 @@ namespace Hazel
 	}
 
 
-	void Scene::OnUpdate(Timestep& t)
+	void Scene::OnUpdateRuntime(Timestep& t)
 	{
 		//update scripts
 		{
@@ -86,7 +86,7 @@ namespace Hazel
 		}
 		if (mainCamera)
 		{
-			Renderer2D::BeginScene(mainCamera->GetProjection(), cameraTransform);
+			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
 			auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
 			for (auto entity : group)
@@ -98,6 +98,21 @@ namespace Hazel
 
 			Renderer2D::EndScene();
 		}
+	}
+
+	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera)
+	{
+		Renderer2D::BeginScene(camera);
+
+		auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
+		for (auto entity : group)
+		{
+			auto [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
+
+			Renderer2D::DrawQuad(transform.GetTransform(), sprite.color);
+		}
+
+		Renderer2D::EndScene();
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -114,6 +129,18 @@ namespace Hazel
 				cameraComponent.camera.SetViewportSize(width, height);
 		}
 
+	}
+
+	Hazel::Entity Scene::GetPrimaryCameraEntity()
+	{
+		auto view = m_Registry.view<Component::Cameras>();
+		for (auto ent : view)
+		{
+			const auto& camera = view.get < Component::Cameras>(ent);
+			if (camera.Primary)
+				return Entity(ent, this);
+		}
+		return {};
 	}
 
 	template<typename T>

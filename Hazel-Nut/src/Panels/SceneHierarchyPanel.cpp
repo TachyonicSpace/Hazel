@@ -39,10 +39,18 @@ namespace Hazel
 			if (ImGui::MenuItem("Create Empty Entity"))
 				m_context->CreateEntity("Empty Entity");
 
-			if (ImGui::MenuItem("Create New Camera Entity"))
+			if (ImGui::MenuItem("Create New Orthographic Camera Entity"))
 			{
 				auto newCamera = m_context->CreateEntity("New Camera");
 				newCamera.AddComponent<Component::Cameras>();
+				newCamera.GetComponent<Component::Cameras>().camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
+			}
+
+			if (ImGui::MenuItem("Create New Perspective Camera Entity"))
+			{
+				auto newCamera = m_context->CreateEntity("New Camera");
+				newCamera.AddComponent<Component::Cameras>();
+				newCamera.GetComponent<Component::Cameras>().camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
 			}
 
 			if (ImGui::MenuItem("Create New Sprite Entity"))
@@ -213,7 +221,8 @@ namespace Hazel
 			{
 				EditTransformVec("translation", transform.Translation);
 				static bool degrees = true;
-				if (ImGui::Checkbox("degrees?", &degrees))
+				ImGui::Checkbox("degrees?", &degrees);
+				if (degrees)
 				{
 					transform.Rotation = glm::degrees(transform.Rotation);
 					EditTransformVec("Rotation", transform.Rotation);
@@ -325,6 +334,7 @@ namespace Hazel
 				m_SelectedContext = {};
 		}
 	}
+	/*
 	void SceneHierarchyPanel::EditTransformMatrix(glm::mat4& transform, bool details)
 	{
 		if (!details)
@@ -617,6 +627,7 @@ namespace Hazel
 			HZ_ASSERT(false, "INVALID Rotation Type: {0}");
 		}
 	}
+	*/
 	bool SceneHierarchyPanel::EditTransformVec(const std::string& label, glm::vec3& values, float resetValue, float columnWidth)
 	{
 		ImGuiIO& io = ImGui::GetIO();

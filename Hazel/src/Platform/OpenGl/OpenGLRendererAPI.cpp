@@ -25,7 +25,7 @@ namespace Hazel {
 	}
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount)
 	{
-		auto count = indexCount ? va->GetIndexBuffer()->GetCount() : indexCount;
+		auto count = indexCount ? indexCount : va->GetIndexBuffer()->GetCount();
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 	}
 	void OpenGLRendererAPI::SetViewport(uint32_t xMin, uint32_t yMin, uint32_t xMax, uint32_t yMax)

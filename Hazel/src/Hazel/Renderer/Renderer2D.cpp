@@ -119,6 +119,21 @@ namespace Hazel {
 	}
 
 
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
+
+		s_Data.texShader->Bind();
+		s_Data.texShader->UploadUniformMat4("u_ViewProjection", viewProj);
+		s_Data.stats.drawCalls = 0;
+		s_Data.stats.quadCount = 0;
+		s_Data.quadIndexCount = 0;
+		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+
+		s_Data.TextureSlotIndex = 1;
+	}
 	void Renderer2D::BeginScene(const OrthographicCamera& cam)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -132,13 +147,11 @@ namespace Hazel {
 
 		s_Data.TextureSlotIndex = 1;
 	}
-	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	void Renderer2D::BeginScene(const EditorCamera& camera)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
-
-		s_Data.texShader->Bind();
+		glm::mat4 viewProj = camera.GetViewProjection();
 		s_Data.texShader->UploadUniformMat4("u_ViewProjection", viewProj);
 		s_Data.stats.drawCalls = 0;
 		s_Data.stats.quadCount = 0;
@@ -164,7 +177,7 @@ namespace Hazel {
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			s_Data.textureSlots[i]->Bind(i);
 
-		RenderCommand::DrawIndexed(s_Data.va, s_Data.stats.quadCount);
+		RenderCommand::DrawIndexed(s_Data.va, s_Data.quadIndexCount);
 
 		s_Data.stats.drawCalls++;
 	}

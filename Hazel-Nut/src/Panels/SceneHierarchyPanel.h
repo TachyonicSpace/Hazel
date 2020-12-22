@@ -16,6 +16,10 @@ namespace Hazel {
 
 		void OnImGuiRender(bool displayAllEntities = false);
 		void DrawComponents(Entity ent);
+
+		Entity GetSelectedEntity() const { return m_SelectedContext; }
+		Entity SetSelectedEntity(const Entity& ent) { return (m_SelectedContext = ent); }
+
 	private:
 		void DrawEntityNode(Entity node, bool displayAllEntities = false);
 		void EditTransformMatrix(glm::mat4& transform, bool details = true); 

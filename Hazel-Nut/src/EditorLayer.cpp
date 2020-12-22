@@ -8,6 +8,9 @@
 
 #include "Hazel/Utils/PlatformUtils.h"
 
+#include "ImGuizmo.h"
+#include <Hazel/Math/Math.h>
+
 
 namespace Hazel
 {
@@ -23,11 +26,13 @@ namespace Hazel
 		m_checkerboard = Texture2D::Create("assets/textures/Checkerboard.png");
 
 		FramebufferSpecs fbspec;
-		fbspec.Width = 900;
-		fbspec.Height = 500;
+		fbspec.Width = 1280;
+		fbspec.Height = 720;
 		m_FrameBuffer = Framebuffer::Create(fbspec);
 
 		m_Scene = NewRef<Scene>();
+
+		m_EditorCamera = EditorCamera(30.f, 1, .1f, 1000.f);
 
 		m_Delta = 1.f;
 
@@ -105,7 +110,7 @@ namespace Hazel
 
 		m_SceneHierarchyPanel.SetContext(m_Scene);
 
-
+		OpenScene("PinkCube.hazel");
 	}
 	void EditorLayer::OnDetach()
 	{
@@ -129,16 +134,20 @@ namespace Hazel
 		}
 
 		if (m_ViewPortFocused)
+		{
+
 			m_Camera.OnUpdate(ts);
+			m_EditorCamera.OnUpdate(ts);
 
-
+		}
+		Renderer2D::ResetStats();
 		m_FrameBuffer->Bind();
 
 		RenderCommand::SetClearColor({ .1f, .1f, .1f, 1 });
 		RenderCommand::Clear();
 
 
-		m_Scene->OnUpdate(ts);
+		m_Scene->OnUpdateEditor(ts, m_EditorCamera);
 
 		m_FrameBuffer->UnBind();
 		timeStep = ts.GetSeconds();
@@ -254,8 +263,12 @@ namespace Hazel
 		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "Quad Count: %d", Renderer2D::GetStats().quadCount);
 		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "frame buffer width: %d", m_FrameBuffer->GetSpecs().Width);
 		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "framebuffer height: %d", m_FrameBuffer->GetSpecs().Height);
-		ImGui::TextColored({ .8f, .2f, .8f, 1.f }, "frameRate: %f", 1 / timeStep);
+		static short frames = 0;
+		static float prevTs = timeStep;
+		if (((frames) %= 10)++ == 1)
+			prevTs = timeStep;
 
+		ImGui::TextColored({ .8f, .2f, .8f, 1.f }, "frameRate: %f-fps\n\t%f-seconds/frame", 1 / prevTs, prevTs);
 		ImGui::End();
 
 
@@ -265,14 +278,58 @@ namespace Hazel
 
 			m_ViewPortFocused = ImGui::IsWindowFocused();
 			m_ViewPortHovered = ImGui::IsWindowHovered();
-			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewPortFocused || !m_ViewPortHovered);
+			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewPortFocused && !m_ViewPortHovered);
 
 			auto viewPortSize = ImGui::GetContentRegionAvail();
 			m_ViewPortSize = { viewPortSize.x, viewPortSize.y };
 
 
 			ImGui::Image((void*)(uint64_t)m_FrameBuffer->GetColorAttachmentID(),
-				{ m_ViewPortSize.x, m_ViewPortSize.y });
+				{ m_ViewPortSize.x, m_ViewPortSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+
+			//Gizmos
+			Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+			if (selectedEntity && m_GizmoType != -1)
+			{
+				ImGuizmo::SetOrthographic(false);
+				ImGuizmo::SetDrawlist();
+
+				float windowWidth = (float)ImGui::GetWindowWidth();
+				float windowHeight = (float)ImGui::GetWindowHeight();
+				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+				// Camera
+
+				//entity camera
+				/*auto cameraEntity = m_Scene->GetPrimaryCameraEntity();
+				const auto& camera = cameraEntity.GetComponent<Component::Cameras>().camera;
+				const glm::mat4& cameraProjection = camera.GetProjection();
+				glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<Component::Transform>().GetTransform());*/
+
+				const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+				glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
+
+
+				// Entity transform
+				auto& tc = selectedEntity.GetComponent<Component::Transform>();
+				glm::mat4 transform = tc.GetTransform();
+
+				bool snapping = Input::IsKeyPressed(Key::LeftControl);
+				float snapValue = (m_GizmoType == ImGuizmo::OPERATION::ROTATE) ? 45.f : .5f;
+
+				float snapValues[3] = { snapValue, snapValue, snapValue };
+
+				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType,
+					ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, (snapping) ? snapValues : nullptr);
+
+				if (ImGuizmo::IsUsing())
+					Math::DecomposeTransform(transform, tc);
+
+
+
+			}
+
 			ImGui::End();
 			ImGui::PopStyleVar();
 			ImGui::End();
@@ -281,6 +338,8 @@ namespace Hazel
 	void EditorLayer::OnEvent(Event& e)
 	{
 		m_Camera.OnEvent(e);
+		if(e.GetEventType() == EventType::MouseButtonPressed)
+		m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
@@ -295,6 +354,7 @@ namespace Hazel
 
 		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
 		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+		bool alt = Input::IsKeyPressed(Key::LeftAlt) || Input::IsKeyPressed(Key::RightAlt);
 		switch (e.GetKeyCode())
 		{
 		case Key::N:
@@ -318,6 +378,26 @@ namespace Hazel
 
 			break;
 		}
+		case Key::Q:
+		{
+			m_GizmoType = -1;
+			break;
+		}
+		case Key::W:
+		{
+			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			break;
+		}
+		case Key::E:
+		{
+			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			break;
+		}
+		case Key::R:
+		{
+			m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			break;
+		}
 		}
 		return true;
 	}
@@ -329,11 +409,22 @@ namespace Hazel
 		m_SceneHierarchyPanel.SetContext(m_Scene);
 	}
 
-	void EditorLayer::OpenScene()
+	void EditorLayer::OpenScene(std::string filepath)
 	{
-		std::string filepath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
+		m_SceneHierarchyPanel.SetSelectedEntity({});
+
+
+		if (filepath == "")
+			filepath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
+
+
 		if (!filepath.empty())
 		{
+			std::string defaultFilepath = "D:\\Hazel\\Hazel-Nut\\assets\\scenes\\";
+			if (filepath.size() <= defaultFilepath.size()
+				|| filepath.substr(0, defaultFilepath.size()) != defaultFilepath)
+				filepath = defaultFilepath + filepath;
+
 			m_Scene = NewRef<Scene>();
 			m_Scene->OnViewportResize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
 			m_SceneHierarchyPanel.SetContext(m_Scene);

@@ -25,6 +25,7 @@ IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
 IncludeDir["entt"] = "Hazel/vendor/entt/include"
 IncludeDir["glm"] = "Hazel/vendor/glm"
 IncludeDir["yaml_cpp"] = "Hazel/vendor/yaml-cpp/include"
+IncludeDir["ImGuizmo"] = "Hazel/vendor/ImGuizmo"
 
 --IncludeDir["boost"] = "Hazel/vendor/boost"
 --IncludeDir["NumC++"] = "Hazel/vendor/NumC++/include"
@@ -59,6 +60,9 @@ project "Hazel"
 		,
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl"
+		,
+		"%{prj.name}/vendor/ImGuizmo/ImGuizmo.cpp",
+		"%{prj.name}/vendor/ImGuizmo/ImGuizmo.h"
 		--,
 		--"%{prj.name}/vendor/boost/**.hpp",
 		--"%{prj.name}/vendor/boost/**.inl"
@@ -83,10 +87,11 @@ project "Hazel"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.stb_image}",
-		--"%{IncludeDir.boost}",
-		--"%{IncludeDir.NumCpp}",
+		"%{IncludeDir.boost}",
+		"%{IncludeDir.NumCpp}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.yaml_cpp}"
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.ImGuizmo}"
 	}
 
 	links 
@@ -97,6 +102,9 @@ project "Hazel"
 		"yaml-cpp",
 		"opengl32.lib"
 	}
+
+	filter "files:vendor/ImGuizmo/**.cpp"
+		flags { "NoPCH" }
 
 	filter "system:windows"
 		systemversion "latest"
@@ -190,9 +198,10 @@ project "Hazel-Nut"
 		"Hazel/src",
 		"Hazel/vendor",
 		"%{IncludeDir.entt}",
-		--"%{IncludeDir.boost}",
-		--"%{IncludeDir.NumCpp}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.boost}",
+		"%{IncludeDir.NumCpp}",
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.ImGuizmo}"
 	}
 
 	links

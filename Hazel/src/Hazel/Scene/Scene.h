@@ -6,6 +6,8 @@
 #pragma warning(pop)
 #include "Hazel/Core/Timestep.h"
 
+#include <Hazel/Renderer/Camera.h>
+
 #include <glm/glm.hpp>
 
 namespace Hazel
@@ -28,7 +30,8 @@ namespace Hazel
 
 		void DestroyEntity(Entity entity);
 
-		void OnUpdate(Timestep& t);
+		void OnUpdateRuntime(Timestep& t);
+		void OnUpdateEditor(Timestep& ts, EditorCamera& camera);
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		template <typename ... Args>
@@ -37,6 +40,7 @@ namespace Hazel
 			m_Registry.each(std::forward<Args>(args)...);
 		}
 
+		Entity GetPrimaryCameraEntity();
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
