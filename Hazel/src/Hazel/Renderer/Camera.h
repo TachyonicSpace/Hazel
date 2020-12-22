@@ -150,7 +150,10 @@ namespace Hazel {
 		float m_Distance = 10.0f;
 		float m_Pitch = 0.0f, m_Yaw = 0.0f;
 
-		float m_ViewportWidth = 1280, m_ViewportHeight = 720;
+		float m_ViewportWidth = 1280, m_ViewportHeight = 700;
+
+		bool m_MovingCamera = false;
+		glm::vec2 m_MousePositionBeforeMovingMouse = { -1, -1 };
 	};
 
 }

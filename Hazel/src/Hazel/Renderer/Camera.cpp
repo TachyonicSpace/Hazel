@@ -132,15 +132,21 @@ namespace Hazel{
 		{
 			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
 			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
-			m_InitialMousePosition = mouse;
 
 			if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
 				MousePan(delta);
 			else if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
 				MouseRotate(delta);
 			else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
-				MouseZoom(delta.y);
+			{
+				MouseZoom((glm::length(mouse - m_MousePositionBeforeMovingMouse) - glm::length(m_InitialMousePosition - m_MousePositionBeforeMovingMouse)) * 0.003f);
+				//MouseZoom(delta.y);
+			}
+			HZ_WARN("{0}, {1}", mouse.x, mouse.y);
+			m_InitialMousePosition = mouse;
 		}
+		else
+			m_MousePositionBeforeMovingMouse = { Input::GetMouseX(), Input::GetMouseY() };
 
 		UpdateView();
 	}
