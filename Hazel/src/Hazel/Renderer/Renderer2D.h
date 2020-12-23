@@ -27,10 +27,11 @@ namespace Hazel {
 		static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle,	const Color& color, const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f);
 		static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const float& radianAngle,	Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& color = { 1, 1, 1, 1 });
 		static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle,	Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& color = { 1, 1, 1, 1 });
-		static void DrawQuad(const glm::mat4& trnasform, const Color& color, const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f);
-		static void DrawQuad(const glm::mat4& trnasform, Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& color = { 1, 1, 1, 1 });
-		//stats
+		static void DrawQuad(const glm::mat4& transform, const Color& color, int EntityID, const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f);
+		static void DrawQuad(const glm::mat4& transform, const Color& color, const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f, int entityID = 0);
+		static void DrawQuad(const glm::mat4& transform, Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& color = { 1, 1, 1, 1 }, int entityID = 0);
 
+		//stats
 		struct Statistics
 		{
 			uint32_t drawCalls = 0;

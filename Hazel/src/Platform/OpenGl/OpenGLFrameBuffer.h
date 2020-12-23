@@ -16,8 +16,7 @@ namespace Hazel
 
         virtual const FramebufferSpecs& GetSpecs() const override { return m_Specs; }
 
-		virtual void Bind() override 
-        { glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID); glViewport(0, 0, m_Specs.Width, m_Specs.Height);}
+        virtual void Bind() override;
 		virtual void UnBind() override {	glBindFramebuffer(GL_FRAMEBUFFER, 0);}
 
         virtual void Resize(uint32_t width, uint32_t height) override;
@@ -29,7 +28,8 @@ namespace Hazel
     private:
         uint32_t m_RendererID = 0;
         uint32_t m_ColorAttachment = 0;
-        uint32_t m_DepthAttachment = 0;
+		uint32_t m_IDAttachment = 0;
+		uint32_t m_DepthAttachment = 0;
         FramebufferSpecs m_Specs;
     };
 

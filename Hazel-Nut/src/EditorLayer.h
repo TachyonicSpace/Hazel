@@ -20,6 +20,7 @@ namespace Hazel
 		virtual void OnEvent(Event & e) override;
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
+		bool OnMousePressed(MouseButtonPressedEvent& e);
 
 		void NewScene();
 		void OpenScene(std::string filepath = "");
@@ -30,17 +31,19 @@ namespace Hazel
 		Ref<VertexArray> m_VertexArray;
 		Ref<Shader> m_Shader;
 		Ref<Framebuffer> m_FrameBuffer;
+		Ref<Framebuffer> m_IDFrameBuffer;
 
 		EditorCamera m_EditorCamera;
 
 		Ref<Scene> m_Scene;
-
+		Entity m_HoveredEntity;
 
 		Ref<Texture2D> m_checkerboard;
 
 		glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
 
 		glm::vec2 m_ViewPortSize = { -1, -1 };
+		glm::vec2 m_ViewportBounds[2];
 
 		float m_angle = 0, m_Delta = .5;
 

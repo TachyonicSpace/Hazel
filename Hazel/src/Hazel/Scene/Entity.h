@@ -14,6 +14,7 @@ namespace Hazel
 	public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
+		Entity(int handle, Scene* scene);
 		Entity(std::string name, entt::entity handle, Scene* scene);
 		Entity(const Entity& other) = default;
 		//~Entity();
@@ -85,6 +86,7 @@ namespace Hazel
 		}
 
 		bool deleted = false;
+	
 
 	private:
 		entt::entity m_EntityHandle{ entt::null };

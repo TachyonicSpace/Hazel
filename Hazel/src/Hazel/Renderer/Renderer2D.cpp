@@ -14,6 +14,7 @@ namespace Hazel {
 		glm::vec2 texCoord;
 		float texIndex;
 		float TilingFactor;
+		int ObjectID;
 	};
 
 	struct Renderer2DData
@@ -54,7 +55,8 @@ namespace Hazel {
 				{ShaderDataType::Float4, "color"},
 				{ShaderDataType::Float2, "texCoord"},
 				{ShaderDataType::Float , "texIndex"},
-				{ShaderDataType::Float , "tilingFactor"}
+				{ShaderDataType::Float , "tilingFactor"},
+				{ShaderDataType::Int   , "objectID"}
 			});
 		s_Data.va->AddVertexBuffer(s_Data.vb);
 
@@ -268,13 +270,17 @@ namespace Hazel {
 
 		s_Data.stats.quadCount++;*/
 	}
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color, int entityID, const Ref<Texture2D>& tex, float tilingFactor)
 	{
-		DrawQuad(transform, (Ref<Texture2D>)tex, tilingFactor, color);
+		DrawQuad(transform, (Ref<Texture2D>)tex, tilingFactor, color, entityID);
 	}
 
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color, const Ref<Texture2D>& tex /*= nullptr*/, float tilingFactor /*= 1.f*/, int entityID /*= 0*/)
+	{
+		DrawQuad(transform, (Ref<Texture2D>)tex, tilingFactor, color, entityID);
+	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, Ref<Texture2D>& tex, float tilingFactor, const Color& color, int entityID)
 	{
 
 
@@ -315,6 +321,7 @@ namespace Hazel {
 			s_Data.quadVertexBufferPtr->texCoord = tex->GetTextureCoordinates()[i];
 			s_Data.quadVertexBufferPtr->texIndex = textureIndex;
 			s_Data.quadVertexBufferPtr->TilingFactor = tilingFactor;
+			s_Data.quadVertexBufferPtr->ObjectID = entityID;
 			s_Data.quadVertexBufferPtr++;
 		}
 

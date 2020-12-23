@@ -5,7 +5,7 @@
 
 namespace Hazel {
 
-	static GLenum ShaderdataTypeToGLEnum(ShaderDataType type)
+	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
 	{
 		switch (type)
 		{
@@ -15,11 +15,11 @@ namespace Hazel {
 			case ShaderDataType::Float4: return GL_FLOAT;
 			case ShaderDataType::Mat3:	 return GL_FLOAT;
 			case ShaderDataType::Mat4:	 return GL_FLOAT;
+			case ShaderDataType::Bool:	 return GL_BOOL;
 			case ShaderDataType::Int:	 return GL_INT;
 			case ShaderDataType::Int2:	 return GL_INT;
 			case ShaderDataType::Int3:	 return GL_INT;
 			case ShaderDataType::Int4:	 return GL_INT;
-			case ShaderDataType::Bool:	 return GL_BOOL;
 		}
 		HZ_CORE_ASSERT(false, "Unknown type given")
 			return 0;
@@ -55,23 +55,69 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		HZ_CORE_ASSERT(vb->GetLayout().GetElements().size(), "Vertex buffer has no layout");
+		HZ_CORE_ASSERT(vb->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
 		glBindVertexArray(m_RendererID);
 		vb->Bind();
 
-		int i = 0;
 		const auto& layout = vb->GetLayout();
-		for (const auto& Element : layout) {
-			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i,
-				Element.GetComponentCount(),
-				ShaderdataTypeToGLEnum(Element.type),
-				Element.normalized ? GL_TRUE : GL_FALSE,
-				layout.GetStride(),
-				(const void*)(uint64_t)Element.offset);
-			i++;
+		for (const auto& element : layout)
+		{
+			switch (element.type)
+			{
+			case ShaderDataType::Float:
+			case ShaderDataType::Float2:
+			case ShaderDataType::Float3:
+			case ShaderDataType::Float4:
+			case ShaderDataType::Bool:
+			{
+				glEnableVertexAttribArray(m_VertexBufferIndex);
+				glVertexAttribPointer(m_VertexBufferIndex,
+					element.GetComponentCount(),
+					ShaderDataTypeToOpenGLBaseType(element.type),
+					element.normalized ? GL_TRUE : GL_FALSE,
+					layout.GetStride(),
+					(const void*)element.offset);
+				m_VertexBufferIndex++;
+				break;
+			}
+			case ShaderDataType::Mat3:
+			case ShaderDataType::Mat4:
+			{
+				uint8_t count = element.GetComponentCount();
+				for (uint8_t i = 0; i < count; i++)
+				{
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+					glVertexAttribPointer(m_VertexBufferIndex,
+						count,
+						ShaderDataTypeToOpenGLBaseType(element.type),
+						element.normalized ? GL_TRUE : GL_FALSE,
+						layout.GetStride(),
+						(const void*)(element.offset + sizeof(float) * count * i));
+					glVertexAttribDivisor(m_VertexBufferIndex, 1);
+					m_VertexBufferIndex++;
+				}
+				break;
+			}
+			case ShaderDataType::Int:
+			case ShaderDataType::Int2:
+			case ShaderDataType::Int3:
+			case ShaderDataType::Int4:
+			{
+				glEnableVertexAttribArray(m_VertexBufferIndex);
+				glVertexAttribIPointer(m_VertexBufferIndex,
+					element.GetComponentCount(),
+					ShaderDataTypeToOpenGLBaseType(element.type),
+					layout.GetStride(),
+					(const void*)element.offset);
+				m_VertexBufferIndex++;
+				break;
+			}
+			default:
+				HZ_CORE_ASSERT(false, "Unknown ShaderDataType!");
+			}
 		}
+
 		m_VertexBuffers.push_back(vb);
 	}
 	void OpenGLVertexArray::AddIndexBuffer(const Ref<IndexBuffer>& ib)

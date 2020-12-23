@@ -5,6 +5,7 @@
 
 namespace Hazel
 {
+
 	Entity::Entity(std::string name, entt::entity handle, Scene* scene)
 		:m_EntityHandle(handle), m_Scene(scene)
 	{
@@ -16,4 +17,9 @@ namespace Hazel
 
 	}
 
+	Entity::Entity(int handle, Scene* scene)
+		:m_Scene(scene)
+	{
+		m_EntityHandle = (handle != -1 && scene->m_Registry.valid((entt::entity)handle))? entt::entity(handle) : entt::null;
+	}
 }

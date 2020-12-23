@@ -5,6 +5,7 @@
 #include "entt.hpp"
 #pragma warning(pop)
 #include "Hazel/Core/Timestep.h"
+#include "Hazel/Renderer/Framebuffer.h"
 
 #include <Hazel/Renderer/Camera.h>
 
@@ -30,17 +31,22 @@ namespace Hazel
 
 		void DestroyEntity(Entity entity);
 
+		Entity& GetEntity(uint64_t handle);
+
 		bool OnUpdateRuntime(Timestep& t);
 		void OnUpdateEditor(Timestep& ts, EditorCamera& camera);
 		void OnViewportResize(uint32_t width, uint32_t height);
+
+		void DrawIDBuffer(Ref<Framebuffer> target, EditorCamera& cam);
+		int Pixel(int x, int y);
+
+		Entity GetPrimaryCameraEntity();
 
 		template <typename ... Args>
 		void each(Args&& ... args)
 		{
 			m_Registry.each(std::forward<Args>(args)...);
 		}
-
-		Entity GetPrimaryCameraEntity();
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

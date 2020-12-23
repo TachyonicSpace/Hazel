@@ -17,6 +17,14 @@ namespace Hazel
 		glDeleteTextures(1, &m_ColorAttachment);
 		glDeleteTextures(1, &m_DepthAttachment);
 	}
+	void OpenGLFrameBuffer::Bind()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
+		glViewport(0, 0, m_Specs.Width, m_Specs.Height);
+
+		int clearValue = -1;
+		glClearTexImage(m_IDAttachment, 0, GL_RED_INTEGER, GL_INT, &clearValue);
+	}
 	void OpenGLFrameBuffer::Invalidate()
 	{
 		if (m_RendererID)
@@ -29,6 +37,7 @@ namespace Hazel
 		glCreateFramebuffers(1, &m_RendererID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 
+		//color attachment
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_ColorAttachment);
 		glBindTexture(GL_TEXTURE_2D, m_ColorAttachment);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Specs.Width, m_Specs.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -37,6 +46,19 @@ namespace Hazel
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorAttachment, 0);
 
+		//ID buffer attachment
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_IDAttachment);
+		glBindTexture(GL_TEXTURE_2D, m_IDAttachment);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, m_Specs.Width, m_Specs.Height, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_IDAttachment, 0);
+
+		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, drawBuffers);
+
+		//depth attachment
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_DepthAttachment);
 		glBindTexture(GL_TEXTURE_2D, m_DepthAttachment);
 		glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, m_Specs.Width, m_Specs.Height);
@@ -54,8 +76,8 @@ namespace Hazel
 			HZ_CORE_WARN("Attempted to rezize framebuffer to {0}, {1}", width, height);
 			return;
 		}
-			m_Specs.Height = height;
-			m_Specs.Width = width;
-			Invalidate();
+		m_Specs.Height = height;
+		m_Specs.Width = width;
+		Invalidate();
 	};
 }

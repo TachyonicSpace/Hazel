@@ -5,8 +5,41 @@
 
 namespace Hazel {
 
+	void OpenGLMessageCallback(
+		unsigned source,
+		unsigned type,
+		unsigned id,
+		unsigned severity,
+		int length,
+		const char* message,
+		const void* userParam)
+	{
+		switch (severity)
+		{
+		case GL_DEBUG_SEVERITY_HIGH:         HZ_CORE_CRITICAL(message); return;
+		case GL_DEBUG_SEVERITY_MEDIUM:       HZ_CORE_ERROR(message); return;
+		case GL_DEBUG_SEVERITY_LOW:          HZ_CORE_WARN(message); return;
+		case GL_DEBUG_SEVERITY_NOTIFICATION: HZ_CORE_TRACE(message); return;
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown severity level!");
+	}
+
 	void OpenGLRendererAPI::Init(bool blend)
 	{
+		HZ_PROFILE_FUNCTION();
+
+		#ifdef HZ_DEBUG
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+		#endif
+
+
+
+
 		if (blend) {
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -36,9 +69,9 @@ namespace Hazel {
 	void OpenGLRendererAPI::DrawPixels(uint32_t width, uint32_t height, float* pixels)
 	{
 		#if 0
-			glDrawPixels(width, height, GL_RGBA, GL_FLOAT, pixels);
+		glDrawPixels(width, height, GL_RGBA, GL_FLOAT, pixels);
 		#else
-			HZ_CORE_ASSERT(false, "function not implemented yet");
+		HZ_CORE_ASSERT(false, "function not implemented yet");
 		#endif
 	}
-}
+	}
