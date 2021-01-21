@@ -46,7 +46,7 @@ namespace Hazel
 		template <typename T>
 		T& RemoveComponent()
 		{
-			auto item = GetComponent<T>();
+			auto& item = GetComponent<T>();
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 			return item;
 		}
@@ -86,7 +86,8 @@ namespace Hazel
 		}
 
 		bool deleted = false;
-	
+		
+		static Entity Null;
 
 	private:
 		entt::entity m_EntityHandle{ entt::null };

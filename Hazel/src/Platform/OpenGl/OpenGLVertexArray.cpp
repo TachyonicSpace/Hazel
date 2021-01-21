@@ -51,16 +51,17 @@ namespace Hazel {
 
 		glBindVertexArray(0);
 	}
-	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vb)
+
+	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		HZ_CORE_ASSERT(vb->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
+		HZ_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
 		glBindVertexArray(m_RendererID);
-		vb->Bind();
+		vertexBuffer->Bind();
 
-		const auto& layout = vb->GetLayout();
+		const auto& layout = vertexBuffer->GetLayout();
 		for (const auto& element : layout)
 		{
 			switch (element.type)
@@ -69,6 +70,10 @@ namespace Hazel {
 			case ShaderDataType::Float2:
 			case ShaderDataType::Float3:
 			case ShaderDataType::Float4:
+			case ShaderDataType::Int:
+			case ShaderDataType::Int2:
+			case ShaderDataType::Int3:
+			case ShaderDataType::Int4:
 			case ShaderDataType::Bool:
 			{
 				glEnableVertexAttribArray(m_VertexBufferIndex);
@@ -99,26 +104,12 @@ namespace Hazel {
 				}
 				break;
 			}
-			case ShaderDataType::Int:
-			case ShaderDataType::Int2:
-			case ShaderDataType::Int3:
-			case ShaderDataType::Int4:
-			{
-				glEnableVertexAttribArray(m_VertexBufferIndex);
-				glVertexAttribIPointer(m_VertexBufferIndex,
-					element.GetComponentCount(),
-					ShaderDataTypeToOpenGLBaseType(element.type),
-					layout.GetStride(),
-					(const void*)element.offset);
-				m_VertexBufferIndex++;
-				break;
-			}
 			default:
 				HZ_CORE_ASSERT(false, "Unknown ShaderDataType!");
 			}
 		}
 
-		m_VertexBuffers.push_back(vb);
+		m_VertexBuffers.push_back(vertexBuffer);
 	}
 	void OpenGLVertexArray::AddIndexBuffer(const Ref<IndexBuffer>& ib)
 	{

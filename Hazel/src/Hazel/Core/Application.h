@@ -49,5 +49,5 @@ namespace Hazel {
 		static Application* s_Instance;
 	};
 	//to be defined in client
-	Application* CreateApplication();
+	Application* CreateApplication(std::string filepath);
 }

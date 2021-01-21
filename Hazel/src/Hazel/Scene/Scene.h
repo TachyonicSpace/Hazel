@@ -31,14 +31,12 @@ namespace Hazel
 
 		void DestroyEntity(Entity entity);
 
-		Entity& GetEntity(uint64_t handle);
 
 		bool OnUpdateRuntime(Timestep& t);
 		void OnUpdateEditor(Timestep& ts, EditorCamera& camera);
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		void DrawIDBuffer(Ref<Framebuffer> target, EditorCamera& cam);
-		int Pixel(int x, int y);
 
 		Entity GetPrimaryCameraEntity();
 
@@ -47,6 +45,9 @@ namespace Hazel
 		{
 			m_Registry.each(std::forward<Args>(args)...);
 		}
+
+	bool ValidEntity(Entity ent);
+	bool ValidEntity(std::string str);
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

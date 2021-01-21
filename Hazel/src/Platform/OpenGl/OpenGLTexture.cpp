@@ -21,13 +21,15 @@ namespace Hazel {
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
+	OpenGLTexture2D::OpenGLTexture2D(const std::string& path, bool error)
 		:m_Path(path)
 	{
 		HZ_PROFILE_FUNCTION();
 
 		if (path == "")
 		{
+		blankTexture:
+
 			m_InternalFormat = GL_RGBA8;
 			m_DataFormat = GL_RGBA;
 
@@ -52,11 +54,30 @@ namespace Hazel {
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = nullptr;
 		{
-			HZ_PROFILE_SCOPE("OpenGLTexture2D::OpenGLTexture2D(const std::string&): loading texture");
-
+			HZ_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std::string&)");
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		}
-		HZ_CORE_ASSERT(data, "Image Path Not Found: ");
+		if (!data)
+		{
+			auto path0 = path;
+
+			std::string defaultFilepath = "D:\\Hazel\\Hazel-Nut\\assets\\textures\\";
+			if (path.size() <= defaultFilepath.size()
+				|| path.substr(0, defaultFilepath.size()) != defaultFilepath)
+				(std::string&)path = defaultFilepath + path;
+
+			{
+				HZ_PROFILE_SCOPE("OpenGLTexture2D::OpenGLTexture2D(const std::string&): loading texture");
+
+				data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+			}
+			if (!data)
+			{
+				if (error)
+					HZ_CORE_ERROR("Image Path Not Found: {0}, or: {1}", path0, path);
+				goto blankTexture;
+			}
+		}
 		m_Width = width;
 		m_Height = height;
 

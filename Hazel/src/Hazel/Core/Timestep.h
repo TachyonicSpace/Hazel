@@ -2,6 +2,7 @@
 
 namespace Hazel {
 
+	//a class for recording the length of time passes between creation and destruction of this class
 	class Timestep
 	{
 	public:

@@ -17,8 +17,10 @@ namespace Hazel {
 		void OnImGuiRender(bool displayAllEntities = false);
 		void DrawComponents(Entity ent);
 
+		Entity& GetSelectedEntity() { return m_SelectedContext; }
 		Entity GetSelectedEntity() const { return m_SelectedContext; }
 		Entity SetSelectedEntity(const Entity& ent) { return (m_SelectedContext = ent); }
+		bool RemoveSelectedEntity();
 
 	private:
 		void DrawEntityNode(Entity node, bool displayAllEntities = false);
@@ -29,8 +31,8 @@ namespace Hazel {
 	private:
 		Ref<Scene> m_context;
 		Entity m_SelectedContext;
-		static Color* m_SavedColor;
-		static short m_SavedColorIndex;
+		static std::vector<Color>& m_SavedColor;
+		static size_t m_SavedColorIndex;
 	};
 
 }

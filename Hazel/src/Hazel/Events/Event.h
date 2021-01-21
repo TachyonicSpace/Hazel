@@ -12,6 +12,7 @@ namespace Hazel {
 	//and blocking events that come after it
 	//for the future, a better strategy would be to buffer events and process them "later"
 
+	//allows us to see what type of event is thrown
 	enum class EventType
 	{
 		None = 0,
@@ -21,6 +22,7 @@ namespace Hazel {
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
 
+	//allows us to catagorize events by type
 	enum class EventCategory : int
 	{
 		None = 0,
@@ -55,7 +57,7 @@ namespace Hazel {
 		}
 	};
 
-
+	//allows to send events to be handled
 	class EventDispatcher
 	{
 		template <typename F>
@@ -64,6 +66,7 @@ namespace Hazel {
 		EventDispatcher(Event& e)
 			:m_Event(e) {}
 
+		//function to send the event to the user defined function func
 		template <typename T>
 		bool Dispatch(EventFn<T> func)
 		{
@@ -78,6 +81,7 @@ namespace Hazel {
 		Event& m_Event;
 	};
 
+	//allows us to print the event name to console
 	inline std::ostream& operator<<(std::ostream& os, const Event& e) {
 		return os << e.ToString();
 	}

@@ -7,8 +7,10 @@
 
 namespace Hazel
 {
+	//creates a new window in the current operating system.
 	Scope<Window> Window::Create(const WindowProps& props)
 	{
+		//only supports windows at this time
 		#ifdef HZ_PLATFORM_WINDOWS
 			return NewScope<WindowsWindow>(props);
 		#else

@@ -5,6 +5,7 @@
 
 namespace Hazel
 {
+	Entity Entity::Null = {};
 
 	Entity::Entity(std::string name, entt::entity handle, Scene* scene)
 		:m_EntityHandle(handle), m_Scene(scene)

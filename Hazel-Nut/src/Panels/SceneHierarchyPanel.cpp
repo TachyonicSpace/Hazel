@@ -4,13 +4,19 @@
 #include <imgui/imgui_internal.h>
 
 #include "Hazel/Scene/Components.h"
+#include "Hazel/Utils/PlatformUtils.h"
 
+/* The Microsoft C++ compiler is non-compliant with the C++ standard and needs
+ * the following definition to disable a security warning on std::strncpy().
+ */
+#ifdef _MSVC_LANG
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 
 namespace Hazel
 {
-	Color* SceneHierarchyPanel::m_SavedColor = (Color*)&Color::White;
-	short SceneHierarchyPanel::m_SavedColorIndex = 0;
-
+	std::vector<Color>& SceneHierarchyPanel::m_SavedColor = Color::ColorPallete;
+	size_t SceneHierarchyPanel::m_SavedColorIndex = 0;
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
 	{
 		SetContext(scene);
@@ -19,164 +25,74 @@ namespace Hazel
 	{
 		m_context = scene;
 	}
-	void SceneHierarchyPanel::OnImGuiRender(bool displayAllEntities)
-	{
-		ImGui::Begin("Scene Hierarchy");
-
-		m_context->m_Registry.each([&](auto entity)
-			{
-				Entity ent = { entity, m_context.get() };
-				DrawEntityNode(ent, displayAllEntities);
-
-			});
-
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			m_SelectedContext = {};
-
-		// Right-click on blank space
-		if (ImGui::BeginPopupContextWindow(0, 1, false))
-		{
-			if (ImGui::MenuItem("Create Empty Entity"))
-				m_context->CreateEntity("Empty Entity");
-
-			if (ImGui::MenuItem("Create New Orthographic Camera Entity"))
-			{
-				auto newCamera = m_context->CreateEntity("New Camera");
-				newCamera.AddComponent<Component::Cameras>();
-				newCamera.GetComponent<Component::Cameras>().camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
-			}
-
-			if (ImGui::MenuItem("Create New Perspective Camera Entity"))
-			{
-				auto newCamera = m_context->CreateEntity("New Camera");
-				newCamera.AddComponent<Component::Cameras>();
-				newCamera.GetComponent<Component::Cameras>().camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
-			}
-
-			if (ImGui::MenuItem("Create New Sprite Entity"))
-			{
-				auto newSprite = m_context->CreateEntity("New Sprite");
-				newSprite.AddComponent<Component::SpriteRenderer>();
-			}
-			ImGui::EndPopup();
-		}
-
-
-		ImGui::End();
-
-		ImGui::Begin("properties");
-
-		if (m_SelectedContext)
-		{
-			DrawComponents(m_SelectedContext);
-		}
-
-
-
-		ImGui::End();
-	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
+	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
+
+	void SceneHierarchyPanel::OnImGuiRender(bool displayAllEntities)
 	{
-		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth |
-			ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
-		if (entity.HasComponent<T>())
+		//all entities
 		{
-			auto& component = entity.GetComponent<T>();
-			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+			ImGui::Begin("Scene Hierarchy");
 
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-			ImGui::Separator();
-			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-			ImGui::PopStyleVar(
-			);
-			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+			m_context->m_Registry.each([&](auto entity)
+				{
+					Entity ent = { entity, m_context.get() };
+					DrawEntityNode(ent, displayAllEntities);
+
+				});
+
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+				m_SelectedContext = {};
+
+			// Right-click on blank space
+			if (ImGui::BeginPopupContextWindow(0, 1, false))
 			{
-				ImGui::OpenPopup("ComponentSettings");
-			}
+				if (ImGui::MenuItem("Create Empty Entity"))
+					m_context->CreateEntity("Empty Entity");
 
-			bool removeComponent = false;
-			if (ImGui::BeginPopup("ComponentSettings"))
-			{
-				if (ImGui::MenuItem("Remove component"))
-					removeComponent = true;
 
+				if (ImGui::MenuItem("Create New Sprite Entity"))
+				{
+					auto newSprite = m_context->CreateEntity("New Sprite");
+					newSprite.AddComponent<Component::SpriteRenderer>();
+				}
+
+				if (ImGui::MenuItem("Create New Orthographic Camera Entity"))
+				{
+					auto newCamera = m_context->CreateEntity("New Orthographic Camera");
+					newCamera.AddComponent<Component::Cameras>();
+					newCamera.GetComponent<Component::Cameras>().camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
+				}
+
+				if (ImGui::MenuItem("Create New Perspective Camera Entity"))
+				{
+					auto newCamera = m_context->CreateEntity("New Perspective Camera");
+					newCamera.AddComponent<Component::Cameras>();
+					newCamera.GetComponent<Component::Cameras>().camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
+				}
 				ImGui::EndPopup();
 			}
 
-			if (open)
+
+			ImGui::End();
+
+		}
+
+		//properties
+		{
+			ImGui::Begin("properties");
+
+			if (m_SelectedContext)
 			{
-				uiFunction(component);
-				ImGui::TreePop();
+				DrawComponents(m_SelectedContext);
 			}
 
-			if (removeComponent)
-				entity.RemoveComponent<T>();
+
+
+			ImGui::End();
 		}
 	}
-
-	void SceneHierarchyPanel::DrawEntityNode(Entity node, bool displayAllEntities)
-	{
-		auto& tag = node.GetComponent<Component::Tag>().name;
-		if (!displayAllEntities)
-			if (tag == "N/A")
-				return;
-
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-		flags |= (m_SelectedContext == node) ? ImGuiTreeNodeFlags_Selected : 0;
-		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)node, flags, tag.c_str());
-
-		if (ImGui::IsItemClicked())
-		{
-			m_SelectedContext = node;
-		}
-
-
-		if (ImGui::BeginPopupContextItem())
-		{
-			if (ImGui::MenuItem("Delete Entity"))
-				node.deleted = true;
-
-			ImGui::EndPopup();
-		}
-
-
-
-		if (opened)
-		{
-			bool opened = ImGui::TreeNodeEx((void*)9817239, flags, tag.c_str());
-			if (opened)
-				ImGui::TreePop();
-			ImGui::TreePop();
-		}
-
-		if (node.deleted)
-		{
-			m_context->DestroyEntity(node);
-			if (m_SelectedContext == node)
-				m_SelectedContext = {};
-		}
-	}
-
-	void SceneHierarchyPanel::AddComponentsPopup()
-	{
-		if (ImGui::MenuItem("Camera"))
-		{
-			m_SelectedContext.AddComponent<Component::Cameras>();
-			ImGui::CloseCurrentPopup();
-		}
-
-		if (ImGui::MenuItem("Sprite Renderer"))
-		{
-			m_SelectedContext.AddComponent<Component::SpriteRenderer>();
-			ImGui::CloseCurrentPopup();
-		}
-	}
-
 	void SceneHierarchyPanel::DrawComponents(Entity ent)
 	{
 		if (ent.HasComponent<Component::Tag>())
@@ -309,10 +225,20 @@ namespace Hazel
 			{
 				static char buffer[256];
 				//memset(buffer, 0x00, sizeof(buffer));
-				ImGui::InputText("Texture address", buffer, 256);
-				if (ImGui::Button("submit new texture address"))
+
+				if (ImGui::InputText("Texture address", buffer, 256, ImGuiInputTextFlags_EnterReturnsTrue))
 					src.Tex = (Texture2D::Create(buffer));
 
+				if (ImGui::Button("find new texture address"))
+				{
+					std::string defaultFilepath = "D:\\Hazel\\Hazel-Nut\\assets\\textures\\";
+					auto path = FileDialogs::OpenFile("textures");
+					if (path.substr(0, defaultFilepath.length()) == defaultFilepath)
+						path = path.substr(defaultFilepath.length());
+					strcpy_s(buffer, 255, path.c_str());
+
+					src.Tex = (Texture2D::Create(buffer));
+				}
 				//if (ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component"))
 				//{
 				//	auto& trans = quad.transformRef();
@@ -334,6 +260,108 @@ namespace Hazel
 				m_SelectedContext = {};
 		}
 	}
+
+	void SceneHierarchyPanel::DrawEntityNode(Entity node, bool displayAllEntities)
+	{
+		auto& tag = node.GetComponent<Component::Tag>().name;
+		if (!displayAllEntities)
+			if (tag == "N/A")
+				return;
+
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+		flags |= (m_SelectedContext == node) ? ImGuiTreeNodeFlags_Selected : 0;
+		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)node, flags, tag.c_str());
+
+		if (ImGui::IsItemClicked())
+		{
+			m_SelectedContext = node;
+		}
+
+
+		if (ImGui::BeginPopupContextItem())
+		{
+			if (ImGui::MenuItem("Delete Entity"))
+				node.deleted = true;
+
+			ImGui::EndPopup();
+		}
+
+
+
+		if (opened)
+		{
+			bool opened = ImGui::TreeNodeEx((void*)9817239, flags, (node.deleted) ? "true" : "false");
+			if (opened)
+				ImGui::TreePop();
+			ImGui::TreePop();
+		}
+
+		if (node.deleted)
+		{
+			m_context->DestroyEntity(node);
+			if (m_SelectedContext == node)
+				m_SelectedContext = {};
+		}
+	}
+
+	void SceneHierarchyPanel::AddComponentsPopup()
+	{
+		if (ImGui::MenuItem("Camera"))
+		{
+			m_SelectedContext.AddComponent<Component::Cameras>();
+			ImGui::CloseCurrentPopup();
+		}
+
+		if (ImGui::MenuItem("Sprite Renderer"))
+		{
+			m_SelectedContext.AddComponent<Component::SpriteRenderer>();
+			ImGui::CloseCurrentPopup();
+		}
+	}
+
+	template<typename T, typename UIFunction>
+	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
+	{
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth |
+			ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+		if (entity.HasComponent<T>())
+		{
+			auto& component = entity.GetComponent<T>();
+			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			ImGui::Separator();
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+			ImGui::PopStyleVar(
+			);
+			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+			{
+				ImGui::OpenPopup("ComponentSettings");
+			}
+
+			bool removeComponent = false;
+			if (ImGui::BeginPopup("ComponentSettings"))
+			{
+				if (ImGui::MenuItem("Remove component"))
+					removeComponent = true;
+
+				ImGui::EndPopup();
+			}
+
+			if (open)
+			{
+				uiFunction(component);
+				ImGui::TreePop();
+			}
+
+			if (removeComponent)
+				entity.RemoveComponent<T>();
+		}
+	}
+
 	/*
 	void SceneHierarchyPanel::EditTransformMatrix(glm::mat4& transform, bool details)
 	{
@@ -647,57 +675,64 @@ namespace Hazel
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("X", buttonSize))
+		//x coordinate
 		{
-			values.x = resetValue;
-			changed = true;
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+			ImGui::PushFont(boldFont);
+			if (ImGui::Button("X", buttonSize))
+			{
+				values.x = resetValue;
+				changed = true;
+			}
+			ImGui::PopFont();
+			ImGui::PopStyleColor(3);
+
+			ImGui::SameLine();
+			changed |= ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
+			ImGui::SameLine();
 		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		changed |= ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Y", buttonSize))
+		//y coordinate
 		{
-			values.y = resetValue;
-			changed = true;
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+			ImGui::PushFont(boldFont);
+			if (ImGui::Button("Y", buttonSize))
+			{
+				values.y = resetValue;
+				changed = true;
+			}
+			ImGui::PopFont();
+			ImGui::PopStyleColor(3);
+
+			ImGui::SameLine();
+			changed |= ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
+			ImGui::SameLine();
 		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		changed |= ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Z", buttonSize))
+		//z coordinate
 		{
-			values.z = resetValue;
-			changed = true;
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+			ImGui::PushFont(boldFont);
+			if (ImGui::Button("Z", buttonSize))
+			{
+				values.z = resetValue;
+				changed = true;
+			}
+			ImGui::PopFont();
+			ImGui::PopStyleColor(3);
+
+			ImGui::SameLine();
+			changed |= ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
+
+			ImGui::PopStyleVar();
 		}
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		changed |= ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
-		ImGui::PopItemWidth();
-
-		ImGui::PopStyleVar();
 
 		ImGui::Columns(1);
 
@@ -707,8 +742,18 @@ namespace Hazel
 	}
 	void SceneHierarchyPanel::EditColor(Color& col)
 	{
+		static int palletLen = int(log2(Color::ColorPallete.size())) + 1;
+		ImGui::Text("color pallet length: 2^%d", palletLen);
+		ImGui::SameLine();
+		ImGui::SliderInt("##x", &palletLen, 0, 8);
+		Color::ColorPallete.resize((size_t)pow(2, palletLen));
+
 		if (ImGui::TreeNodeEx((void*)typeid(Component::SpriteRenderer).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
 		{
+			if (m_SavedColorIndex > m_SavedColor.size() - 1)
+				m_SavedColorIndex = m_SavedColor.size() - 1;
+
+
 
 			ImGui::ColorEdit4("color", col.GetRGBAPointer());
 			if (ImGui::Button("invert Color?"))
@@ -719,7 +764,7 @@ namespace Hazel
 			ImGui::SameLine();
 			if (ImGui::Button("load saved color?"))
 				col = m_SavedColor[m_SavedColorIndex];
-			ImGui::SliderInt("saved color index", (int*)&m_SavedColorIndex, 0, 15);
+			ImGui::SliderInt("saved color index", (int*)&m_SavedColorIndex, 0, (int)m_SavedColor.size() - 1);
 			ImGui::ColorEdit4("saved color edit", m_SavedColor[m_SavedColorIndex].GetRGBAPointer());
 
 			ImGui::TreePop();

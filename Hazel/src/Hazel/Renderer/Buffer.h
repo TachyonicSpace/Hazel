@@ -2,11 +2,13 @@
 
 namespace Hazel {
 
+	//enables us to use switch on the different data that can be in a shader
 	enum class ShaderDataType
 	{
 		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
 	};
 
+	//calculates the memory size of each type
 	static uint32_t ShaderdataTypeSize(ShaderDataType type)
 	{
 		switch (type)
@@ -27,13 +29,14 @@ namespace Hazel {
 		return 0;
 	}
 
+	//stores the name of the element, type, and other data calculated for you like size and offset
 	struct BufferElements
 	{
 	public:
 		std::string name;
 		ShaderDataType type;
 		uint32_t size;
-		uint32_t offset;
+		size_t offset;
 		bool normalized;
 
 		BufferElements() = default;
@@ -62,6 +65,7 @@ namespace Hazel {
 		}
 	};
 
+	//a wrapper class for a std::vector of buffer elements, order of vector matters
 	class BufferLayout
 	{
 	public:

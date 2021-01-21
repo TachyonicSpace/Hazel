@@ -7,6 +7,7 @@
 
 namespace Hazel {
 
+	//creates vertex buffer with data at verticies, and the length into memory the data is
 	Ref<VertexBuffer> VertexBuffer::Create(float* vertices, uint32_t size)
 	{
 		switch (Renderer::GetAPI())
@@ -18,6 +19,8 @@ namespace Hazel {
 		HZ_CORE_ASSERT(false, "Unknown RendererAPI::API!");
 		return nullptr;
 	}
+
+	//creates vertex buffer with a size, but empty data
 	Ref<VertexBuffer> VertexBuffer::Create(uint32_t size)
 	{
 		switch (Renderer::GetAPI())
@@ -30,6 +33,7 @@ namespace Hazel {
 		return nullptr;
 	}
 
+	//creates vertex buffer with data at indices, and the length into memory the data is
 	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t size)
 	{
 		switch (Renderer::GetAPI())

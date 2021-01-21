@@ -9,7 +9,7 @@ namespace Hazel
 	class EditorLayer : public Layer
 	{
 	public:
-		EditorLayer();
+		EditorLayer(std::string filePath);
 		virtual ~EditorLayer() = default;
 
 		virtual void OnAttach() override;
@@ -31,12 +31,11 @@ namespace Hazel
 		Ref<VertexArray> m_VertexArray;
 		Ref<Shader> m_Shader;
 		Ref<Framebuffer> m_FrameBuffer;
-		Ref<Framebuffer> m_IDFrameBuffer;
 
 		EditorCamera m_EditorCamera;
 
 		Ref<Scene> m_Scene;
-		Entity m_HoveredEntity;
+		Entity m_HoveredEntity, m_MouseCursor;
 
 		Ref<Texture2D> m_checkerboard;
 
@@ -49,6 +48,8 @@ namespace Hazel
 
 		bool m_ViewPortFocused = false, m_ViewPortHovered = false, m_UsingEditorCamera = true;
 		int m_GizmoType = 0;
+
+		std::string m_FilePath;
 
 		//panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;

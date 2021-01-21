@@ -20,10 +20,10 @@ public:
 	vec2 acc;
 	DNA dna;
 
-	Hazel::Color col = { .5, .5, .5, .5 };
+	Hazel::Color col;
 	float width = 25;
 	float height = 5;
-
+	static float targetSize;
 	float aspect = 0;
 
 	float angle = 0;

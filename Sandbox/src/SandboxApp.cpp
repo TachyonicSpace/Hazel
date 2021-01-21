@@ -12,10 +12,12 @@
 #define WindowHeight 540.0f
 float rocketW = .065;
 float rocketH = .025;
-float popsize = 1000;
+float popsize = 100;
+float popAverage = 0;
 vec4 obstacle(0, 0, 1, .2);
+vec2 mouse;
 
-	int testing = 0;
+int testing = -1;
 
 
 bool restart = false;
@@ -41,25 +43,38 @@ struct population {
 	}
 
 	float eval() {
-		float bestFit = rockets[0].fitness(&obstacle);
-		for (int i = 0; i < popsize; i++) {
-			bestFit = __min(rockets[i].fitness(&obstacle), bestFit);
+		float average = 0;
+		static float previous[5] = { 0, 0, 0, 0, 0 };
+		for (int i = 0; i < 4; i++)
+		{
+			previous[i] = previous[i + 1];
 		}
-		for (int i = 0; i < popsize; i++) {
-			//rockets[i].Fitness /= (bestFit + .00000001);
+		for (int i = 0; i < rockets.size(); i++) {
+			average = __max(rockets[i].fitness(&obstacle), average);
 		}
+		previous[4] = average;
 		matingPool.resize(0);
 		//matingPool.clear();
 		//matingPool.shrink_to_fit();
-		for (int i = 0; i < popsize; i++) {
+		for (int i = 0; i < rockets.size(); i++) {
 			float fitness = rockets[i].Fitness;
-			auto n = clamp(fitness, 1.f, 150.f);
+			auto n = clamp(fitness, 0.f, 1000.f);
 			for (int j = 0; j < n; j++) {
 				matingPool.push_back(rockets[i]);
 			}
 		}
 		matingPool.shrink_to_fit();
-		return bestFit;
+
+		selection();
+		bool same = true;
+		for (float f : previous)
+			same &= f == previous[0];
+		if (same)
+		{
+			rockets[rockets.size() - 1] = Rocket(rocketW, rocketH);
+		}
+
+		return average;
 	}
 
 	void selection() {
@@ -69,7 +84,8 @@ struct population {
 			matingPool = rockets;
 			std::cout << "Error: MatingPool empty, making the mating pool equal to the population\n\n";
 		}
-		for (int i = 0; i < popsize; i++) {
+		rockets.resize(popsize);
+		for (int i = 0; i < rockets.size(); i++) {
 			auto index = Rand((matingPool.size() - 1), 0);
 			auto partnerA = (matingPool[index]);
 
@@ -309,11 +325,13 @@ class Sandbox2D : public Hazel::Layer
 	float mean = 5.0, sd = 2.0;
 	float testValue = -.55;
 	std::default_random_engine gen;
-	std::normal_distribution<double>* dist = new std::normal_distribution<double>(mean, 1/sd);
+	std::normal_distribution<double>* dist = new std::normal_distribution<double>(mean, 1 / sd);
+
+	Hazel::Ref<Hazel::Framebuffer> m_FrameBuffer;
 
 public:
 	Sandbox2D()
-		:Layer("2D sandbox"), m_Camera(1280.f / 720.f)
+		:Layer("2D sandbox"), m_Camera(Hazel::Application::Get().GetWindow().GetAspectRatio())
 	{
 	}
 
@@ -342,46 +360,57 @@ public:
 			pop = *(new population(rocketW, rocketH));
 			restart = false;
 		}
-
+		Hazel::Renderer2D::ResetStats();
 		Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
 
 		bool notFinished = false;
-		for (int i = 0; i < pop.prevPopSize; i++)
+		for (int i = 0; i < pop.rockets.size(); i++)
 		{
 
 			Rocket& r = pop.rockets[i];
-			Hazel::Renderer2D::DrawQuad(r.pos(), { rocketW, rocketH }, r.angle, r.col);
 
-			if(i != testing)
+			glm::mat4 transform;
+			glm::vec2 size = { rocketW, rocketH };
+			if (r.angle == 0)
 			{
-				bool tmp = r.update(&obstacle);
-				if (tmp)
-					notFinished = true;
-				//notFinished = r.update(&obstacle) || notFinished;
+				transform = glm::translate(glm::mat4(1), r.pos()) *
+					glm::scale(glm::mat4(1), { size.x, size.y, 1 });
 			}
+			else
+			{
+				transform = glm::translate(glm::mat4(1), r.pos()) *
+					glm::rotate(glm::mat4(1), r.angle, { 0, 0, 1 }) *
+					glm::scale(glm::mat4(1), { size.x, size.y, 1 });
+			}
+
+			Hazel::Renderer2D::DrawQuad(transform, r.col);
+
+			notFinished |= r.update(&obstacle);
+
+		}
+
+
+		{
+			Rocket target;
+			Hazel::Renderer2D::DrawQuad(target.target, { Rocket::targetSize, Rocket::targetSize }, { 0, 1, 1, .8 });
+		}
+
+		{
+			//obstacle;
+			Hazel::Renderer2D::DrawQuad({ obstacle.x, obstacle.y, -.8 }, { obstacle.z, obstacle.w }, { 1, 0, .8 });
+
 		}
 
 		if (!notFinished)
 			goto Finished;
 
-
-
-		{
-			Rocket target;
-			Hazel::Renderer2D::DrawQuad(target.target, { .01, .01 }, { 0, 1, 1, .8 });
-		}
-
-		{
-			Rocket obstacle;
-			Hazel::Renderer2D::DrawQuad({ 0, 0, -.8 }, { 1, .2 }, { 1, 0, .8 });
-		}
-
 		Rocket::count++;
 		if (Rocket::count >= DNA::lifespan) {
-			Finished:
+		Finished:
 			Rocket::count = 0;
+			//Rocket::targetSize *= (Rocket::targetSize < .005) ? 1 : .9f;
 			pop.eval();
-			pop.selection();
+			//pop.selection();
 		}
 
 
@@ -391,74 +420,111 @@ public:
 
 	void OnImGuiRender()
 	{
-		//HZ_CORE_ASSERT(false, "");
-		ImGui::Begin("Settings");
-
-		#if needed
-		ImGui::SliderFloat("angle", &angle, 0, 2 * PI);
-
-		ImGui::SliderInt("index", &testing, 0, pop.rockets.size() - 1);
-		ImGui::SliderFloat("popsize", &popsize, 1, 1000);
-		ImGui::Checkbox("restart", &restart);
-
-		auto& rocket = pop.rockets[testing];
-		ImGui::Text("stats of rocket %p:", &rocket);
-		ImGui::SliderFloat2("pos: ", &rocket.Pos.x, -2, 2);
-		ImGui::Text("vel: x~%f, y~%f", rocket.vel.x, rocket.vel.y);
-		ImGui::Text("acc: x~%f, y~%f", rocket.acc.x, rocket.acc.y);
-		ImGui::ColorEdit4("color:", rocket.col.GetRGBAPointer());
-		ImGui::SliderFloat("mutationRate", &Rocket::mutationRate, 0, 1);
-		ImGui::SliderFloat("mutationPow", &Rocket::mutationpow, -1, 2);
-		ImGui::Text("angle: %f", rocket.angle);
-		ImGui::Text("fitness: %f", rocket.fitness(&obstacle));
-
-		ImGui::Separator();
-		#endif
-
-		auto& stats = Hazel::Renderer2D::GetStats();
-
-		ImGui::TextColored({ .8, .2, .2, 1 }, "number of draw calls: %d", stats.drawCalls);
-		ImGui::TextColored({ .8, .2, .2, 1 }, "number of quads: %d", stats.quadCount);
-
-		ImGui::Separator();
-		ImGui::Separator();
-
-		constexpr int range = 50;
 
 
-		ImGui::SliderFloat("mean", &mean, 0, range);
-		ImGui::SliderFloat("standard deviation", &sd, .2, range);
-		if (dist->mean() != mean || dist->sigma() != sd)
+		//settings
 		{
-			free(dist);
-			dist = new std::normal_distribution<double>(mean, 1/sd);
+			ImGui::Begin("Settings");
+
+			#if 1
+			ImGui::Checkbox("restart", &restart);
+
+			ImGui::SliderInt("index", &testing, -1, pop.rockets.size() - 1);
+			ImGui::SliderFloat("popsize", &popsize, 1, 1000);
+
+			static auto& window = Hazel::Application::Get().GetWindow();
+			if (testing == -1)
+			{
+				static Rocket rocket = pop.rockets[0];
+				rocket.Pos = { Hazel::Input::GetMouseX() / window.GetWidth() * 2.f * window.GetAspectRatio() - window.GetAspectRatio(), -(Hazel::Input::GetMouseY() / window.GetHeight() * 2.f - 1) };
+				ImGui::Text("pos: %f, %f", rocket.Pos.x, rocket.Pos.y);
+				ImGui::Text("vel: x~%f, y~%f", rocket.vel.x, rocket.vel.y);
+				ImGui::Text("acc: x~%f, y~%f", rocket.acc.x, rocket.acc.y);
+				ImGui::ColorEdit4("color:", rocket.col.GetRGBAPointer());
+				ImGui::SliderFloat("mutationRate", &Rocket::mutationRate, 0, 1);
+				ImGui::SliderFloat("mutationPow", &Rocket::mutationpow, -1, 2);
+				rocket.angle += .5f;
+				rocket.angle = fmod(rocket.angle, 3.141592f * 2.0f);
+				ImGui::Text("fitness: %f", rocket.fitness(&obstacle));
+
+				Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
+				Hazel::Renderer2D::DrawQuad(rocket.pos(), { rocketW, rocketH }, rocket.angle, rocket.col);
+				Hazel::Renderer2D::EndScene();
+
+				ImGui::DragFloat4("obstical", &obstacle.x, .05, -rocket.aspect, rocket.aspect);
+				ImGui::DragFloat2("target", &rocket.target[0], .05, -rocket.aspect, rocket.aspect);
+			}
+			else
+			{
+				if (testing > popsize - 1)
+					testing = popsize - 1;
+				Rocket& rocket = pop.rockets[testing];
+				ImGui::Text("stats of rocket %p:", &rocket);
+				ImGui::SliderFloat2("pos: ", &rocket.Pos.x, -2, 2);
+				ImGui::Text("vel: x~%f, y~%f", rocket.vel.x, rocket.vel.y);
+				ImGui::Text("acc: x~%f, y~%f", rocket.acc.x, rocket.acc.y);
+				ImGui::ColorEdit4("color:", rocket.col.GetRGBAPointer());
+				ImGui::SliderFloat("mutationRate", &Rocket::mutationRate, 0, 1);
+				ImGui::SliderFloat("mutationPow", &Rocket::mutationpow, -.001, 1);
+				ImGui::Text("angle: %f", rocket.angle);
+				ImGui::Text("fitness: %f", rocket.fitness(&obstacle));
+
+				ImGui::DragFloat4("obstical", &obstacle.x, .05, -rocket.aspect, rocket.aspect);
+				ImGui::DragFloat2("target", &rocket.target[0], .05, -rocket.aspect, rocket.aspect);
+			}
+
+			mouse = { Hazel::Input::GetMouseX() / window.GetWidth() * 2.f * window.GetAspectRatio() - window.GetAspectRatio(), -(Hazel::Input::GetMouseY() / window.GetHeight() * 2.f - 1) };
+			if (Hazel::Input::IsMouseButtonPressed(Hazel::Mouse::ButtonLeft))
+				obstacle = { mouse, obstacle.z, obstacle.w };
+
+
+			ImGui::Separator();
+
+			auto& stats = Hazel::Renderer2D::GetStats();
+
+			ImGui::TextColored({ .8, .2, .2, 1 }, "number of draw calls: %d", stats.drawCalls);
+			ImGui::TextColored({ .8, .2, .2, 1 }, "number of quads: %d", stats.quadCount);
+
+			#else
+
+			constexpr int range = 50;
+
+
+			ImGui::SliderFloat("mean", &mean, 0, range);
+			ImGui::SliderFloat("standard deviation", &sd, .2, range);
+			if (dist->mean() != mean || dist->sigma() != sd)
+			{
+				free(dist);
+				dist = new std::normal_distribution<double>(mean, 1 / sd);
+			}
+
+
+			std::stringstream normal;
+			int list[range] = {};
+
+			for (int i = 0; i < Rolls; i++)
+			{
+				double number = (*dist)(gen);
+				if ((number >= 0) && (number < range))
+					++list[int(number)];
+			}
+			normal << "normal dist (" << mean << ", " << sd << "):\n";
+
+			for (int i = 0; i < range; i++)
+			{
+				normal << i << '-' << (i + 1) << ": ";
+				normal << std::string(list[i] * stars / Rolls, '*') << "\n";
+			}
+
+			//auto zvalue = (mean - testValue) / sd;
+			//std::string probability = std::to_string(std::erfc(-zvalue * M_SQRT1_2)/2.0);
+			ImGui::SliderFloat("probability", &testValue, 0, range);
+			//ImGui::TextColored(ImVec4(0, 1, 1, 1), probability.c_str());
+			ImGui::TextColored(ImVec4(1, 0, 1, 1), normal.str().c_str());
+			#endif
+
+			ImGui::End();
 		}
-			
-
-		std::stringstream normal;
-		int list[range] = {};
-
-		for (int i = 0; i < Rolls; i++)
-		{
-			double number = (*dist)(gen);
-			if ((number >= 0) && (number < range))
-				++list[int(number)];
-		}
-		normal << "normal dist (" << mean << ", " << sd << "):\n";
-
-		for (int i = 0; i < range; i++)
-		{
-			normal << i << '-' << (i + 1) << ": ";
-			normal << std::string(list[i] * stars / Rolls, '*') << "\n";
-		}
-
-		//auto zvalue = (mean - testValue) / sd;
-		//std::string probability = std::to_string(std::erfc(-zvalue * M_SQRT1_2)/2.0);
-		ImGui::SliderFloat("probability", &testValue, 0, range);
-		//ImGui::TextColored(ImVec4(0, 1, 1, 1), probability.c_str());
-		ImGui::TextColored(ImVec4(1, 0, 1, 1), normal.str().c_str());
-
-		ImGui::End();
 
 	}
 
@@ -483,6 +549,6 @@ public:
 	}
 };
 
-Hazel::Application* Hazel::CreateApplication() {
+Hazel::Application* Hazel::CreateApplication(std::string str) {
 	return new Sandbox;
 }

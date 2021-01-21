@@ -21,7 +21,18 @@ namespace Hazel
 														const glm::vec3& scale /* = glm::vec3(1) */)
 	{
 		Entity e(m_Registry.create(), this);
-		e.AddComponent<Component::Tag>(name);
+
+		if (!ValidEntity(name))
+			e.AddComponent<Component::Tag>(name);
+		else
+		{
+			int num = -1;
+			auto newName = name + "(";
+			while (ValidEntity(newName + std::to_string(++num) + ")")) {}
+			
+			e.AddComponent<Component::Tag>(newName + std::to_string(num) + ")");
+		}
+
 		e.AddComponent<Component::Transform>(translation, rotation, scale);
 		return e;
 	}
@@ -49,16 +60,24 @@ namespace Hazel
 		m_Registry.destroy(entity);
 	}
 
+	bool Scene::ValidEntity(Entity ent) { return m_Registry.valid((entt::entity)ent); }
 
-	Hazel::Entity& Scene::GetEntity(uint64_t handle)
+
+	bool Scene::ValidEntity(std::string str)
 	{
-		Entity tmp = { (entt::entity)handle, this };
-		if (m_Registry.has(tmp))
-		{
-			return tmp;
-		}
+		bool has = false;
+		m_Registry.each([&](auto entity)
+			{
+				if (m_Registry.has<Component::Tag>(entity))
+				{
+					Component::Tag t = m_Registry.get<Component::Tag>(entity);
+					if (t.name == str)
+						has = true;
+				}
+			}
+		);
+		return has;
 	}
-
 	bool Scene::OnUpdateRuntime(Timestep& t)
 	{
 		//update scripts
@@ -104,7 +123,7 @@ namespace Hazel
 			{
 				auto& [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
 
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor, (int)entity);
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
 			}
 
 			Renderer2D::EndScene();
@@ -123,7 +142,7 @@ namespace Hazel
 		{
 			auto [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
 
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.color, (int)entity);
+			Renderer2D::DrawQuad(transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
 		}
 
 		Renderer2D::EndScene();
@@ -156,19 +175,12 @@ namespace Hazel
 		{
 			auto [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
 
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.color, (int)entity);
+			Renderer2D::DrawQuad(transform.GetTransform(), sprite.color);
 		}
 
 		Renderer2D::EndScene();
 	}
 
-	int Scene::Pixel(int x, int y)
-	{
-		glReadBuffer(GL_COLOR_ATTACHMENT1);
-		int pixelData;
-		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
-		return pixelData;
-	}
 	Hazel::Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = m_Registry.view<Component::Cameras>();

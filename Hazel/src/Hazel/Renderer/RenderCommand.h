@@ -30,11 +30,6 @@ namespace Hazel {
 		{
 			s_RendererAPI->DrawIndexed(va, indexCount);
 		}
-
-		static void DrawPixels(uint32_t width, uint32_t height, float* pixels)
-		{
-			s_RendererAPI->DrawPixels(width, height, pixels);
-		}
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};

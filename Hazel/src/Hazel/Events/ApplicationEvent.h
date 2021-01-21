@@ -5,6 +5,7 @@
 
 namespace Hazel {
 
+	//allows us to handle resising window
 	class  WindowResizeEvent : public Event
 	{
 	public: 
@@ -27,6 +28,7 @@ namespace Hazel {
 		unsigned int m_Width, m_Height;
 	};
 
+	//allows us to close window to close application
 	class  WindowCloseEvent : public Event
 	{
 	public:
@@ -36,6 +38,7 @@ namespace Hazel {
 		EVENT_CLASS_CATEGORY((int)EventCategory::EventCategoryApplication)
 	};
 
+	//unknown exactly, assume it handles time within the client app
 	class  AppTickEvent : public Event
 	{
 	public:
@@ -45,6 +48,7 @@ namespace Hazel {
 		EVENT_CLASS_CATEGORY((int)EventCategory::EventCategoryApplication)
 	};
 
+	//unknown exactly, assume it handles events within the client app
 	class  AppUpdateEvent : public Event
 	{
 	public:
@@ -54,7 +58,8 @@ namespace Hazel {
 		EVENT_CLASS_CATEGORY((int)EventCategory::EventCategoryApplication)
 	};
 
-	class  AppRenderEvent : public Event
+	//unknown exactly, assume it handles rendering within the client app
+	class AppRenderEvent : public Event
 	{
 	public:
 		AppRenderEvent() {}

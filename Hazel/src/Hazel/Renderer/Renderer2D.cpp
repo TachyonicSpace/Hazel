@@ -7,6 +7,7 @@
 
 namespace Hazel {
 
+	//struct containing core properties of a rectangle
 	struct QuadVertex
 	{
 		glm::vec3 pos;
@@ -14,12 +15,12 @@ namespace Hazel {
 		glm::vec2 texCoord;
 		float texIndex;
 		float TilingFactor;
-		int ObjectID;
 	};
 
+	//data for the renderer
 	struct Renderer2DData
 	{
-		static const uint32_t MaxQuads = 150;
+		static const uint32_t MaxQuads = 4000;
 		static const uint32_t MaxVerticies = MaxQuads * 4;
 		static const uint32_t Maxindicies = MaxQuads * 6;
 		static const uint32_t MaxTexture = 32;
@@ -43,6 +44,7 @@ namespace Hazel {
 
 	static Renderer2DData s_Data;
 
+	//initilizes the renderer
 	void Renderer2D::Init()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -50,13 +52,13 @@ namespace Hazel {
 		s_Data.va = (VertexArray::Create());
 
 		s_Data.vb = VertexBuffer::Create(s_Data.MaxVerticies * sizeof(QuadVertex));
+		//data is given to gpu in this order, make sure shader matches this order
 		s_Data.vb->SetLayout({
 				{ShaderDataType::Float3, "position"},
 				{ShaderDataType::Float4, "color"},
 				{ShaderDataType::Float2, "texCoord"},
 				{ShaderDataType::Float , "texIndex"},
-				{ShaderDataType::Float , "tilingFactor"},
-				{ShaderDataType::Int   , "objectID"}
+				{ShaderDataType::Float , "tilingFactor"}
 			});
 		s_Data.va->AddVertexBuffer(s_Data.vb);
 
@@ -82,7 +84,7 @@ namespace Hazel {
 
 		delete[] quadIndices;
 
-
+		//makes a blank white texture
 		s_Data.whiteTexture = Texture2D::Create(1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
 		s_Data.whiteTexture->SetData(&whiteTextureData, sizeof(whiteTextureData));
@@ -91,6 +93,7 @@ namespace Hazel {
 		for (uint32_t i = 0; i < s_Data.MaxTexture; i++)
 			samplers[i] = i;
 
+		//loads the shader to be used
 		s_Data.texShader = Shader::Create("assets/shaders/Texture.glsl");
 		s_Data.texShader->Bind();
 		s_Data.texShader->UploadUniformIntArray("u_Texture", samplers, s_Data.MaxTexture);
@@ -129,12 +132,8 @@ namespace Hazel {
 
 		s_Data.texShader->Bind();
 		s_Data.texShader->UploadUniformMat4("u_ViewProjection", viewProj);
-		s_Data.stats.drawCalls = 0;
-		s_Data.stats.quadCount = 0;
-		s_Data.quadIndexCount = 0;
-		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
 
-		s_Data.TextureSlotIndex = 1;
+		StartNewBatch();
 	}
 	void Renderer2D::BeginScene(const OrthographicCamera& cam)
 	{
@@ -142,12 +141,8 @@ namespace Hazel {
 
 		s_Data.texShader->Bind();
 		s_Data.texShader->UploadUniformMat4("u_ViewProjection", cam.GetViewProjectionMatrix());
-		s_Data.stats.drawCalls = 0;
-		s_Data.stats.quadCount = 0;
-		s_Data.quadIndexCount = 0;
-		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
-
-		s_Data.TextureSlotIndex = 1;
+		
+		StartNewBatch();
 	}
 	void Renderer2D::BeginScene(const EditorCamera& camera)
 	{
@@ -155,12 +150,8 @@ namespace Hazel {
 
 		glm::mat4 viewProj = camera.GetViewProjection();
 		s_Data.texShader->UploadUniformMat4("u_ViewProjection", viewProj);
-		s_Data.stats.drawCalls = 0;
-		s_Data.stats.quadCount = 0;
-		s_Data.quadIndexCount = 0;
-		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
-
-		s_Data.TextureSlotIndex = 1;
+		
+		StartNewBatch();
 	}
 	void Renderer2D::EndScene()
 	{
@@ -176,6 +167,7 @@ namespace Hazel {
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.quadVertexBufferPtr - (uint8_t*)s_Data.quadVertexBufferBase);
 		s_Data.vb->SetData(s_Data.quadVertexBufferBase, dataSize);
 
+		//bind textures
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			s_Data.textureSlots[i]->Bind(i);
 
@@ -270,17 +262,14 @@ namespace Hazel {
 
 		s_Data.stats.quadCount++;*/
 	}
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color, int entityID, const Ref<Texture2D>& tex, float tilingFactor)
+
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color, const Ref<Texture2D>& tex /*= nullptr*/, float tilingFactor /*= 1.f*/)
 	{
-		DrawQuad(transform, (Ref<Texture2D>)tex, tilingFactor, color, entityID);
+		DrawQuad(transform, (Ref<Texture2D>)tex, tilingFactor, color);
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color, const Ref<Texture2D>& tex /*= nullptr*/, float tilingFactor /*= 1.f*/, int entityID /*= 0*/)
-	{
-		DrawQuad(transform, (Ref<Texture2D>)tex, tilingFactor, color, entityID);
-	}
-
-	void Renderer2D::DrawQuad(const glm::mat4& transform, Ref<Texture2D>& tex, float tilingFactor, const Color& color, int entityID)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
 	{
 
 
@@ -321,7 +310,6 @@ namespace Hazel {
 			s_Data.quadVertexBufferPtr->texCoord = tex->GetTextureCoordinates()[i];
 			s_Data.quadVertexBufferPtr->texIndex = textureIndex;
 			s_Data.quadVertexBufferPtr->TilingFactor = tilingFactor;
-			s_Data.quadVertexBufferPtr->ObjectID = entityID;
 			s_Data.quadVertexBufferPtr++;
 		}
 

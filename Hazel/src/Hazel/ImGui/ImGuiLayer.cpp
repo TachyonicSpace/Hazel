@@ -15,12 +15,13 @@
 #include "ImGuizmo.h"
 
 namespace Hazel {
-
+	//makes a layer with debugging name imguilayer
 	ImGuiLayer::ImGuiLayer()
 		:Layer("ImGuiLayer")
 	{
 	}
 
+	//activates imgui when attatched
 	void ImGuiLayer::OnAttach()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -36,6 +37,7 @@ namespace Hazel {
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_VeiwPortsNoMerge;
 
+		//enables our fonts to be used
 		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", 18.0f);
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", 18.0f);
 
@@ -43,7 +45,7 @@ namespace Hazel {
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
 
-		//when viewports are enabled we teak WindowRounding so platform window looks identical
+		//when viewports are enabled we tweak WindowRounding so platform window looks identical
 		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -61,6 +63,7 @@ namespace Hazel {
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 
+	//deactivates ingui when detatched
 	void ImGuiLayer::OnDetach()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -70,6 +73,7 @@ namespace Hazel {
 		ImGui::DestroyContext();
 	}
 
+	//handles events, if we are blocking events, and if we want to get the event
 	void ImGuiLayer::OnEvent(Event& e)
 	{
 		if (m_BlockEvents)
@@ -80,6 +84,7 @@ namespace Hazel {
 		}
 	}
 
+	//begins whatever context to use imgui and imguizmo
 	void ImGuiLayer::Begin()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -91,6 +96,7 @@ namespace Hazel {
 		ImGuizmo::BeginFrame();
 	}
 
+	//renders whatever imgui code from between here and the closest begin in the same context
 	void ImGuiLayer::End()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -112,6 +118,7 @@ namespace Hazel {
 		}
 	}
 
+	//sets our dark theme color, may edit to allow multiple themes
 	void ImGuiLayer::SetDarkThemeColors()
 	{
 		auto& colors = ImGui::GetStyle().Colors;

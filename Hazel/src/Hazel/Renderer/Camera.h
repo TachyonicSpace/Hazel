@@ -10,6 +10,7 @@
 
 namespace Hazel {
 
+	//generic camera class to be overloaded
 	class Camera
 	{
 	public:
@@ -24,6 +25,7 @@ namespace Hazel {
 		glm::mat4 m_Projection = glm::mat4(1.0f);
 	};
 
+	
 	class OrthographicCamera
 	{
 	public:
@@ -103,6 +105,7 @@ namespace Hazel {
 	public:
 		EditorCamera() = default;
 		EditorCamera(float fov, float aspectRatio, float nearClip, float farClip);
+		EditorCamera(EditorCamera& cam);
 
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
@@ -123,6 +126,11 @@ namespace Hazel {
 
 		float GetPitch() const { return m_Pitch; }
 		float GetYaw() const { return m_Yaw; }
+		float GetFOV() const { return m_FOV; }
+		float GetAspectRatio() const { return m_AspectRatio; }
+
+
+		glm::vec2 m_MousePositionBeforeMovingMouse = { -1, -1 };
 	private:
 		void UpdateProjection();
 		void UpdateView();
@@ -145,7 +153,6 @@ namespace Hazel {
 		glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_FocalPoint = { 0.0f, 0.0f, 0.0f };
 
-		glm::vec2 m_InitialMousePosition = { 0.0f, 0.0f };
 
 		float m_Distance = 10.0f;
 		float m_Pitch = 0.0f, m_Yaw = 0.0f;
@@ -153,7 +160,7 @@ namespace Hazel {
 		float m_ViewportWidth = 1280, m_ViewportHeight = 700;
 
 		bool m_MovingCamera = false;
-		glm::vec2 m_MousePositionBeforeMovingMouse = { -1, -1 };
+		glm::vec2 m_InitialMousePosition = { 0.0f, 0.0f };
 	};
 
 }

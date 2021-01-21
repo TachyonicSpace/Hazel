@@ -8,8 +8,7 @@
 #define random() (2* PI *rand() / ((float)(RAND_MAX)))
 #define Rand(max, min) (rand()*(((max)-(min))/((float)RAND_MAX)))+(min)
 #define mutate(x, amount) x += Rand(amount, -amount)
-//#define remove(x) delete(&x);\
-					free(&x)
+
 
 
 class DNA

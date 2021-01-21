@@ -7,9 +7,9 @@ Rocket::Rocket() :Pos(startingPos), vel(startingVel), acc(startingAcc)//, r(Rand
 {
 }
 
-Rocket::Rocket(float width, float height) 
+Rocket::Rocket(float width, float height)
 	: Pos(startingPos), vel(startingVel), acc(startingAcc),
-	width(width), height(height), timeTofinish(-1)//, col({Rand(0, 1), Rand(0, 1), Rand(0, 1)})
+	width(width), height(height), timeTofinish(-1), col({Rand(0, 1), Rand(0, 1), Rand(0, 1), .3f})
 {
 }
 
@@ -47,7 +47,7 @@ bool Rocket::update(vec4* barrier)
 		return false;
 	}
 
-	if (distance(Pos, vec2(target.x, target.y)) > .01) {
+	if (distance(Pos, vec2(target.x, target.y)) > targetSize) {
 		acc *= 0;
 		try {
 			setMag(dna.genes[count], .01);
@@ -58,12 +58,21 @@ bool Rocket::update(vec4* barrier)
 
 			Pos += vel;
 			angle = atan2(vel.y, vel.x);
+
+			/*if (distance(Pos, vec2(target.x, target.y)) <= targetSize)
+				Rocket::targetSize *= (Rocket::targetSize < .005) ? 1 : .9f;*/
+
+
 			return true;
 		}
 		catch (...) {
 			return true;
 		}
-	} return true;
+	}
+	else
+	{
+	}
+	return false;
 }
 
 float Rocket::heading()
@@ -73,7 +82,8 @@ float Rocket::heading()
 
 int Rocket::count;
 float Rocket::mutationRate = .001;
-float Rocket::mutationpow = 1.001;
+float Rocket::mutationpow = .001;
+float Rocket::targetSize = .1f;
 
 float* Rocket::rect(float width, float height) {
 	float rocketRect[] = {
@@ -97,24 +107,23 @@ float Rocket::fitness(vec4* barrier)
 {
 	aspect = Hazel::Application::Get().GetWindow().GetAspectRatio() * .99;
 
-	if (timeTofinish != -1)
-		return Fitness;
-
+	float timing = 2500.f / (float)(DNA::lifespan - timeTofinish);
+	//timing *= timing/10.f;
 	if (Pos.x <= -aspect || Pos.x >= aspect || Pos.y <= -.99 || Pos.y >= .99)
 	{
-		Fitness = 15 / (pow(distance(pos(), target), 3) + 4) + (DNA::lifespan - count)/250.0;
-		timeTofinish = count;
+		Fitness = 25 / (distance(pos(), target) + .25) - timing;
 	}
 	//barrier
 	else if (barrier && Pos.x > barrier->x - barrier->z / 2.0 && Pos.x < barrier->x + barrier->z / 2.0 &&
 		Pos.y > barrier->y - barrier->w / 2.0 && Pos.y < barrier->y + barrier->w / 2.0)
 	{
-		Fitness = 15 / (distance(pos(), target) + 7);
-		timeTofinish = count;
+		Fitness = 20 / (distance(pos(), target) + .07) - timing;
 	}
 	else
-		Fitness =  15/(distance(pos(), target) + .25) - 5 + (DNA::lifespan - count)/250.0;
-
+	{
+		Fitness = 35 / (distance(pos(), target) + .25) - .2 * timing;
+		timeTofinish = count;
+	}
 	return Fitness;
 }
 
@@ -126,12 +135,13 @@ Rocket Rocket::crossover(const Rocket& b)
 		child.genes[i] = b.dna.genes[i];
 		float mutationChance = Rand(1, -1);
 		if (abs(mutationChance) < mutationRate)
-			child.genes[i] += vec2((pow(mutationpow, mutationChance) - 1));
+			child.genes[i] += vec2((pow(1+mutationpow, mutationChance) - 1));
 	}
 	Rocket childRocket(child);
 	childRocket.col.GetRGBAPointer()[0] = (Rand(0, 1) > .5) ? this->col.GetRGBAPointer()[0] : b.col.GetRGBA()[0];
 	childRocket.col.GetRGBAPointer()[1] = (Rand(0, 1) > .5) ? this->col.GetRGBAPointer()[1] : b.col.GetRGBA()[1];
 	childRocket.col.GetRGBAPointer()[2] = (Rand(0, 1) > .5) ? this->col.GetRGBAPointer()[2] : b.col.GetRGBA()[2];
+	childRocket.col.a = (this->col.a + b.col.a) / 2.0f;
 
 	/*float mutationChance = Rand(1, -1);
 	if (abs(mutationChance) < mutationRate) {
@@ -158,19 +168,19 @@ Rocket Rocket::crossover(const Rocket& b)
 	{
 		glm::vec4 mutantcolor = childRocket.col.GetVec4();
 		if (abs(mutationChanceR) < mutationRate) {
-			mutantcolor[0] += (pow(mutationpow, mutationChanceR) - 1);
+			mutantcolor[0] += (pow(1+mutationpow, mutationChanceR) - 1);
 			mutantcolor[0] = clamp(mutantcolor[0], 0.f, 1.f);
 		}if (abs(mutationChanceG) < mutationRate) {
-			mutantcolor[1] += (pow(mutationpow, mutationChanceR) - 1);
+			mutantcolor[1] += (pow(1+mutationpow, mutationChanceR) - 1);
 			mutantcolor[1] = clamp(mutantcolor[1], 0.f, 1.f);
 		}if (abs(mutationChanceB) < mutationRate) {
-			mutantcolor[2] += (pow(mutationpow, mutationChanceR) - 1);
+			mutantcolor[2] += (pow(1+mutationpow, mutationChanceR) - 1);
 			mutantcolor[2] = clamp(mutantcolor[2], 0.f, 1.f);
 		}if (abs(mutationChanceA) < mutationRate) {
-			mutantcolor[3] += (pow(mutationpow, mutationChanceR) - 1);
+			mutantcolor[3] += (pow(1+mutationpow, mutationChanceR) - 1);
 			mutantcolor[3] = clamp(mutantcolor[3], 0.f, 1.f);
 		}
-		if(mutantcolor != childRocket.col.GetVec4())
+		if (mutantcolor != childRocket.col.GetVec4())
 			childRocket.col = mutantcolor;
 	}
 

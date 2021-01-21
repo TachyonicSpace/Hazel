@@ -65,13 +65,4 @@ namespace Hazel {
 	{
 		glViewport(xMin, yMin, xMax, yMax);
 	}
-
-	void OpenGLRendererAPI::DrawPixels(uint32_t width, uint32_t height, float* pixels)
-	{
-		#if 0
-		glDrawPixels(width, height, GL_RGBA, GL_FLOAT, pixels);
-		#else
-		HZ_CORE_ASSERT(false, "function not implemented yet");
-		#endif
-	}
 	}

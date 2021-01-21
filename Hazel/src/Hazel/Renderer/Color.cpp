@@ -5,7 +5,8 @@ namespace Hazel
 {
 	bool Color::HSBMode = false;
 
-	Color Color::ColorPallete[17] = { 
+	//color pallet, used to store and save colors
+	std::vector<Color> Color::ColorPallete = { 
 		Color({255.f, 255.f, 255.f}),
 		Color({000.f, 000.f, 000.f}),
 		Color({255.f, 000.f, 000.f}),
@@ -25,29 +26,29 @@ namespace Hazel
 		Color({139.f, 069.f, 019.f})
 	};
 
-	const Color& Color::White = Color::ColorPallete[0];
-	const Color& Color::Black = Color::ColorPallete[1];
-	const Color& Color::Red = Color::ColorPallete[2];
-	const Color& Color::Lime = Color::ColorPallete[3];
-	const Color& Color::Blue = Color::ColorPallete[4];
-	const Color& Color::Yellow = Color::ColorPallete[5];
-	const Color& Color::Cyan = Color::ColorPallete[6];
-	const Color& Color::Magenta = Color::ColorPallete[7];
-	const Color& Color::Silver = Color::ColorPallete[8];
-	const Color& Color::Grey = Color::ColorPallete[9];
-	const Color& Color::Maroon = Color::ColorPallete[10];
-	const Color& Color::Olive = Color::ColorPallete[11];
-	const Color& Color::Green = Color::ColorPallete[12];
-	const Color& Color::Purple = Color::ColorPallete[13];
-	const Color& Color::Teal = Color::ColorPallete[14];
-	const Color& Color::Navy = Color::ColorPallete[15];
-	const Color& Color::Brown = Color::ColorPallete[16];
+	//common colors used as a starting point
+	const Color Color::White = Color::ColorPallete[0];
+	const Color Color::Black = Color::ColorPallete[1];
+	const Color Color::Red = Color::ColorPallete[2];
+	const Color Color::Lime = Color::ColorPallete[3];
+	const Color Color::Blue = Color::ColorPallete[4];
+	const Color Color::Yellow = Color::ColorPallete[5];
+	const Color Color::Cyan = Color::ColorPallete[6];
+	const Color Color::Magenta = Color::ColorPallete[7];
+	const Color Color::Silver = Color::ColorPallete[8];
+	const Color Color::Grey = Color::ColorPallete[9];
+	const Color Color::Maroon = Color::ColorPallete[10];
+	const Color Color::Olive = Color::ColorPallete[11];
+	const Color Color::Green = Color::ColorPallete[12];
+	const Color Color::Purple = Color::ColorPallete[13];
+	const Color Color::Teal = Color::ColorPallete[14];
+	const Color Color::Navy = Color::ColorPallete[15];
+	const Color Color::Brown = Color::ColorPallete[16];
 
 
 
 
-	//#define old
-
+	//makes the color black by default
 	Color::Color()
 	{
 		r = 0;
@@ -59,6 +60,7 @@ namespace Hazel
 		s = 0;
 		v = 0;
 	}
+	//copys color
 	Color::Color(const Color& col)
 	{
 		r = col.r;
@@ -70,20 +72,23 @@ namespace Hazel
 		s = col.s;
 		v = col.v;
 	}
-	Color::Color(int R, int G, int B)
+	//color from three values
+	Color::Color(float R, float G, float B)
 	{
 		if (HSBMode)
 			this->SetHsb(R, G, B);
 		else
 			this->SetRgb(R, G, B);
 	}
-	Color::Color(int R, int G, int B, int A)
+	//sets color from 4 values
+	Color::Color(float R, float G, float B, float A)
 	{
 		if (HSBMode)
 			this->SetHsb(R, G, B, A);
 		else
 			this->SetRgb(R, G, B, A);
 	}
+	//sets colors from initilizer list
 	Color::Color(const std::initializer_list<float>& Element)
 	{
 		if (HSBMode)
@@ -91,6 +96,7 @@ namespace Hazel
 		else
 			this->SetRgb(Element);
 	}
+	//sets color from vec3
 	Color::Color(glm::vec3 color)
 	{
 		if (HSBMode)
@@ -105,6 +111,7 @@ namespace Hazel
 		else
 			this->SetRgb(color);
 	}
+	//sets greyscale color
 	Color::Color(float greyScale)
 	{
 		if (HSBMode)
@@ -120,7 +127,7 @@ namespace Hazel
 			this->SetRgb(greyScale);
 	}
 
-
+	//makes a color with the hue and full saturation asnd brightness
 	Color& Color::SetHsb(int hue)
 	{
 		this->Color::SetHsb({ (float)hue, 1, 1 });
@@ -260,13 +267,12 @@ namespace Hazel
 
 		return *this;
 	}
-
-	Color& Color::SetHsb(int R, int G, int B)
+	Color& Color::SetHsb(float R, float G, float B)
 	{
 		this->SetHsb({ (float)R, (float)G, (float)B });
 		return *this;
 	}
-	Color& Color::SetHsb(int R, int G, int B, int A)
+	Color& Color::SetHsb(float R, float G, float B, float A)
 	{
 		this->SetHsb({ (float)R, (float)G, (float)B, (float)A });
 		return *this;
@@ -276,6 +282,7 @@ namespace Hazel
 		this->SetHsb({ col.h, col.s, col.m_HSV[2] });
 		return *this;
 	}
+
 
 
 	Color& Color::SetRgb(int greyScale)
@@ -428,13 +435,12 @@ namespace Hazel
 
 		return *this;
 	}
-
-	Color& Color::SetRgb(int R, int G, int B)
+	Color& Color::SetRgb(float R, float G, float B)
 	{
 		this->SetRgb({ (float)R, (float)G, (float)B });
 		return *this;
 	}
-	Color& Color::SetRgb(int R, int G, int B, int A)
+	Color& Color::SetRgb(float R, float G, float B, float A)
 	{
 		this->SetRgb({ (float)R, (float)G, (float)B, (float)A });
 		return *this;
@@ -446,6 +452,7 @@ namespace Hazel
 	}
 
 
+	//gets the hex representation of the rgba values
 	const uint32_t Color::GetHex() const
 	{
 		uint32_t val = 0;
@@ -460,6 +467,7 @@ namespace Hazel
 
 		return val;
 	}
+	//gets the hex representation of the rgba values
 	uint32_t Color::GetHex()
 	{
 		uint32_t val = 0;
@@ -474,15 +482,16 @@ namespace Hazel
 
 		return val;
 	}
+	//gets the color at the ith indez
 	float& Color::operator[](int i)
 	{
-		if (HSBMode)
+		if (HSBMode && (i = abs(i)) < 3)
 			return this->m_HSV[i];
 		else
 			return this->m_RGBA[i];
 	}
 
-
+	//subtracts colors together, maxing each value at 1
 	Hazel::Color Color::operator-=(const Color& col)
 	{
 		for (int i = 0; i < 3; i++)
@@ -492,6 +501,7 @@ namespace Hazel
 		}
 		return *this;
 	}
+	//adds colors together, maxing each value at 1
 	Hazel::Color Color::operator+=(const Color& col)
 	{
 		for (int i = 0; i < 3; i++)
@@ -521,6 +531,7 @@ namespace Hazel
 		}
 		return Color({ cols[0], cols[1], cols[2], a });
 	}
+	//subtracts color from white
 	Color Color::operator-() const
 	{
 		Color tmp = (Color({ 1.f, 1.f, 1.f, a}) - *this);
@@ -528,7 +539,7 @@ namespace Hazel
 		return tmp;
 	}
 
-
+	//adjust the brightness by a value
 	Hazel::Color Color::operator*=(float hue)
 	{
 		if (v * hue != 0)

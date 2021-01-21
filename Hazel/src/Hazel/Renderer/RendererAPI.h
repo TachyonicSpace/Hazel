@@ -27,8 +27,6 @@ namespace Hazel {
 
 		virtual void DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount = 0) = 0;
 
-		virtual void DrawPixels(uint32_t width, uint32_t height, float* pixels) = 0;
-
 		inline static API GetAPI() { return s_API; }
 		static Scope<RendererAPI> Create();
 	private:

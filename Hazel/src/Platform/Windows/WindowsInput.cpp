@@ -6,6 +6,9 @@
 
 namespace Hazel {
 
+	float Input::viewportX = -1;
+	float Input::viewportY = -1;
+
 	bool Input::IsKeyPressed(KeyCode key)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
@@ -39,6 +42,30 @@ namespace Hazel {
 	{
 		auto [x, y] = GetMousePos();
 		return y;
+	}
+
+
+	std::pair<float, float> Hazel::Input::GetViewportPos()
+	{
+		return { viewportX, viewportY };
+	}
+	float Hazel::Input::GetViewportMouseX()
+	{
+		return GetMouseX() - viewportX;
+	}
+	float Hazel::Input::GetViewportMouseY()
+	{
+		return GetMouseY() - viewportY;
+	}
+	void Hazel::Input::SetViewportOffset(float x, float y)
+	{
+		int winX, winY;
+
+		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		glfwGetWindowPos(window, &winX, &winY);
+
+		viewportX = x - winX;
+		viewportY = y - winY;
 	}
 
 }

@@ -7,6 +7,7 @@
 
 namespace Hazel {
 
+	//struct to hold the properties of all windows
 	struct WindowProps
 	{
 		std::string Title;
