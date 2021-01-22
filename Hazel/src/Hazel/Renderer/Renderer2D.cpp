@@ -115,7 +115,7 @@ namespace Hazel {
 
 	static void StartNewBatch()
 	{
-		Renderer2D::EndScene();
+		//Renderer2D::EndScene();
 
 		s_Data.quadIndexCount = 0;
 		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;

@@ -1,3 +1,5 @@
+include "./vendor/premake/premake_customization/solution_items.lua"
+
 workspace "Hazel"
 	architecture "x86_64"
 	startproject "Hazel-Nut"
@@ -7,6 +9,11 @@ workspace "Hazel"
 		"Debug",
 		"Release",
 		"Dist"
+	}
+
+	solution_items
+	{
+		".editorconfig"
 	}
 	
 	flags
@@ -18,211 +25,24 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
-IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"
-IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
-IncludeDir["ImGui"] = "Hazel/vendor/imgui"
-IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
-IncludeDir["entt"] = "Hazel/vendor/entt/include"
-IncludeDir["glm"] = "Hazel/vendor/glm"
-IncludeDir["yaml_cpp"] = "Hazel/vendor/yaml-cpp/include"
-IncludeDir["ImGuizmo"] = "Hazel/vendor/ImGuizmo"
-
---IncludeDir["boost"] = "Hazel/vendor/boost"
---IncludeDir["NumC++"] = "Hazel/vendor/NumC++/include"
+IncludeDir["GLFW"] = "%{wks.location}/Hazel/vendor/GLFW/include"
+IncludeDir["Glad"] = "%{wks.location}/Hazel/vendor/Glad/include"
+IncludeDir["ImGui"] = "%{wks.location}/Hazel/vendor/imgui"
+IncludeDir["glm"] = "%{wks.location}/Hazel/vendor/glm"
+IncludeDir["stb_image"] = "%{wks.location}/Hazel/vendor/stb_image"
+IncludeDir["entt"] = "%{wks.location}/Hazel/vendor/entt/include"
+IncludeDir["yaml_cpp"] = "%{wks.location}/Hazel/vendor/yaml-cpp/include"
+IncludeDir["ImGuizmo"] = "%{wks.location}/Hazel/vendor/ImGuizmo"
 
 group "Dependencies"
+	include "vendor/premake"
 	include "Hazel/vendor/GLFW"
 	include "Hazel/vendor/Glad"
 	include "Hazel/vendor/imgui"
 	include "Hazel/vendor/yaml-cpp"
 group ""
 
-project "Hazel"
-	location "Hazel"
-	kind "StaticLib"
-	language "C++"
-	cppdialect "C++17"
-	staticruntime "on"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-	pchheader "hzpch.h"
-	pchsource "Hazel/src/hzpch.cpp"
-
-	files
-	{
-		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
-		,
-		"%{prj.name}/vendor/stb_image/**.h",
-		"%{prj.name}/vendor/stb_image/**.cpp"
-		,
-		"%{prj.name}/vendor/glm/glm/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.inl"
-		,
-		"%{prj.name}/vendor/ImGuizmo/ImGuizmo.cpp",
-		"%{prj.name}/vendor/ImGuizmo/ImGuizmo.h"
-		--,
-		--"%{prj.name}/vendor/boost/**.hpp",
-		--"%{prj.name}/vendor/boost/**.inl"
-		--,
-		--"%{prj.name}/vendor/NumC++/include/**.hpp",
-		--"%{prj.name}/vendor/NumC++/include/**.inl"
-		
-	}
-
-	defines
-	{
-		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
-	}
-
-	includedirs
-	{
-		"%{prj.name}/src",
-		"%{prj.name}/vendor/spdlog/include",
-		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.Glad}",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.boost}",
-		"%{IncludeDir.NumCpp}",
-		"%{IncludeDir.entt}",
-		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.ImGuizmo}"
-	}
-
-	links 
-	{ 
-		"GLFW",
-		"Glad",
-		"ImGui",
-		"yaml-cpp",
-		"opengl32.lib"
-	}
-
-	filter "files:vendor/ImGuizmo/**.cpp"
-		flags { "NoPCH" }
-
-	filter "system:windows"
-		systemversion "latest"
-
-		defines
-		{
-		}
-
-	filter "configurations:Debug"
-		defines "HZ_DEBUG"
-		runtime "Debug"
-		symbols "on"
-
-	filter "configurations:Release"
-		defines "HZ_RELEASE"
-		runtime "Release"
-		optimize "on"
-
-	filter "configurations:Dist"
-		defines "HZ_DIST"
-		runtime "Release"
-		optimize "on"
-
-project "Sandbox"
-	location "Sandbox"
-	kind "ConsoleApp"
-	language "C++"
-	cppdialect "C++17"
-	staticruntime "on"
-
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-	files
-	{
-		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
-	}
-
-	includedirs
-	{
-		"Hazel/vendor/spdlog/include",
-		"Hazel/src",
-		"Hazel/vendor",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
-	}
-
-	links
-	{
-		"Hazel"
-	}
-
-	filter "system:windows"
-		systemversion "latest"
-		
-	filter "configurations:Debug"
-		defines "HZ_DEBUG"
-		runtime "Debug"
-		symbols "on"
-
-	filter "configurations:Release"
-		defines "HZ_RELEASE"
-		runtime "Release"
-		optimize "on"
-
-	filter "configurations:Dist"
-		defines "HZ_DIST"
-		runtime "Release"
-		optimize "on"
-
-project "Hazel-Nut"
-	location "Hazel-Nut"
-	kind "ConsoleApp"
-	language "C++"
-	cppdialect "C++17"
-	staticruntime "on"
-
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-	files
-	{
-		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
-	}
-
-	includedirs
-	{
-		"Hazel/vendor/spdlog/include",
-		"Hazel/src",
-		"Hazel/vendor",
-		"%{IncludeDir.entt}",
-		"%{IncludeDir.boost}",
-		"%{IncludeDir.NumCpp}",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.ImGuizmo}"
-	}
-
-	links
-	{
-		"Hazel"
-	}
-
-	filter "system:windows"
-		systemversion "latest"
-		
-	filter "configurations:Debug"
-		defines "HZ_DEBUG"
-		runtime "Debug"
-		symbols "on"
-
-	filter "configurations:Release"
-		defines "HZ_RELEASE"
-		runtime "Release"
-		optimize "on"
-
-	filter "configurations:Dist"
-		defines "HZ_DIST"
-		runtime "Release"
-		optimize "on"
+include "Hazel"
+include "Sandbox"
+include "Hazel-nut"

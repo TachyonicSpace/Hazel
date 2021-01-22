@@ -15,10 +15,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{7D56A4DC-E9C0-5853-32FF-09F99EA836A8}</ProjectGuid>
+    <ProjectGuid>{7052FE3C-5C1F-5948-8538-47F071648ED6}</ProjectGuid>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Hazel-Nut</RootNamespace>
+    <RootNamespace>Hazelnut</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -55,23 +55,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\bin\Debug-windows-x86_64\Hazel-Nut\</OutDir>
-    <IntDir>..\bin-int\Debug-windows-x86_64\Hazel-Nut\</IntDir>
-    <TargetName>Hazel-Nut</TargetName>
+    <OutDir>..\bin\Debug-windows-x86_64\Hazelnut\</OutDir>
+    <IntDir>..\bin-int\Debug-windows-x86_64\Hazelnut\</IntDir>
+    <TargetName>Hazelnut</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\bin\Release-windows-x86_64\Hazel-Nut\</OutDir>
-    <IntDir>..\bin-int\Release-windows-x86_64\Hazel-Nut\</IntDir>
-    <TargetName>Hazel-Nut</TargetName>
+    <OutDir>..\bin\Release-windows-x86_64\Hazelnut\</OutDir>
+    <IntDir>..\bin-int\Release-windows-x86_64\Hazelnut\</IntDir>
+    <TargetName>Hazelnut</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\bin\Dist-windows-x86_64\Hazel-Nut\</OutDir>
-    <IntDir>..\bin-int\Dist-windows-x86_64\Hazel-Nut\</IntDir>
-    <TargetName>Hazel-Nut</TargetName>
+    <OutDir>..\bin\Dist-windows-x86_64\Hazelnut\</OutDir>
+    <IntDir>..\bin-int\Dist-windows-x86_64\Hazelnut\</IntDir>
+    <TargetName>Hazelnut</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>HZ_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;..\Hazel\vendor\glm;..\Hazel\vendor\entt\include;..\Hazel\vendor\ImGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;Hazel\vendor\glm;Hazel\vendor\entt\include;Hazel\vendor\ImGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -97,7 +97,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>HZ_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;..\Hazel\vendor\glm;..\Hazel\vendor\entt\include;..\Hazel\vendor\ImGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;Hazel\vendor\glm;Hazel\vendor\entt\include;Hazel\vendor\ImGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -118,7 +118,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>HZ_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;..\Hazel\vendor\glm;..\Hazel\vendor\entt\include;..\Hazel\vendor\ImGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;Hazel\vendor\glm;Hazel\vendor\entt\include;Hazel\vendor\ImGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
