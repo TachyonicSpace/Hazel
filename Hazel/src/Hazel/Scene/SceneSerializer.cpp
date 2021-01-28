@@ -186,7 +186,7 @@ namespace Hazel {
 		strStream << stream.rdbuf();
 
 		YAML::Node data = YAML::Load(strStream.str());
-		if (!data["Scene"])
+		if (data.IsNull() || !data["Scene"])
 			return false;
 
 		std::string sceneName = data["Scene"].as<std::string>();

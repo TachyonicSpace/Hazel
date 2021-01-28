@@ -1,6 +1,8 @@
 #include "hzpch.h"
 #include "WindowsWindow.h"
 
+#include "D:/Hazel/Hazel-Nut/src/EditorLayer.h"
+
 #include "Hazel\Events\ApplicationEvent.h"
 #include "Hazel\Events\KeyEvent.h"
 #include "Hazel\Events\MouseEvent.h"
@@ -60,22 +62,30 @@ namespace Hazel {
 		SetVSync(true);
 
 		//set gflw callbacks
-		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
-			{
-				WindowData& data = *(WindowData*) glfwGetWindowUserPointer(window);
-
-				data.Width = width;
-				data.Height = height;
-				WindowResizeEvent event(width, height);
-				data.EventCallback(event);
-			});
-
-		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
+		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int key)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				WindowCloseEvent event;
+
+				KeyTypedEvent event(static_cast<KeyCode>(key));
 				data.EventCallback(event);
 			});
+
+		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double x, double y)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+				MouseMovedEvent event((float)x, (float)y);
+				data.EventCallback(event);
+			});
+
+		glfwSetDropCallback(m_Window, [](GLFWwindow* window, int count, const char** paths)
+			{
+				if (count > 1)
+					HZ_CORE_ERROR("error, only supports opening one scene at a time, not {0}", count);
+				EditorLayer::m_MainEditorLayer->OpenScene(paths[0]);
+			});
+
+		//glfwSetErrorCallback()
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 			{
@@ -102,14 +112,6 @@ namespace Hazel {
 						break;
 					}
 					}
-			});
-
-		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int key)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-
-				KeyTypedEvent event(static_cast<KeyCode>(key));
-				data.EventCallback(event);
 			});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
@@ -142,13 +144,24 @@ namespace Hazel {
 				data.EventCallback(event);
 			});
 
-		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double x, double y)
+		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-
-				MouseMovedEvent event((float)x, (float)y);
+				WindowCloseEvent event;
 				data.EventCallback(event);
 			});
+
+		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+			{
+				WindowData& data = *(WindowData*) glfwGetWindowUserPointer(window);
+
+				data.Width = width;
+				data.Height = height;
+				WindowResizeEvent event(width, height);
+				data.EventCallback(event);
+			});
+
+		//glfwSetWindowUserPointer()
 	}
 
 

@@ -19,7 +19,10 @@ namespace Hazel
 	{
 	public:
 		Scene();
-		~Scene() = default;
+		~Scene()
+		{
+			HZ_CORE_WARN("destroying scene");
+		};
 
 		Entity CreateEntity();
 		Entity CreateEntity(const glm::vec3& transform = glm::vec3(0),
@@ -35,6 +38,7 @@ namespace Hazel
 		bool OnUpdateRuntime(Timestep& t);
 		void OnUpdateEditor(Timestep& ts, EditorCamera& camera);
 		void OnViewportResize(uint32_t width, uint32_t height);
+		bool Empty();
 
 		void DrawIDBuffer(Ref<Framebuffer> target, EditorCamera& cam);
 
@@ -48,12 +52,16 @@ namespace Hazel
 
 	bool ValidEntity(Entity ent);
 	bool ValidEntity(std::string str);
+	
+	public:
+		bool ScenePlay = false;
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
 	private:
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
+
 
 		friend class Entity;
 		friend class SceneSerializer;

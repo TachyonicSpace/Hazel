@@ -14,6 +14,7 @@
 
 namespace Hazel
 {
+	EditorLayer* EditorLayer::m_MainEditorLayer = nullptr;
 
 	EditorLayer::EditorLayer(std::string filePath)
 		:Layer("2D sandbox"), m_Camera(1280.f / 720.f, true), m_ViewportBounds(), m_FilePath(filePath)
@@ -25,7 +26,7 @@ namespace Hazel
 
 		m_checkerboard = Texture2D::Create("assets/textures/Checkerboard.png");
 
-		FramebufferSpecs fbspec;
+		fbspec.Attatchments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 		fbspec.Width = 1280;
 		fbspec.Height = 720;
 		m_FrameBuffer = Framebuffer::Create(fbspec);
@@ -110,6 +111,7 @@ namespace Hazel
 
 		m_SceneHierarchyPanel.SetContext(m_Scene);
 
+		m_MainEditorLayer = this;
 
 		//todo --remove
 		if (m_FilePath != "")
@@ -140,7 +142,7 @@ namespace Hazel
 				m_Scene->OnViewportResize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
 			}
 
-			if(m_ViewPortFocused)
+			if (m_ViewPortFocused)
 				m_Camera.OnUpdate(ts);
 
 			m_EditorCamera.OnUpdate(ts);
@@ -158,40 +160,52 @@ namespace Hazel
 
 		//render to screen
 		{
-			if (m_UsingEditorCamera)
-				m_Scene->OnUpdateEditor(ts, m_EditorCamera);
-			else
+			if (m_Scene->ScenePlay)
 			{
 				if (!m_Scene->OnUpdateRuntime(ts))
 				{
-					m_Scene->OnUpdateEditor(ts, m_EditorCamera);
-					m_UsingEditorCamera = true;
 					HZ_ERROR("Tried Rendering without a primary scene camera");
+					m_Scene->ScenePlay = false;
+				}
+			}
+			if (!m_Scene->ScenePlay)
+			{
+				if (m_UsingEditorCamera)
+					m_Scene->OnUpdateEditor(ts, m_EditorCamera);
+				else
+				{
+					if (!m_Scene->OnUpdateRuntime(ts))
+					{
+						m_Scene->OnUpdateEditor(ts, m_EditorCamera);
+						m_UsingEditorCamera = true;
+						HZ_ERROR("Tried Rendering without a primary scene camera");
+					}
 				}
 			}
 		}
 
+		//mouse picking
+		{
+			auto [mx, my] = ImGui::GetMousePos();
+			mx -= m_ViewportBounds[0].x;
+			my -= m_ViewportBounds[0].y;// -24;
+			auto viewportWidth = m_ViewportBounds[1].x - m_ViewportBounds[0].x;
+			auto viewportHeight = m_ViewportBounds[1].y - m_ViewportBounds[0].y;
+			my = viewportHeight - my;
+			int mousex = (int)mx;
+			int mousey = (int)my;
+			if (mousex >= 0 && mousex < viewportWidth && mousey >= 0 && mousey < viewportHeight/* - 24*/)
+			{
+				int pixel = m_FrameBuffer->Pixel(1, mousex, mousey);
+				HZ_CORE_ERROR("{0}", pixel);
 
-		////mouse picking
-		//{
-		//	auto [mx, my] = ImGui::GetMousePos();
-		//	mx -= m_ViewportBounds[0].x;
-		//	my -= m_ViewportBounds[0].y;// -24;
-		//	auto viewportWidth = m_ViewportBounds[1].x - m_ViewportBounds[0].x;
-		//	auto viewportHeight = m_ViewportBounds[1].y - m_ViewportBounds[0].y;
-		//	my = viewportHeight - my;
-		//	int mousex = (int)mx;
-		//	int mousey = (int)my;
-		//	if (mousex >= 0 && mousex < viewportWidth && mousey >= 0 && mousey < viewportHeight/* - 24*/)
-		//	{
-		//		int pixel = m_Scene->Pixel(mousex, mousey);
+				if (pixel == -1)
+					m_HoveredEntity = Entity();
+				else
+					m_HoveredEntity = { pixel, m_Scene.get() };
 
-		//		if (pixel == -1)
-		//			m_HoveredEntity = Entity();
-		//		else
-		//			m_HoveredEntity = { pixel, m_Scene.get() };
-		//	}
-		//}
+			}
+		}
 
 
 		m_FrameBuffer->UnBind();
@@ -308,6 +322,14 @@ namespace Hazel
 			ImGui::Begin("Settings");
 			//ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416f);
 			ImGui::Checkbox("using editor camera", &m_UsingEditorCamera);
+			int size = fbspec.Attatchments.Attachments.size();
+			for (int i = size - 1; i >= 0; i--)
+			{
+				if (!(fbspec.Attatchments.Attachments[i].m_TextureFormat == FramebufferTextureFormat::RGBA8))
+					size--;
+			}
+			if (fbspec.Attatchments.Attachments.size() > 2)
+				ImGui::SliderInt("colorBuffer", &colorBufferIndex, 0, size - 1);
 
 			auto& stats = Renderer2D::GetStats();
 
@@ -375,9 +397,15 @@ namespace Hazel
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 			ImGui::Begin("viewPort");
 
+			#ifdef playButton
+			if (m_Scene->ScenePlay)
+				m_Scene->ScenePlay = !ImGui::ColorButton("Stop Scene", { .8, .2, .1, 1 });
+			else
+				m_Scene->ScenePlay = ImGui::ColorButton("Stop Scene", { .2, .7, .1, 1 });
+			#endif
+
 
 			auto viewportOffset = ImGui::GetCursorPos(); //includes tab bar
-
 			m_ViewPortFocused = ImGui::IsWindowFocused();
 			m_ViewPortHovered = ImGui::IsWindowHovered();
 			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewPortFocused && !m_ViewPortHovered);
@@ -385,9 +413,11 @@ namespace Hazel
 			auto viewPortSize = ImGui::GetContentRegionAvail();
 			m_ViewPortSize = { viewPortSize.x, viewPortSize.y };
 
-
-			ImGui::Image((void*)(uint64_t)m_FrameBuffer->GetColorAttachmentID(),
+			//drawing the scene to imgui
+			ImGui::Image((void*)(uint64_t)m_FrameBuffer->GetColorAttachmentID(colorBufferIndex),
 				{ m_ViewPortSize.x, m_ViewPortSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+
 
 
 			auto windowSize = ImGui::GetWindowSize();
@@ -608,7 +638,6 @@ namespace Hazel
 	{
 		m_SceneHierarchyPanel.SetSelectedEntity({});
 
-
 		if (filepath == "")
 			filepath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
 
@@ -616,11 +645,12 @@ namespace Hazel
 		if (!filepath.empty())
 		{
 			std::string defaultFilepath = "D:\\Hazel\\Hazel-Nut\\assets\\scenes\\";
-			if (filepath.size() <= defaultFilepath.size()
-				|| filepath.substr(0, defaultFilepath.size()) != defaultFilepath)
+			if ((filepath.size() <= defaultFilepath.size()
+				|| filepath.substr(0, defaultFilepath.size()) != defaultFilepath) && !(isupper(filepath[0]) && filepath.substr(1, 2) == ":\\"))
 				filepath = defaultFilepath + filepath;
 
-			m_Scene = NewRef<Scene>();
+			if (!m_Scene->Empty())
+				m_Scene = NewRef<Scene>();
 			m_Scene->OnViewportResize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
 			m_SceneHierarchyPanel.SetContext(m_Scene);
 
@@ -628,7 +658,7 @@ namespace Hazel
 			if (!serializer.Deserialize(filepath))
 			{
 				if (!serializer.Deserialize(filepath.substr(defaultFilepath.size())))
-					HZ_CORE_ERROR("invalid file:\n\t{0},\n\t{1}\n please try again.", filepath, filepath.substr(defaultFilepath.size()));
+					HZ_CORE_ERROR("invalid file:\n\t{0},\nor at:\t{1}\n please try again.", filepath, filepath.substr(defaultFilepath.size()));
 			}
 		}
 	}

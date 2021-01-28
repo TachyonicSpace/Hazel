@@ -16,9 +16,9 @@ namespace Hazel
 	{
 	}
 
-	Entity Scene::CreateEntity(const std::string& name, const glm::vec3& translation /* = glm::vec3(0) */, 
-														const glm::vec3& rotation /* = glm::vec3(0) */, 
-														const glm::vec3& scale /* = glm::vec3(1) */)
+	Entity Scene::CreateEntity(const std::string& name, const glm::vec3& translation /* = glm::vec3(0) */,
+		const glm::vec3& rotation /* = glm::vec3(0) */,
+		const glm::vec3& scale /* = glm::vec3(1) */)
 	{
 		Entity e(m_Registry.create(), this);
 
@@ -29,7 +29,7 @@ namespace Hazel
 			int num = -1;
 			auto newName = name + "(";
 			while (ValidEntity(newName + std::to_string(++num) + ")")) {}
-			
+
 			e.AddComponent<Component::Tag>(newName + std::to_string(num) + ")");
 		}
 
@@ -37,8 +37,8 @@ namespace Hazel
 		return e;
 	}
 	Entity Scene::CreateEntity(const glm::vec3& translation /* = glm::vec3(0) */,
-							   const glm::vec3& rotation /* = glm::vec3(0) */,
-							   const glm::vec3& scale /* = glm::vec3(1) */)
+		const glm::vec3& rotation /* = glm::vec3(0) */,
+		const glm::vec3& scale /* = glm::vec3(1) */)
 	{
 		Entity e(m_Registry.create(), this);
 		e.AddComponent<Component::Tag>("N/A");
@@ -62,6 +62,10 @@ namespace Hazel
 
 	bool Scene::ValidEntity(Entity ent) { return m_Registry.valid((entt::entity)ent); }
 
+	bool Scene::Empty()
+	{
+		return m_Registry.empty();
+	}
 
 	bool Scene::ValidEntity(std::string str)
 	{
@@ -78,23 +82,26 @@ namespace Hazel
 		);
 		return has;
 	}
+
 	bool Scene::OnUpdateRuntime(Timestep& t)
 	{
 		//update scripts
 		{
 			//on Scene play
-			m_Registry.view<Component::NativeScript>().each([=](auto entity, auto& nsc)
-				{
-					if (!nsc.Instance)
+			if (ScenePlay)
+			{
+				m_Registry.view<Component::NativeScript>().each([=](auto entity, auto& nsc)
 					{
-						nsc.Instance = nsc.InstantiateScript();
-						nsc.Instance->m_Entity = { entity, this };
-						nsc.Instance->OnCreate();
-					}
+						if (!nsc.Instance)
+						{
+							nsc.Instance = nsc.InstantiateScript();
+							nsc.Instance->m_Entity = { entity, this };
+							nsc.Instance->OnCreate();
+						}
 
-					nsc.Instance->OnUpdate(t);
-				});
-
+						nsc.Instance->OnUpdate(t);
+					});
+			}
 		}
 
 		// Render 2D
@@ -123,13 +130,13 @@ namespace Hazel
 			{
 				auto& [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
 
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
+				Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
 			}
 
 			Renderer2D::EndScene();
 			return true;
 		}
-		else 
+		else
 			return false;
 	}
 
@@ -142,8 +149,10 @@ namespace Hazel
 		{
 			auto [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
 
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
+			Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
 		}
+
+		//todo::draw cameras here
 
 		Renderer2D::EndScene();
 	}
@@ -175,7 +184,7 @@ namespace Hazel
 		{
 			auto [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
 
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.color);
+			Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color);
 		}
 
 		Renderer2D::EndScene();

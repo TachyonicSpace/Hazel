@@ -70,10 +70,6 @@ namespace Hazel {
 			case ShaderDataType::Float2:
 			case ShaderDataType::Float3:
 			case ShaderDataType::Float4:
-			case ShaderDataType::Int:
-			case ShaderDataType::Int2:
-			case ShaderDataType::Int3:
-			case ShaderDataType::Int4:
 			case ShaderDataType::Bool:
 			{
 				glEnableVertexAttribArray(m_VertexBufferIndex);
@@ -102,6 +98,20 @@ namespace Hazel {
 					glVertexAttribDivisor(m_VertexBufferIndex, 1);
 					m_VertexBufferIndex++;
 				}
+				break;
+			}
+
+			case ShaderDataType::Int:
+			case ShaderDataType::Int2:
+			case ShaderDataType::Int3:
+			case ShaderDataType::Int4:
+			{
+				glEnableVertexAttribArray(m_VertexBufferIndex);
+				glVertexAttribIPointer(m_VertexBufferIndex,
+					element.GetComponentCount(),
+					ShaderDataTypeToOpenGLBaseType(element.type),
+					layout.GetStride(),
+					(const void*)element.offset);
 				break;
 			}
 			default:

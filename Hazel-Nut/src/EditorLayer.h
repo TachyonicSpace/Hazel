@@ -18,12 +18,15 @@ namespace Hazel
 		virtual void OnUpdate(Timestep & ts) override;
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event & e) override;
+		
+		void OpenScene(std::string filepath = "");
+	public:
+		static EditorLayer* m_MainEditorLayer;
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMousePressed(MouseButtonPressedEvent& e);
 
 		void NewScene();
-		void OpenScene(std::string filepath = "");
 		void SaveSceneAs();
 	private:
 		OrthographicCameraController m_Camera;
@@ -32,7 +35,11 @@ namespace Hazel
 		Ref<Shader> m_Shader;
 		Ref<Framebuffer> m_FrameBuffer;
 
+		FramebufferSpecs fbspec;
+		int colorBufferIndex = 0;
+
 		EditorCamera m_EditorCamera;
+
 
 		Ref<Scene> m_Scene;
 		Entity m_HoveredEntity, m_MouseCursor;
