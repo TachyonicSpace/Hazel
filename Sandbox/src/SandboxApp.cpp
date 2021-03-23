@@ -1,3 +1,4 @@
+#define HZ_MAIN
 #include <Hazel.h>
 
 #include "imgui/imgui.h"
@@ -215,81 +216,96 @@
 class Sandbox2D : public Hazel::Layer
 {
 public:
-	Sandbox2D()
-		:Layer("2D sandbox"), m_Camera(1280.f / 720.f)
-	{
-	}
-
+	Sandbox2D():Layer("2D sandbox") {}
 	~Sandbox2D() = default;
-
-	void OnAttatch()
-	{
-		HZ_PROFILE_FUNCTION();
-
-		m_checkerboard = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
-	}
-
-	void OnDetatch()
-	{
-		HZ_PROFILE_FUNCTION();
-
-	}
-
-	void OnUpdate(Hazel::Timestep& ts)
-
-	{
-		HZ_PROFILE_FUNCTION();
-
-		m_Camera.OnUpdate(ts);
-
-		{
-			HZ_PROFILE_SCOPE("Renderer::setup");
-			Hazel::RenderCommand::SetClearColor({ .1f, .1f, .2f, 1 });
-			Hazel::RenderCommand::Clear();
-		}
-
-		{
-			HZ_PROFILE_SCOPE("Renderer::draw");
-
-			Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
-
-			Hazel::Renderer2D::DrawQuad({ -1, 0 }, { .8, .8 }, m_SquareColor);
-			Hazel::Renderer2D::DrawQuad({ .5, -.5 }, { .5, .75 }, m_SquareColor);
+	void OnAttatch() {}
+	void OnDetatch(){}
+	void OnUpdate(Hazel::Timestep& ts){}
+	void OnEvent(Hazel::Event& e){}
 
 
-			Hazel::Renderer2D::DrawQuad({ 0, 0, -.1 }, { 50, 50 }, m_checkerboard);
-		}
 
-		//triangle rendering
-		//Hazel::Renderer::Submit(m_Shader, m_VertexArray);
-
-		{
-			HZ_PROFILE_SCOPE("End Scene");
-			Hazel::Renderer2D::EndScene();
-		}
-	}
 
 	void OnImGuiRender()
 	{
+		{
+			{
+				static bool opt_fullscreen_persistant = true;
+				bool opt_fullscreen = opt_fullscreen_persistant;
+				static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+				// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+				// because it would be confusing to have two docking targets within each others.
+				ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+				if (opt_fullscreen)
+				{
+					ImGuiViewport* viewport = ImGui::GetMainViewport();
+					ImGui::SetNextWindowPos(viewport->Pos);
+					ImGui::SetNextWindowSize(viewport->Size);
+					ImGui::SetNextWindowViewport(viewport->ID);
+					ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+					ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+					window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+					window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+				}
+
+				// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background 
+				// and handle the pass-thru hole, so we ask Begin() to not render a background.
+				if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+					window_flags |= ImGuiWindowFlags_NoBackground;
+
+				// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+				// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
+				// all active windows docked into it will lose their parent and become undocked.
+				// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
+				// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+				bool dockSpaceOpen = true;
+				ImGui::Begin("DockSpace Demo", &dockSpaceOpen, window_flags);
+				ImGui::PopStyleVar();
+
+				if (opt_fullscreen)
+					ImGui::PopStyleVar(2);
+
+				// DockSpace
+				ImGuiIO& io = ImGui::GetIO();
+				ImGuiStyle& style = ImGui::GetStyle();
+				float minWinSizeX = style.WindowMinSize.x;
+				style.WindowMinSize.x = 370.0f;
+				if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+				{
+					ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+					ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+				}
+
+				style.WindowMinSize.x = minWinSizeX;
+
+			}
+			if (ImGui::BeginMenuBar())
+			{
+				if (ImGui::BeginMenu("File"))
+				{
+
+					if (ImGui::MenuItem("Exit"))
+						Hazel::Application::Get().Close();
+
+					ImGui::EndMenu();
+				}
+
+				ImGui::EndMenuBar();
+			}
+
+		}
+
 		ImGui::Begin("Settings");
-		ImGui::ColorEdit4("color", &m_SquareColor.x);
+
+		ImGui::Button("name");
+
+		ImGui::End();
 		ImGui::End();
 	}
-
-	void OnEvent(Hazel::Event& e)
-	{
-		m_Camera.OnEvent(e);
-	}
-
-private:
-	Hazel::OrthographicCameraController m_Camera;
-
-	Hazel::Ref<Hazel::VertexArray> m_VertexArray;
-	Hazel::Ref<Hazel::Shader> m_Shader;
-
-	Hazel::Ref<Hazel::Texture2D> m_checkerboard;
-
-	glm::vec4 m_SquareColor = { 1, 0, 1, 1 };
+private: 
+	//enter variables here
 };
 
 

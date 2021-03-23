@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Scene.h"
-#include "entt.hpp"
 #include "Hazel/Core/log.h"
 
 namespace Hazel
