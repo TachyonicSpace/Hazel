@@ -7,7 +7,6 @@
 
 namespace Hazel {
 
-	//struct to hold the properties of all windows
 	struct WindowProps
 	{
 		std::string Title;
@@ -15,8 +14,8 @@ namespace Hazel {
 		unsigned int Height;
 
 		WindowProps(const std::string& title = "Hazel Engine",
-			unsigned int width = 1500,
-			unsigned int height = 700)
+			unsigned int width = 900,
+			unsigned int height = 500)
 			:Title(title), Width(width), Height(height)
 		{
 		}

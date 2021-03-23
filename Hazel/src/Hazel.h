@@ -5,7 +5,6 @@
 #include "Hazel\Core\Application.h"
 #include "Hazel\Core\Layer.h"
 #include "Hazel\Core\log.h"
-#include "Hazel/Core/Assert.h"
 
 #include "Hazel\Core\Timestep.h"
 
