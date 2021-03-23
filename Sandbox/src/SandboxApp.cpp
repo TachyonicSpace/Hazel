@@ -299,7 +299,10 @@ public:
 
 		ImGui::Begin("Settings");
 
-		ImGui::Button("name");
+		if (ImGui::Button("name"))
+		{
+			std::cout << "hello world";
+		}
 
 		ImGui::End();
 		ImGui::End();
