@@ -197,7 +197,7 @@ namespace Hazel
 			if (mousex >= 0 && mousex < viewportWidth && mousey >= 0 && mousey < viewportHeight/* - 24*/)
 			{
 				int pixel = m_FrameBuffer->Pixel(1, mousex, mousey);
-				HZ_CORE_ERROR("{0}", pixel);
+				//HZ_CORE_ERROR("{0}", pixel);
 
 				if (pixel == -1)
 					m_HoveredEntity = Entity();
@@ -274,7 +274,7 @@ namespace Hazel
 			{
 				if (ImGui::BeginMenu("File"))
 				{
-					// Disabling fullscreen would allow the window to be moved to the front of other windows,
+					// Disabling full screen would allow the window to be moved to the front of other windows,
 					// which we can't undo at the moment without finer window depth/z control.
 					//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
 
@@ -328,7 +328,7 @@ namespace Hazel
 				if (!(fbspec.Attatchments.Attachments[i].m_TextureFormat == FramebufferTextureFormat::RGBA8))
 					size--;
 			}
-			if (fbspec.Attatchments.Attachments.size() > 2)
+			if (size > 1)
 				ImGui::SliderInt("colorBuffer", &colorBufferIndex, 0, size - 1);
 
 			auto& stats = Renderer2D::GetStats();

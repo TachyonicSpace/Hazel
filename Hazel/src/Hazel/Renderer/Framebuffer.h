@@ -66,7 +66,7 @@ namespace Hazel
 		virtual void Bind() = 0;
 		virtual void UnBind() = 0;
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
-		virtual int Pixel(int buffer, int x, int y) = 0;
+		virtual float Pixel(int buffer, int x, int y) = 0;
 		virtual glm::vec4 Pixel4(int buffer, int x, int y) = 0;
 	};
 

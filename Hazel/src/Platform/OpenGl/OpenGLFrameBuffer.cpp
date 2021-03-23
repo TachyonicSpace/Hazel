@@ -231,10 +231,11 @@ namespace Hazel
 		Invalidate();
 	};
 
-	int OpenGLFrameBuffer::Pixel(int buffer, int x, int y)
+	float OpenGLFrameBuffer::Pixel(int buffer, int x, int y)
 	{
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + buffer);
 		int i = -1;
+		float j = -1;
 		auto specs = m_ColorAttachmentSpecs[buffer].m_TextureFormat;
 		//add switch
 		switch (specs)
@@ -243,14 +244,15 @@ namespace Hazel
 			HZ_CORE_WARN("error, tried to read from a non-color buffer");
 			break;
 		case Hazel::FramebufferTextureFormat::RGBA8:
-			glReadPixels(x, y, 1, 1, GL_RGBA8, GL_INT, &i);
+			glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &j);
 			HZ_CORE_WARN("error, tried to read from a multi-channel color buffer");
 			break;
 		case Hazel::FramebufferTextureFormat::RED:
-			glReadPixels(x, y, 1, 1, GL_RED, GL_FLOAT, &i);
+			glReadPixels(x, y, 1, 1, GL_RED, GL_FLOAT, &j);
 			break;
 		case Hazel::FramebufferTextureFormat::RED_INTEGER:
 			glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &i);
+			j = i;
 			break;
 		case Hazel::FramebufferTextureFormat::DEPTH24STENCIL8:
 			HZ_CORE_WARN("error, tried to read from a non-color buffer");
@@ -259,7 +261,7 @@ namespace Hazel
 			break;
 		}
 
-		return i;
+		return j;
 	}
 
 	glm::vec4 OpenGLFrameBuffer::Pixel4(int buffer, int x, int y)
@@ -274,14 +276,14 @@ namespace Hazel
 			HZ_CORE_WARN("error, tried to read from a non-color buffer");
 			break;
 		case Hazel::FramebufferTextureFormat::RGBA8:
-			glReadPixels(x, y, 1, 1, GL_RGBA8, GL_FLOAT, &i.x);
+			glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, &i.x);
 			break;
 		case Hazel::FramebufferTextureFormat::RED:
 			glReadPixels(x, y, 1, 1, GL_RED, GL_FLOAT, &i.x);
 			HZ_CORE_WARN("error, tried to read from a single-channel color buffer");
 			break;
 		case Hazel::FramebufferTextureFormat::RED_INTEGER:
-			glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &i.x);
+			i.x = Pixel(buffer, x, y);
 			HZ_CORE_WARN("error, tried to read from a single-channel color buffer");
 			break;
 		case Hazel::FramebufferTextureFormat::DEPTH24STENCIL8:

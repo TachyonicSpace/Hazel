@@ -34,7 +34,7 @@ namespace Hazel
         std::vector<uint32_t> m_ColorAttachments;
         uint32_t m_DepthAttachment = 0;
 
-		virtual int Pixel(int buffer, int x, int y);
+		virtual float Pixel(int buffer, int x, int y);
 		virtual glm::vec4 Pixel4(int buffer, int x, int y);
     };
 
