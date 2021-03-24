@@ -20,9 +20,9 @@ IncludeDir["glm"] = "Hazel/vendor/glm"
 IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
 
 
-include "Hazel/vendor/GLFW"
-include "Hazel/vendor/Glad"
-include "Hazel/vendor/imgui"
+include "Sandbox/vendor/GLFW"
+include "Sandbox/vendor/Glad"
+include "Sandbox/vendor/imgui"
 
 
 project "Hazel"
@@ -114,16 +114,18 @@ project "Sandbox"
 
 	includedirs
 	{
-		"Hazel/vendor/spdlog/include",
-		"Hazel/src",
-		"Hazel/vendor",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.Glad}"
+		"%{prj.name}/src",
+		"%%{prj.name}/vendor/GLFW/include",
+		"%%{prj.name}/vendor/Glad/include",
+		"%%{prj.name}/vendor/imgui"
 	}
 
-	links 
+	links
 	{
-		"Hazel"
+		"GLFW",
+		"Glad",
+		"ImGui",
+		"opengl32.lib"
 	}
 
 	filter "system:windows"
