@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "WindowsWindow.h"
 
-#include "D:/Hazel/Hazel-Nut/src/EditorLayer.h"
+#include "Hazel-Nut/src/EditorLayer.h"
 
 #include "Hazel\Events\ApplicationEvent.h"
 #include "Hazel\Events\KeyEvent.h"

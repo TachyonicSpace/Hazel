@@ -644,9 +644,8 @@ namespace Hazel
 
 		if (!filepath.empty())
 		{
-			std::string defaultFilepath = "D:\\Hazel\\Hazel-Nut\\assets\\scenes\\";
-			if ((filepath.size() <= defaultFilepath.size()
-				|| filepath.substr(0, defaultFilepath.size()) != defaultFilepath) && !(isupper(filepath[0]) && filepath.substr(1, 2) == ":\\"))
+			std::string defaultFilepath = "assets\\scenes\\";
+			if ((filepath.size() <= defaultFilepath.size() || filepath.substr(0, defaultFilepath.size()) != defaultFilepath))
 				filepath = defaultFilepath + filepath;
 
 			if (!m_Scene->Empty())

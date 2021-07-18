@@ -32,6 +32,7 @@ project "Hazel"
 	includedirs
 	{
 		"src",
+		"%{wks.location}",
 		"vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
