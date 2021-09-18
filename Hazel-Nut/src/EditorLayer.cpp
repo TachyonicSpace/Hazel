@@ -113,11 +113,7 @@ namespace Hazel
 
 		m_MainEditorLayer = this;
 
-		//todo --remove
-		if (m_FilePath != "")
-			OpenScene(m_FilePath);
-		//else
-			//OpenScene("PinkCube.hazel");
+		OpenScene(m_FilePath);
 	}
 	void EditorLayer::OnDetach()
 	{
@@ -520,7 +516,6 @@ namespace Hazel
 						transform.Scale = { .005 * CameraDist, .005 * CameraDist, 1 };
 
 						//changes color to bright magenta
-						//todo -- upload bright texture here
 						m_MouseCursor.GetComponent<Component::SpriteRenderer>().color.SetRgb(Color({ .8f, 0.f, .8f, 1.f }));
 					}
 				}

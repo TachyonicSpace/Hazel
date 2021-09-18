@@ -10,12 +10,13 @@
 
 #define WindowWidth 960.0f
 #define WindowHeight 540.0f
-float rocketW = .065;
-float rocketH = .025;
-float popsize = 100;
-float popAverage = 0;
+float rocketW = .065f;
+float rocketH = .025f;
+float popsize = 10000.f;
+float popAverage = 0.f;
 vec4 obstacle(0, 0, 1, .2);
 vec2 mouse;
+int numThreads = std::thread::hardware_concurrency();
 
 int testing = -1;
 
@@ -23,7 +24,7 @@ int testing = -1;
 bool restart = false;
 
 struct population {
-	std::vector<Rocket> rockets;
+	std::vector<Rocket> rocketPopulation;
 	std::vector<Rocket> matingPool;
 
 	float prevPopSize;
@@ -31,13 +32,14 @@ struct population {
 	population(float width, float height) {
 		Rocket::count = 0;
 		for (int i = 0; i < popsize; i++) {
-			rockets.push_back(*(new Rocket(width, height)));
+			rocketPopulation.push_back(*(new Rocket(width, height)));
 		}
 		prevPopSize = popsize;
 	}
 
 	void pos(glm::vec2 pos) {
-		for (Rocket r : rockets) {
+		//todo: multithread this
+		for (Rocket r : rocketPopulation) {
 			r.Pos = pos;
 		}
 	}
@@ -49,52 +51,51 @@ struct population {
 		{
 			previous[i] = previous[i + 1];
 		}
-		for (int i = 0; i < rockets.size(); i++) {
-			average = __max(rockets[i].fitness(&obstacle), average);
+		//todo: multithread this
+		for (int i = 0; i < rocketPopulation.size(); i++) {
+			average = __max(rocketPopulation[i].fitness(&obstacle), average);
 		}
 		previous[4] = average;
 		matingPool.resize(0);
-		//matingPool.clear();
-		//matingPool.shrink_to_fit();
-		for (int i = 0; i < rockets.size(); i++) {
-			float fitness = rockets[i].Fitness;
-			auto n = clamp(fitness, 0.f, 1000.f);
+
+		//todo: multithread this
+		for (int i = 0; i < rocketPopulation.size(); i++) {
+			float fitness = rocketPopulation[i].Fitness;
+			auto n = clamp(fitness, 1.f, 1000.f);
 			for (int j = 0; j < n; j++) {
-				matingPool.push_back(rockets[i]);
+				matingPool.push_back(rocketPopulation[i]);
 			}
 		}
-		matingPool.shrink_to_fit();
 
 		selection();
+		matingPool.resize(0);
+
+		//if all the populations in memory are the same average fitness, then create a random rocket
 		bool same = true;
 		for (float f : previous)
 			same &= f == previous[0];
 		if (same)
 		{
-			rockets[rockets.size() - 1] = Rocket(rocketW, rocketH);
+			rocketPopulation[0] = Rocket(rocketW, rocketH);
 		}
 
 		return average;
 	}
 
 	void selection() {
-		/*
-		population* newpop = new population();*/
-		if (matingPool.size() <= 0) {
-			matingPool = rockets;
-			std::cout << "Error: MatingPool empty, making the mating pool equal to the population\n\n";
-		}
-		rockets.resize(popsize);
-		for (int i = 0; i < rockets.size(); i++) {
+
+		rocketPopulation.resize((size_t)popsize);
+		//todo: multithread this
+		for (size_t i = 0; i < rocketPopulation.size(); i++) {
 			auto index = Rand((matingPool.size() - 1), 0);
-			auto partnerA = (matingPool[index]);
+			auto partnerA = (matingPool[(size_t)index]);
 
 			index = Rand((matingPool.size() - 1), 0);
-			auto partnerB = (matingPool[index]);
+			auto partnerB = (matingPool[(size_t)index]);
 
 			auto child = partnerA.crossover(partnerB);
 
-			this->rockets[i] = child;
+			this->rocketPopulation[i] = child;
 		}
 		prevPopSize = popsize;
 	}
@@ -314,21 +315,6 @@ struct population {
 
 class Sandbox2D : public Hazel::Layer
 {
-	Hazel::OrthographicCameraController m_Camera;
-
-	population pop = population(rocketW, rocketH);
-
-	float angle = 0;
-
-	int Rolls = 10000;
-	int stars = 500;
-	float mean = 5.0, sd = 2.0;
-	float testValue = -.55;
-	std::default_random_engine gen;
-	std::normal_distribution<double>* dist = new std::normal_distribution<double>(mean, 1 / sd);
-
-	Hazel::Ref<Hazel::Framebuffer> m_FrameBuffer;
-
 public:
 	Sandbox2D()
 		:Layer("2D sandbox"), m_Camera(Hazel::Application::Get().GetWindow().GetAspectRatio())
@@ -364,57 +350,58 @@ public:
 		Hazel::Renderer2D::BeginScene(m_Camera.GetCamera());
 
 		bool notFinished = false;
-		for (int i = 0; i < pop.rockets.size(); i++)
+
 		{
-
-			Rocket& r = pop.rockets[i];
-
-			glm::mat4 transform;
-			glm::vec2 size = { rocketW, rocketH };
-			if (r.angle == 0)
+			for (int i = 0; i < pop.rocketPopulation.size(); i++)
 			{
-				transform = glm::translate(glm::mat4(1), r.pos()) *
-					glm::scale(glm::mat4(1), { size.x, size.y, 1 });
+
+				Rocket& r = pop.rocketPopulation[i];
+
+				glm::mat4 transform;
+				glm::vec2 size = { rocketW, rocketH };
+				if (r.angle == 0)
+				{
+					transform = glm::translate(glm::mat4(1), r.pos()) *
+						glm::scale(glm::mat4(1), { size.x, size.y, 1 });
+				}
+				else
+				{
+					transform = glm::translate(glm::mat4(1), r.pos()) *
+						glm::rotate(glm::mat4(1), r.angle, { 0, 0, 1 }) *
+						glm::scale(glm::mat4(1), { size.x, size.y, 1 });
+				}
+
+				Hazel::Renderer2D::DrawQuad(transform, r.col);
+
+
+				if (!notPaused)
+				{
+					notFinished |= r.update(&obstacle);
+				}
 			}
-			else
+			if (!notPaused)
 			{
-				transform = glm::translate(glm::mat4(1), r.pos()) *
-					glm::rotate(glm::mat4(1), r.angle, { 0, 0, 1 }) *
-					glm::scale(glm::mat4(1), { size.x, size.y, 1 });
+				Rocket::count++;
+				if (!notFinished)
+					goto Finished;
 			}
-
-			Hazel::Renderer2D::DrawQuad(transform, r.col);
-
-			notFinished |= r.update(&obstacle);
-
-		}
-
-
-		{
-			Rocket target;
-			Hazel::Renderer2D::DrawQuad(target.target, { Rocket::targetSize, Rocket::targetSize }, { 0, 1, 1, .8 });
+			if (Rocket::count >= DNA::lifespan) {
+			Finished:
+				Rocket::count = 0;
+				//Rocket::targetSize *= (Rocket::targetSize < .005) ? 1 : .9f;
+				pop.eval();
+			}
 		}
 
 		{
-			//obstacle;
-			Hazel::Renderer2D::DrawQuad({ obstacle.x, obstacle.y, -.8 }, { obstacle.z, obstacle.w }, { 1, 0, .8 });
+			Hazel::Renderer2D::DrawQuad(Rocket::rocketTarget, { Rocket::targetSize, Rocket::targetSize }, { 0, 1, 1, .8f });
+
+			Hazel::Renderer2D::DrawQuad({ obstacle.x, obstacle.y, -.8 }, { obstacle.z, obstacle.w }, { 1, 0, .8f });
 
 		}
-
-		if (!notFinished)
-			goto Finished;
-
-		Rocket::count++;
-		if (Rocket::count >= DNA::lifespan) {
-		Finished:
-			Rocket::count = 0;
-			//Rocket::targetSize *= (Rocket::targetSize < .005) ? 1 : .9f;
-			pop.eval();
-			//pop.selection();
-		}
-
 
 		Hazel::Renderer2D::EndScene();
+		timeStep = ts.GetSeconds();
 	}
 
 
@@ -426,20 +413,22 @@ public:
 		{
 			ImGui::Begin("Settings");
 
-			#if 1
-			ImGui::Checkbox("restart", &restart);
+#if 1
+			ImGui::Checkbox("restart", &restart); ImGui::SameLine();
+			ImGui::Checkbox("PauseRockets?", &notPaused);
 
-			ImGui::SliderInt("index", &testing, -1, pop.rockets.size() - 1);
+			ImGui::SliderInt("index", &testing, -1, (int)pop.rocketPopulation.size() - 1);
 			ImGui::SliderFloat("popsize", &popsize, 1, 1000);
 
 			static auto& window = Hazel::Application::Get().GetWindow();
+			static float frametime = 1.f;
 			if (testing == -1)
 			{
-				static Rocket rocket = pop.rockets[0];
+				static Rocket rocket = pop.rocketPopulation[0];
 				rocket.Pos = { Hazel::Input::GetMouseX() / window.GetWidth() * 2.f * window.GetAspectRatio() - window.GetAspectRatio(), -(Hazel::Input::GetMouseY() / window.GetHeight() * 2.f - 1) };
 				ImGui::Text("pos: %f, %f", rocket.Pos.x, rocket.Pos.y);
 				ImGui::Text("vel: x~%f, y~%f", rocket.vel.x, rocket.vel.y);
-				ImGui::Text("acc: x~%f, y~%f", rocket.acc.x, rocket.acc.y);
+				ImGui::Text("Life left: %d", DNA::lifespan - Rocket::count);
 				ImGui::ColorEdit4("color:", rocket.col.GetRGBAPointer());
 				ImGui::SliderFloat("mutationRate", &Rocket::mutationRate, 0, 1);
 				ImGui::SliderFloat("mutationPow", &Rocket::mutationpow, -1, 2);
@@ -451,26 +440,26 @@ public:
 				Hazel::Renderer2D::DrawQuad(rocket.pos(), { rocketW, rocketH }, rocket.angle, rocket.col);
 				Hazel::Renderer2D::EndScene();
 
-				ImGui::DragFloat4("obstical", &obstacle.x, .05, -rocket.aspect, rocket.aspect);
-				ImGui::DragFloat2("target", &rocket.target[0], .05, -rocket.aspect, rocket.aspect);
+				ImGui::DragFloat4("obstical", &obstacle.x, .05f, -rocket.aspect, rocket.aspect);
+				ImGui::DragFloat2("rocketTarget", &Rocket::rocketTarget[0], .05f, -rocket.aspect, rocket.aspect);
 			}
 			else
 			{
 				if (testing > popsize - 1)
-					testing = popsize - 1;
-				Rocket& rocket = pop.rockets[testing];
+					testing = (int)popsize - 1;
+				Rocket& rocket = pop.rocketPopulation[testing];
 				ImGui::Text("stats of rocket %p:", &rocket);
 				ImGui::SliderFloat2("pos: ", &rocket.Pos.x, -2, 2);
 				ImGui::Text("vel: x~%f, y~%f", rocket.vel.x, rocket.vel.y);
 				ImGui::Text("acc: x~%f, y~%f", rocket.acc.x, rocket.acc.y);
 				ImGui::ColorEdit4("color:", rocket.col.GetRGBAPointer());
 				ImGui::SliderFloat("mutationRate", &Rocket::mutationRate, 0, 1);
-				ImGui::SliderFloat("mutationPow", &Rocket::mutationpow, -.001, 1);
+				ImGui::SliderFloat("mutationPow", &Rocket::mutationpow, -.001f, 1);
 				ImGui::Text("angle: %f", rocket.angle);
 				ImGui::Text("fitness: %f", rocket.fitness(&obstacle));
 
-				ImGui::DragFloat4("obstical", &obstacle.x, .05, -rocket.aspect, rocket.aspect);
-				ImGui::DragFloat2("target", &rocket.target[0], .05, -rocket.aspect, rocket.aspect);
+				ImGui::DragFloat4("obstical", &obstacle.x, .05f, -rocket.aspect, rocket.aspect);
+				ImGui::DragFloat2("rocketTarget", &Rocket::rocketTarget[0], .05f, -rocket.aspect, rocket.aspect);
 			}
 
 			mouse = { Hazel::Input::GetMouseX() / window.GetWidth() * 2.f * window.GetAspectRatio() - window.GetAspectRatio(), -(Hazel::Input::GetMouseY() / window.GetHeight() * 2.f - 1) };
@@ -482,10 +471,28 @@ public:
 
 			auto& stats = Hazel::Renderer2D::GetStats();
 
-			ImGui::TextColored({ .8, .2, .2, 1 }, "number of draw calls: %d", stats.drawCalls);
-			ImGui::TextColored({ .8, .2, .2, 1 }, "number of quads: %d", stats.quadCount);
+			ImGui::TextColored({ .8f, .2f, .2f, 1 }, "number of draw calls: %d", stats.drawCalls);
+			ImGui::TextColored({ .8f, .2f, .2f, 1 }, "number of quads: %d", stats.quadCount);
 
-			#else
+
+			static float prevTs = timeStep;
+
+			static bool vsync = true;
+			if (ImGui::Checkbox("vsync?", &vsync))
+			{
+				Hazel::Application::Get().GetWindow().SetVSync(vsync);
+				prevTs = 0.1f;
+			}
+			static short frames = 0;
+			{
+				float times = (1 / 6.0f) / (prevTs + 0.00001f);
+				frames = (int)fmod(frames, times);
+				if (++(frames) == 1)
+					prevTs = timeStep;
+			}
+			ImGui::TextColored({ .8f, .2f, .8f, 1.f }, "frameRate: %f-fps\n\t%f-seconds/frame", 1 / prevTs, prevTs);
+
+#else
 
 			constexpr int range = 50;
 
@@ -521,7 +528,7 @@ public:
 			ImGui::SliderFloat("probability", &testValue, 0, range);
 			//ImGui::TextColored(ImVec4(0, 1, 1, 1), probability.c_str());
 			ImGui::TextColored(ImVec4(1, 0, 1, 1), normal.str().c_str());
-			#endif
+#endif
 
 			ImGui::End();
 		}
@@ -533,6 +540,25 @@ public:
 		m_Camera.OnEvent(e);
 	}
 
+
+private:
+	Hazel::OrthographicCameraController m_Camera;
+
+	population pop = population(rocketW, rocketH);
+
+	float angle = 0;
+
+	bool notPaused = false;
+
+	int Rolls = 10000;
+	int stars = 500;
+	float mean = 5.0, sd = 2.0;
+	float testValue = -.55f;
+	float timeStep = 0.f;
+	std::default_random_engine gen;
+	std::normal_distribution<double>* dist = new std::normal_distribution<double>(mean, 1 / sd);
+
+	Hazel::Ref<Hazel::Framebuffer> m_FrameBuffer;
 
 };
 

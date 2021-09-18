@@ -91,7 +91,7 @@ namespace Hazel
 	OpenGLFrameBuffer::~OpenGLFrameBuffer()
 	{
 		glDeleteFramebuffers(1, &m_RendererID);
-		glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
+		glDeleteTextures((GLsizei)m_ColorAttachments.size(), m_ColorAttachments.data());
 		glDeleteTextures(1, &m_DepthAttachment);
 	}
 	void OpenGLFrameBuffer::Invalidate()
@@ -99,7 +99,7 @@ namespace Hazel
 		if (m_RendererID)
 		{
 			glDeleteFramebuffers(1, &m_RendererID);
-			glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
+			glDeleteTextures((GLsizei)m_ColorAttachments.size(), m_ColorAttachments.data());
 			glDeleteTextures(1, &m_DepthAttachment);
 
 			m_ColorAttachments.clear();
@@ -114,7 +114,7 @@ namespace Hazel
 		if (m_ColorAttachmentSpecs.size())
 		{
 			m_ColorAttachments.resize(m_ColorAttachmentSpecs.size());
-			Utils::CreateTextures(multiSample, m_ColorAttachments.data(), m_ColorAttachments.size());
+			Utils::CreateTextures(multiSample, m_ColorAttachments.data(), (GLsizei)m_ColorAttachments.size());
 
 			for (int i = 0; i < m_ColorAttachments.size(); i++)
 			{
@@ -164,7 +164,7 @@ namespace Hazel
 				GL_COLOR_ATTACHMENT24, GL_COLOR_ATTACHMENT25, GL_COLOR_ATTACHMENT26, GL_COLOR_ATTACHMENT27, GL_COLOR_ATTACHMENT28, GL_COLOR_ATTACHMENT29,
 				GL_COLOR_ATTACHMENT30, GL_COLOR_ATTACHMENT31
 			};*/
-			glDrawBuffers(m_ColorAttachments.size(), buffers);
+			glDrawBuffers((GLsizei)m_ColorAttachments.size(), buffers);
 		}
 		//only depth pass
 		else if (m_ColorAttachments.empty())
@@ -252,7 +252,7 @@ namespace Hazel
 			break;
 		case Hazel::FramebufferTextureFormat::RED_INTEGER:
 			glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &i);
-			j = i;
+			j = (float)i;
 			break;
 		case Hazel::FramebufferTextureFormat::DEPTH24STENCIL8:
 			HZ_CORE_WARN("error, tried to read from a non-color buffer");

@@ -10,7 +10,9 @@ class Rocket
 {
 
 public:
-	vec3 target = vec3(0, .6, 0);
+
+	static vec3 rocketTarget;
+
 	const vec2 startingPos = vec2(0, .10 - 1);
 	const vec2 startingVel = vec2(0, 0);
 	const vec2 startingAcc = vec2(0, 0);
@@ -31,7 +33,6 @@ public:
 	static int count;
 	static float mutationRate;
 	static float mutationpow;
-	static float* rect(float width, float height);
 	int timeTofinish = -1;
 
 	Rocket();
@@ -53,5 +54,4 @@ public:
 
 	Rocket& operator=(const Rocket& R);
 
-	float* rect();
 };

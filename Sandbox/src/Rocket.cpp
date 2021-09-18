@@ -24,7 +24,7 @@ Rocket::~Rocket()
 }
 
 
-
+glm::vec3 Rocket::rocketTarget = vec3(0, .6, 0);
 
 
 auto Rocket::applyForce(vec2 force)
@@ -34,7 +34,7 @@ auto Rocket::applyForce(vec2 force)
 
 bool Rocket::update(vec4* barrier)
 {
-	aspect = Hazel::Application::Get().GetWindow().GetAspectRatio() * .99;
+	aspect = Hazel::Application::Get().GetWindow().GetAspectRatio() * .99f;
 
 	//border
 	if (Pos.x < -aspect || Pos.x > aspect || Pos.y < -1 || Pos.y > 1) {
@@ -47,7 +47,7 @@ bool Rocket::update(vec4* barrier)
 		return false;
 	}
 
-	if (distance(Pos, vec2(target.x, target.y)) > targetSize) {
+	if (distance(Pos, vec2(rocketTarget.x, rocketTarget.y)) > targetSize) {}
 		acc *= 0;
 		try {
 			setMag(dna.genes[count], .01);
@@ -68,10 +68,7 @@ bool Rocket::update(vec4* barrier)
 		catch (...) {
 			return true;
 		}
-	}
-	else
-	{
-	}
+	
 	return false;
 }
 
@@ -81,23 +78,9 @@ float Rocket::heading()
 }
 
 int Rocket::count;
-float Rocket::mutationRate = .001;
-float Rocket::mutationpow = .001;
+float Rocket::mutationRate = .001f;
+float Rocket::mutationpow = .001f;
 float Rocket::targetSize = .1f;
-
-float* Rocket::rect(float width, float height) {
-	float rocketRect[] = {
-			-width / 2.0, -height / 2.0, 0, 0,
-			-width / 2.0,  height / 2.0, 1, 0,
-			 width / 2.0,  height / 2.0, 1, 1,
-			 width / 2.0, -height / 2.0, 0, 1
-	};
-	float* heapRocketRect = new float[sizeof(rocketRect)]();
-	for (int i = 0; i < sizeof(rocketRect); i++) {
-		heapRocketRect[i] = rocketRect[i];
-	}
-	return heapRocketRect;
-}
 
 vec3 Rocket::pos() {
 	return vec3(Pos.x, Pos.y, 0);
@@ -105,23 +88,24 @@ vec3 Rocket::pos() {
 
 float Rocket::fitness(vec4* barrier)
 {
-	aspect = Hazel::Application::Get().GetWindow().GetAspectRatio() * .99;
+	aspect = Hazel::Application::Get().GetWindow().GetAspectRatio() * .99f;
 
-	float timing = 2500.f / (float)(DNA::lifespan - timeTofinish);
-	//timing *= timing/10.f;
+	float timing = 12000.f / (float)(DNA::lifespan * 3 - count * 2);
+	//wandering
 	if (Pos.x <= -aspect || Pos.x >= aspect || Pos.y <= -.99 || Pos.y >= .99)
 	{
-		Fitness = 25 / (distance(pos(), target) + .25) - timing;
+		Fitness = 25 / (distance(pos(), rocketTarget) + .25f) - timing;
 	}
 	//barrier
 	else if (barrier && Pos.x > barrier->x - barrier->z / 2.0 && Pos.x < barrier->x + barrier->z / 2.0 &&
 		Pos.y > barrier->y - barrier->w / 2.0 && Pos.y < barrier->y + barrier->w / 2.0)
 	{
-		Fitness = 20 / (distance(pos(), target) + .07) - timing;
+		Fitness = 20 / (distance(pos(), rocketTarget) + .07f) - timing;
 	}
+	//found target
 	else
 	{
-		Fitness = 35 / (distance(pos(), target) + .25) - .2 * timing;
+		Fitness = 35 / (distance(pos(), rocketTarget) + .25f) - .2f * timing;
 		timeTofinish = count;
 	}
 	return Fitness;
@@ -130,7 +114,7 @@ float Rocket::fitness(vec4* barrier)
 Rocket Rocket::crossover(const Rocket& b)
 {
 	auto child = this->dna;
-	int middle = Rand(DNA::lifespan, 0);
+	int middle = (int)Rand(DNA::lifespan, 0);
 	for (int i = middle; i < DNA::lifespan; i++) {
 		child.genes[i] = b.dna.genes[i];
 		float mutationChance = Rand(1, -1);
@@ -138,7 +122,7 @@ Rocket Rocket::crossover(const Rocket& b)
 			child.genes[i] += vec2((pow(1+mutationpow, mutationChance) - 1));
 	}
 	Rocket childRocket(child);
-	childRocket.col.GetRGBAPointer()[0] = (Rand(0, 1) > .5) ? this->col.GetRGBAPointer()[0] : b.col.GetRGBA()[0];
+	childRocket.col.GetRGBAPointer()[0] = (Rand(0.f, 1.f) > .5) ? this->col.GetRGBAPointer()[0] : b.col.GetRGBA()[0];
 	childRocket.col.GetRGBAPointer()[1] = (Rand(0, 1) > .5) ? this->col.GetRGBAPointer()[1] : b.col.GetRGBA()[1];
 	childRocket.col.GetRGBAPointer()[2] = (Rand(0, 1) > .5) ? this->col.GetRGBAPointer()[2] : b.col.GetRGBA()[2];
 	childRocket.col.a = (this->col.a + b.col.a) / 2.0f;
@@ -208,20 +192,4 @@ Rocket& Rocket::operator=(const Rocket& R)
 	this->timeTofinish = -1;
 
 	return *this;
-}
-
-float* Rocket::rect()
-{
-
-	float rocketRect[] = {
-			-width / 2.0, -height / 2.0, 0, 0,
-			-width / 2.0,  height / 2.0, 1, 0,
-			 width / 2.0,  height / 2.0, 1, 1,
-			 width / 2.0, -height / 2.0, 0, 1
-	};
-	float* heapRocketRect = new float[sizeof(rocketRect)]();
-	for (int i = 0; i < sizeof(rocketRect); i++) {
-		heapRocketRect[i] = rocketRect[i];
-	}
-	return heapRocketRect;
 }

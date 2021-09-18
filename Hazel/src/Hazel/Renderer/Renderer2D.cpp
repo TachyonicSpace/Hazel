@@ -38,7 +38,7 @@ namespace Hazel {
 		std::array<Ref<Texture2D>, MaxTexture> textureSlots;
 		uint32_t TextureSlotIndex = 1; //0 = whiteTexture
 
-		glm::vec4 quadVertexPositions[4];
+		glm::vec4 quadVertexPositions[4] = { glm::vec4(0) };
 
 		Renderer2D::Statistics stats;
 	};

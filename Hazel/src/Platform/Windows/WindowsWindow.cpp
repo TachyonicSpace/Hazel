@@ -45,7 +45,6 @@ namespace Hazel {
 
 		if (!s_GLFWInitilized)
 		{
-			//TODO: glfwTerminate on system shutdown
 			int success = glfwInit();
 			HZ_CORE_ASSERT(success, "error, GLFW failed to initilize");
 
@@ -82,7 +81,7 @@ namespace Hazel {
 			{
 				if (count > 1)
 					HZ_CORE_ERROR("error, only supports opening one scene at a time, not {0}", count);
-				EditorLayer::m_MainEditorLayer->OpenScene(paths[0]);
+				//EditorLayer::m_MainEditorLayer->OpenScene(paths[0]);
 			});
 
 		//glfwSetErrorCallback()
@@ -169,6 +168,7 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 		glfwDestroyWindow(m_Window);
+		glfwTerminate();
 	}
 
 	void WindowsWindow::OnUpdate()
