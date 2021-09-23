@@ -195,9 +195,9 @@ namespace Hazel
 			my = viewportHeight - my;
 			int mousex = (int)mx;
 			int mousey = (int)my;
-			if (mousex >= 0 && mousex < viewportWidth && mousey >= 0 && mousey < viewportHeight/* - 24*/)
+			if (mousex >= 0 && mx < viewportWidth && mousey >= 0 && my < viewportHeight/* - 24*/)
 			{
-				int pixel = m_FrameBuffer->Pixel(1, mousex, mousey);
+				int pixel = (int)m_FrameBuffer->Pixel(1, mousex, mousey);
 				//HZ_CORE_ERROR("{0}", pixel);
 
 				if (pixel == -1)
@@ -323,7 +323,7 @@ namespace Hazel
 			ImGui::Begin("Settings");
 			//ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416f);
 			ImGui::Checkbox("using editor camera", &m_UsingEditorCamera);
-			int size = fbspec.Attatchments.Attachments.size();
+			int size = (int)fbspec.Attatchments.Attachments.size();
 			for (int i = size - 1; i >= 0; i--)
 			{
 				if (!(fbspec.Attatchments.Attachments[i].m_TextureFormat == FramebufferTextureFormat::RGBA8))

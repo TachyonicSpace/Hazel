@@ -575,6 +575,6 @@ public:
 	}
 };
 
-Hazel::Application* Hazel::CreateApplication(std::string str) {
+Hazel::Application* Hazel::CreateApplication(Hazel::ApplicationCommandLineArgs args) {
 	return new Sandbox;
 }

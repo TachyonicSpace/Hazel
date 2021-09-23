@@ -26,7 +26,6 @@ namespace Hazel
 		void SetDarkThemeColors();
 	private:
 		bool m_BlockEvents = false;
-		float m_Time = 0.f;
 	};
 
 }
