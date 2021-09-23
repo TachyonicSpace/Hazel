@@ -16,8 +16,8 @@ namespace Hazel
 {
 	EditorLayer* EditorLayer::m_MainEditorLayer = nullptr;
 
-	EditorLayer::EditorLayer(std::string filePath)
-		:Layer("2D sandbox"), m_Camera(1280.f / 720.f, true), m_ViewportBounds(), m_FilePath(filePath)
+	EditorLayer::EditorLayer()
+		:Layer("2D sandbox"), m_Camera(1280.f / 720.f, true), m_ViewportBounds()
 	{
 	}
 	void EditorLayer::OnAttach()
@@ -33,13 +33,20 @@ namespace Hazel
 
 		m_Scene = NewRef<Scene>();
 
+		auto commandLineArgs = Application::Get().GetCommandLineArgs();
+		if (commandLineArgs.Count > 1)
+		{
+			auto sceneFilePath = commandLineArgs[1];
+			OpenScene(sceneFilePath);
+		}
+
 		m_EditorCamera = EditorCamera(30.f, 1, .1f, 1000.f);
 
 		m_Delta = 1.f;
 
 		m_Delta = 1 / m_Delta;
 
-		#if 0
+#if 0
 
 		m_CameraEntity = m_Scene->CreateEntity("first Camera", { .5, .5, 5 });
 		m_CameraEntity.AddComponent<Component::Cameras>(SceneCamera::ProjectionType::Perspective);
@@ -107,13 +114,11 @@ namespace Hazel
 		auto secondEntity = m_Scene->CreateEntity("red rect", { 0, 1.2, 0 });
 		secondEntity.AddComponent<Component::SpriteRenderer>(Color{ 1, 0, 0 });
 
-		#endif
+#endif
 
 		m_SceneHierarchyPanel.SetContext(m_Scene);
 
 		m_MainEditorLayer = this;
-
-		OpenScene(m_FilePath);
 	}
 	void EditorLayer::OnDetach()
 	{
@@ -393,12 +398,12 @@ namespace Hazel
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 			ImGui::Begin("viewPort");
 
-			#ifdef playButton
+#ifdef playButton
 			if (m_Scene->ScenePlay)
 				m_Scene->ScenePlay = !ImGui::ColorButton("Stop Scene", { .8, .2, .1, 1 });
 			else
 				m_Scene->ScenePlay = ImGui::ColorButton("Stop Scene", { .2, .7, .1, 1 });
-			#endif
+#endif
 
 
 			auto viewportOffset = ImGui::GetCursorPos(); //includes tab bar
