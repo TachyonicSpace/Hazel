@@ -87,6 +87,7 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+*.tlog
 
 # Chutzpah Test files
 _Chutzpah*
@@ -290,6 +291,17 @@ paket-files/
 
 # FAKE - F# Make
 .fake/
+
+
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+
+# Directories
+Hazel/vendor/VulkanSDK
+Hazelnut/assets/cache
+scripts/__pycache__
+
 
 # JetBrains Rider
 .idea/

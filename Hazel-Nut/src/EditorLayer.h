@@ -9,7 +9,7 @@ namespace Hazel
 	class EditorLayer : public Layer
 	{
 	public:
-		EditorLayer(std::string filePath);
+		EditorLayer();
 		virtual ~EditorLayer() = default;
 
 		virtual void OnAttach() override;
@@ -53,7 +53,7 @@ namespace Hazel
 
 		float m_angle = 0, m_Delta = .5;
 
-		bool m_ViewPortFocused = false, m_ViewPortHovered = false, m_UsingEditorCamera = true;
+		bool m_ViewPortFocused = false, m_ViewPortHovered = false, m_UsingEditorCamera = true, entitySelected = false;
 		int m_GizmoType = 0;
 
 		std::string m_FilePath;

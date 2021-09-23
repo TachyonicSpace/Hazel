@@ -20,9 +20,23 @@
 
 namespace Hazel {
 
+
+	struct ApplicationCommandLineArgs
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int index) const
+		{
+			HZ_CORE_ASSERT(index < Count);
+			return Args[index];
+		}
+	};
+
+
 	class  Application {
 	public:
-		Application(const WindowProps& props = {});
+		Application(const WindowProps& props = {}, ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
 		virtual ~Application();
 
 		void Run();
@@ -33,6 +47,7 @@ namespace Hazel {
 		void PushOverlay(Layer* overlay);
 
 		static Application& Get() { return *s_Instance; }
+		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 		Window& GetWindow() { return *m_Window; }
 
 		void Close() { m_Running = false; }
@@ -45,6 +60,7 @@ namespace Hazel {
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 	private:
+		ApplicationCommandLineArgs m_CommandLineArgs;
 		Ref<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
@@ -56,5 +72,5 @@ namespace Hazel {
 		static Application* s_Instance;
 	};
 	//to be defined in client
-	Application* CreateApplication(std::string str);
+	Application* CreateApplication(ApplicationCommandLineArgs args);
 }

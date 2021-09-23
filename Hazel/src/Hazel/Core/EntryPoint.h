@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Hazel/Core/Core.h"
+#include "Hazel/Core/Application.h"
 
 #ifdef HZ_MAIN
 
 #ifdef HZ_PLATFORM_WINDOWS
 
-extern Hazel::Application* Hazel::CreateApplication(std::string filePath);
+extern Hazel::Application* Hazel::CreateApplication(ApplicationCommandLineArgs args);
 
 int main(int argc, char** argv)
 {
@@ -16,10 +17,7 @@ int main(int argc, char** argv)
 	HZ_PROFILE_BEGIN_SESSION("startup", "HazelProfile-Startup.json");
 	Hazel::Application* app;
 	//passes any files to open to the application
-	if (argc > 1)
-		app = Hazel::CreateApplication(std::string(argv[1]));
-	else
-		app = Hazel::CreateApplication(std::string(""));
+		app = Hazel::CreateApplication({ argc, argv });
 	HZ_PROFILE_END_SESSION();
 
 	HZ_PROFILE_BEGIN_SESSION("runTime", "HazelProfile-runTime.json");

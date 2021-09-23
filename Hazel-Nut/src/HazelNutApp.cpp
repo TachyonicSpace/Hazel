@@ -10,11 +10,11 @@ namespace Hazel
 	//creates the hazel game engine editor
 	class HazelNut : public Application {
 	public:
-		HazelNut(std::string filePath)
-			:Application(Hazel::WindowProps("Hazelnut Editor", 1500, 700))
+		HazelNut(ApplicationCommandLineArgs args)
+			:Application(Hazel::WindowProps("Hazelnut Editor", 1500, 700), args)
 		{
 			//pushes the file to open on startup into editorLayer
-			PushLayer(new EditorLayer(filePath));
+			PushLayer(new EditorLayer());
 		}
 
 		~HazelNut() {
@@ -22,8 +22,8 @@ namespace Hazel
 		}
 	};
 
-	Application* CreateApplication(std::string filePath) {
-		return new HazelNut(filePath);
+	Application* CreateApplication(ApplicationCommandLineArgs args) {
+		return new HazelNut(args);
 	}
 
 

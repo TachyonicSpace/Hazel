@@ -16,3 +16,9 @@
 [submodule "Hazel/vendor/imguizmo"]
 	path = Hazel/vendor/imguizmo
 	url = https://github.com/thecherno/imguizmo
+[submodule "Hazel/vendor/shaderc"]
+	path = Hazel/vendor/shaderc
+	url = https://github.com/google/shaderc
+[submodule "Hazel/vendor/SPIRV-Cross"]
+	path = Hazel/vendor/SPIRV-Cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross

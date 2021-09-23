@@ -3,7 +3,10 @@
 
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Hazel/Renderer/UniformBuffer.h"
 #include "RenderCommand.h"
+
+#include "glm/gtc/type_ptr.hpp"
 
 namespace Hazel {
 
@@ -41,6 +44,14 @@ namespace Hazel {
 		glm::vec4 quadVertexPositions[4] = { glm::vec4(0) };
 
 		Renderer2D::Statistics stats;
+
+
+		struct CameraData
+		{
+			glm::mat4 ViewProjection;
+		};
+		CameraData CameraBuffer;
+		Ref<UniformBuffer> CameraUniformBuffer;
 	};
 
 	static Renderer2DData s_Data;
@@ -107,6 +118,8 @@ namespace Hazel {
 		s_Data.quadVertexPositions[1] = { .5, -.5, 0, 1 };
 		s_Data.quadVertexPositions[2] = { .5,  .5, 0, 1 };
 		s_Data.quadVertexPositions[3] = { -.5,  .5, 0, 1 };
+
+		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
 	}
 
 	void Renderer2D::Shutdown()
@@ -131,10 +144,8 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
-
-		s_Data.texShader->Bind();
-		s_Data.texShader->UploadUniformMat4("u_ViewProjection", viewProj);
+		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
+		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
 		StartNewBatch();
 	}
@@ -142,8 +153,8 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		s_Data.texShader->Bind();
-		s_Data.texShader->UploadUniformMat4("u_ViewProjection", cam.GetViewProjectionMatrix());
+		s_Data.CameraBuffer.ViewProjection = cam.GetViewProjectionMatrix();
+		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 		
 		StartNewBatch();
 	}
@@ -151,8 +162,8 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		glm::mat4 viewProj = camera.GetViewProjection();
-		s_Data.texShader->UploadUniformMat4("u_ViewProjection", viewProj);
+		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjection();
+		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 		
 		StartNewBatch();
 	}

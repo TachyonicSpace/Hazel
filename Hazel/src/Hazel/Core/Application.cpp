@@ -15,7 +15,8 @@ namespace Hazel {
 	//application pointer
 	Application* Application::s_Instance = nullptr;
 
-	Hazel::Application::Application(const WindowProps& props)
+	Hazel::Application::Application(const WindowProps& props, ApplicationCommandLineArgs args)
+		:m_CommandLineArgs(args)
 	{
 		HZ_PROFILE_FUNCTION();
 

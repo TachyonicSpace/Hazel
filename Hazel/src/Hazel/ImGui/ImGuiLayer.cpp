@@ -4,8 +4,8 @@
 #define IMGUI_IMPL_API
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include "imgui.h"
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
 #include "Hazel\Core\Application.h"
 
@@ -63,12 +63,11 @@ namespace Hazel {
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 
-	//deactivates ingui when detatched
+	//deactivates imgui when detached
 	void ImGuiLayer::OnDetach()
 	{
 		HZ_PROFILE_FUNCTION();
 
-		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui::DestroyContext();
 	}
