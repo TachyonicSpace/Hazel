@@ -130,7 +130,6 @@ namespace Hazel {
 		float GetAspectRatio() const { return m_AspectRatio; }
 
 
-		glm::vec2 m_MousePositionBeforeMovingMouse = { -1, -1 };
 	private:
 		void UpdateProjection();
 		void UpdateView();

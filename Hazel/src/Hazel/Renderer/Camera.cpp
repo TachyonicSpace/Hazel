@@ -168,8 +168,7 @@ namespace Hazel {
 			else if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
 				MousePan(delta);
 			else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
-				MouseZoom((glm::length(mouse - m_MousePositionBeforeMovingMouse) - glm::length(m_InitialMousePosition - m_MousePositionBeforeMovingMouse)) * 0.003f);
-
+				MouseZoom((delta.x-delta.y) );
 			m_InitialMousePosition = mouse;
 		}
 		UpdateView();

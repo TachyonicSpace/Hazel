@@ -487,67 +487,6 @@ namespace Hazel
 
 
 			}
-
-
-			//mouse-cursor when editing camera
-			{
-				//runs if left alt and one of the three main mouse buttons are pressed
-				if (Input::IsKeyPressed(KeyCode::LeftAlt) &&
-					(Input::IsMouseButtonPressed(Mouse::ButtonLeft) || Input::IsMouseButtonPressed(Mouse::ButtonRight) ||
-						Input::IsMouseButtonPressed(Mouse::ButtonMiddle)))
-				{
-					//makes the entity if it doesnt exist(first frame this is pressed) and added a color to it
-					if (!m_Scene->ValidEntity(m_MouseCursor))
-					{
-						m_MouseCursor = m_Scene->CreateEntity("Mouse");
-						m_MouseCursor.AddComponent<Component::SpriteRenderer>();
-					}
-
-					{
-						//gets the distance to the camera from focal point of camera
-						float CameraDist = m_EditorCamera.GetDistance();
-						//gets the max range that a point will be on screen in the viewport
-						float range = tan(glm::radians(m_EditorCamera.GetFOV() / 2.0f)) * CameraDist;
-						//gets the direction the camera is pointing to 
-						auto forward = m_EditorCamera.GetForwardDirection();
-
-
-						//makes the point at the focal point of the camera
-						glm::vec3 pos = m_EditorCamera.GetPosition() + forward * CameraDist;
-						//adds the point the mouse was at before changing camera to the position, rotated to face the same plane as the camera
-						pos += glm::rotate(m_EditorCamera.GetOrientation(),
-							glm::vec3(m_EditorCamera.m_MousePositionBeforeMovingMouse.x / m_ViewPortSize.x * 2.0f - 1.0f,
-								-(m_EditorCamera.m_MousePositionBeforeMovingMouse.y / m_ViewPortSize.y * 2.0f - 1.0f),
-								0) * range);
-
-
-						//sets distance to calculated distance
-						auto& transform = m_MouseCursor.GetComponent<Component::Transform>();
-						transform.Translation = pos;
-						//modifies the mouse cursor transform to look identical independent of the camera oreintation
-						transform.Rotation = glm::vec3(-m_EditorCamera.GetPitch(), -m_EditorCamera.GetYaw(), 0.0f);
-						//saets same size independent of distance
-						transform.Scale = { .005 * CameraDist, .005 * CameraDist, 1 };
-
-						//changes color to bright magenta
-						m_MouseCursor.GetComponent<Component::SpriteRenderer>().color.SetRgb(Color({ .8f, 0.f, .8f, 1.f }));
-					}
-				}
-
-				else
-				{
-					//if entity still exist while not moving camera, destroy it
-					if (m_Scene->ValidEntity(m_MouseCursor))
-					{
-						m_Scene->DestroyEntity(m_MouseCursor);
-					}
-					//update the last known position of camera
-					m_EditorCamera.m_MousePositionBeforeMovingMouse = { ImGui::GetMousePos().x - minBound.x , ImGui::GetMousePos().y - minBound.y };
-				}
-
-			}
-
-
 			ImGui::End();
 		}
 

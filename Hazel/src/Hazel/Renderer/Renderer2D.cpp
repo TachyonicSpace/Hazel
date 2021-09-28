@@ -107,7 +107,6 @@ namespace Hazel {
 		//loads the shader to be used
 		s_Data.texShader = Shader::Create("assets/shaders/Texture.glsl");
 		s_Data.texShader->Bind();
-		s_Data.texShader->UploadUniformIntArray("u_Texture", samplers, s_Data.MaxTexture);
 
 		s_Data.textureSlots[0] = s_Data.whiteTexture;
 

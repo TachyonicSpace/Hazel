@@ -25,7 +25,6 @@ namespace Hazel
 		static EditorLayer* m_MainEditorLayer;
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
-		bool OnMousePressed(MouseButtonPressedEvent& e);
 
 		void NewScene();
 		void SaveSceneAs();
@@ -43,7 +42,7 @@ namespace Hazel
 
 
 		Ref<Scene> m_Scene;
-		Entity m_HoveredEntity, m_MouseCursor;
+		Entity m_HoveredEntity;
 
 		Ref<Texture2D> m_checkerboard;
 

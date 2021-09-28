@@ -25,23 +25,6 @@ namespace Hazel {
 
 		void Bind() const override;
 		void UnBind() const override;
-
-		void UploadUniformInt(const std::string& name, const int& val);
-		void UploadUniformIntArray(const std::string& name, int* vals, uint32_t count);
-
-		void UploadUniformFloat(const std::string& name, const float& val);
-		void UploadUniformFloat2(const std::string& name, const glm::vec2& vec);
-		void UploadUniformFloat3(const std::string& name, const glm::vec3& vec);
-		void UploadUniformFloat4(const std::string& name, const glm::vec4& vec);
-
-		void UploadUniformFloat2(const std::string& name, const float*& vec);
-		void UploadUniformFloat3(const std::string& name, const float*& vec);
-		void UploadUniformFloat4(const std::string& name, const float*& vec);
-
-		void UploadUniformFloat4(const std::string& name, const Color& vec);
-
-		void UploadUniformMat3(const std::string& name, const glm::mat3& matrix);
-		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
 	private:
 		std::string ReadFile(const std::string& filepath);
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);

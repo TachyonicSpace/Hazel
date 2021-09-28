@@ -35,8 +35,6 @@ namespace Hazel
 	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& va, const glm::mat4& transform)
 	{
 		shader->Bind();
-		shader->UploadUniformMat4("u_ViewProjection", m_sceneData->viewProjectionMatrix);
-		shader->UploadUniformMat4("u_Transform", transform);
 
 		va->Bind();
 		RenderCommand::DrawIndexed(va);
