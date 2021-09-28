@@ -10,6 +10,7 @@ namespace Hazel {
 	public:
 		OpenGLTexture2D(uint32_t width, uint32_t height);
 		OpenGLTexture2D(const std::string& path, bool error = true);
+		OpenGLTexture2D();
 		~OpenGLTexture2D();
 
 

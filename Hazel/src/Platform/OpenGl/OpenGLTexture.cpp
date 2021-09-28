@@ -21,6 +21,27 @@ namespace Hazel {
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
+	OpenGLTexture2D::OpenGLTexture2D()
+		:m_Width(1), m_Height(1)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		m_InternalFormat = GL_RGBA8;
+		m_DataFormat = GL_RGBA;
+
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
+		glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
+
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+		uint32_t whiteTextureData = 0xffffffff;
+		this->SetData(&whiteTextureData, sizeof(whiteTextureData));
+	}
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path, bool error)
 		:m_Path(path)
 	{
@@ -62,8 +83,9 @@ namespace Hazel {
 			auto path0 = path;
 
 			std::string defaultFilepath = "D:\\Hazel\\Hazel-Nut\\assets\\textures\\";
-			if (path.size() <= defaultFilepath.size()
-				|| path.substr(0, defaultFilepath.size()) != defaultFilepath)
+			/*if (path.size() <= defaultFilepath.size()
+				|| path.substr(0, defaultFilepath.size()) != defaultFilepath)*/
+			if(path.substr(1, 2) != ":\\")
 				(std::string&)path = defaultFilepath + path;
 
 			{

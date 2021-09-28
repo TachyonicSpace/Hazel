@@ -93,6 +93,52 @@ namespace Hazel
 			ImGui::End();
 		}
 	}
+
+	void SceneHierarchyPanel::DrawEntityNode(Entity node, bool displayAllEntities)
+	{
+		auto tag = node.GetComponent<Component::Tag>().name;
+		if (!displayAllEntities)
+			if (tag == "N/A")
+				return;
+
+		tag += "\n\tid:" + std::to_string((uint32_t)node);
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+		flags |= (m_SelectedContext == node) ? ImGuiTreeNodeFlags_Selected : 0;
+		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)node, flags, tag.c_str());
+
+		if (ImGui::IsItemClicked())
+		{
+			m_SelectedContext = node;
+		}
+
+
+		if (ImGui::BeginPopupContextItem())
+		{
+			if (ImGui::MenuItem("Delete Entity"))
+				node.deleted = true;
+
+			ImGui::EndPopup();
+		}
+
+
+
+		if (opened)
+		{
+			bool opened = ImGui::TreeNodeEx((void*)9817239, flags, (node.deleted) ? "true" : "false");
+			if (opened)
+				ImGui::TreePop();
+			ImGui::TreePop();
+		}
+
+		if (node.deleted)
+		{
+			m_context->DestroyEntity(node);
+			if (m_SelectedContext == node)
+				m_SelectedContext = {};
+		}
+	}
+
 	void SceneHierarchyPanel::DrawComponents(Entity ent)
 	{
 		if (ent.HasComponent<Component::Tag>())
@@ -238,6 +284,10 @@ namespace Hazel
 					strcpy_s(buffer, 255, path.c_str());
 
 					src.Tex = (Texture2D::Create(buffer));
+				}ImGui::SameLine();
+				if (ImGui::Button("Remove Texture"))
+				{
+					src.Tex = Texture2D::Create();
 				}
 				//if (ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component"))
 				//{
@@ -257,50 +307,6 @@ namespace Hazel
 		{
 			m_context->DestroyEntity(ent);
 			if (m_SelectedContext == ent)
-				m_SelectedContext = {};
-		}
-	}
-
-	void SceneHierarchyPanel::DrawEntityNode(Entity node, bool displayAllEntities)
-	{
-		auto& tag = node.GetComponent<Component::Tag>().name;
-		if (!displayAllEntities)
-			if (tag == "N/A")
-				return;
-
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-		flags |= (m_SelectedContext == node) ? ImGuiTreeNodeFlags_Selected : 0;
-		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)node, flags, tag.c_str());
-
-		if (ImGui::IsItemClicked())
-		{
-			m_SelectedContext = node;
-		}
-
-
-		if (ImGui::BeginPopupContextItem())
-		{
-			if (ImGui::MenuItem("Delete Entity"))
-				node.deleted = true;
-
-			ImGui::EndPopup();
-		}
-
-
-
-		if (opened)
-		{
-			bool opened = ImGui::TreeNodeEx((void*)9817239, flags, (node.deleted) ? "true" : "false");
-			if (opened)
-				ImGui::TreePop();
-			ImGui::TreePop();
-		}
-
-		if (node.deleted)
-		{
-			m_context->DestroyEntity(node);
-			if (m_SelectedContext == node)
 				m_SelectedContext = {};
 		}
 	}
@@ -362,300 +368,6 @@ namespace Hazel
 		}
 	}
 
-	/*
-	void SceneHierarchyPanel::EditTransformMatrix(glm::mat4& transform, bool details)
-	{
-		if (!details)
-		{
-			EditTransformVec("Position", (glm::vec3)transform[3]);
-			return;
-		}
-
-		static bool degrees = false;
-
-		const char* rotationType[3] = { "Matrix", "Axis-angle", "euler angles" };
-		static const char* currentRotationType = rotationType[2];
-
-		glm::vec3 oldScales = glm::vec3(glm::length(transform[0]), glm::length(transform[1]), glm::length(transform[2]));
-
-		glm::mat3 rotation;
-
-		//add support for scaling
-		if (currentRotationType == "Matrix")
-		{
-		MATRIX_MODIFYING:
-
-			if (ImGui::BeginCombo("rotation", currentRotationType))
-			{
-				for (int i = 0; i < 4; i++)
-				{
-					bool isSelected = currentRotationType == rotationType[i];
-					if (ImGui::Selectable(rotationType[i], isSelected))
-					{
-						currentRotationType = rotationType[i];
-					}
-
-					if (isSelected)
-						ImGui::SetItemDefaultFocus();
-				}
-
-				ImGui::EndCombo();
-			}
-			ImGui::Separator();//finish
-			if (ImGui::DragFloat4("0", &transform[0][0], .01f) ||
-				ImGui::DragFloat4("1", &transform[1][0], .01f) ||
-				ImGui::DragFloat4("2", &transform[2][0], .01f) ||
-				ImGui::DragFloat4("3", &transform[3][0], .01f))
-			{
-				//for (int i = 0; i < 3; i++) {
-				//	for (int j = 0; j < 3; j++) {
-				//		transform[i][j] = oldScales[i] * rotation[i][j];
-				//	}
-				//}
-			}
-			return;
-		}
-
-		//display and allow edit of the position in x, y, z;
-		EditTransformVec("Position", (glm::vec3&)transform[3]);
-
-		//allow edit of the scales in all three directions
-		{
-			glm::vec3 newScales = oldScales;
-			if (EditTransformVec("Scale", newScales, 1.f))
-			{
-				for (int i = 0; i < 3; i++)
-				{
-					if (newScales[i] <= 0)
-						newScales[i] = .000001f;
-
-					transform[i] = (transform[i]) * newScales[i] / (oldScales[i]);
-				}
-			}
-		}
-
-		oldScales = glm::vec3(glm::length(transform[0]), glm::length(transform[1]), glm::length(transform[2]));
-
-
-		ImGui::Separator();
-		if (ImGui::BeginCombo("rotation type", currentRotationType))
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				bool isSelected = currentRotationType == rotationType[i];
-				if (ImGui::Selectable(rotationType[i], isSelected))
-				{
-					currentRotationType = rotationType[i];
-				}
-
-				if (isSelected)
-					ImGui::SetItemDefaultFocus();
-			}
-
-			ImGui::EndCombo();
-		}
-
-		for (int i = 0; i < 3; i++)
-		{
-			for (int j = 0; j < 3; j++)
-			{
-				rotation[i][j] = transform[i][j] / oldScales[i];
-			}
-		}
-		//oldScales = glm::vec3(glm::length(rotation[0]), glm::length(rotation[1]), glm::length(rotation[2]));
-
-		if (currentRotationType == "Matrix")
-			goto MATRIX_MODIFYING;
-
-		else if (currentRotationType == "Axis-angle")
-		{
-			glm::vec3 axis;
-			float theta;
-			//calculating axis and angle
-			{
-				auto d = glm::length(glm::vec3(rotation[2][1] - rotation[1][2],
-					rotation[0][2] - rotation[2][0],
-					rotation[1][0] - rotation[0][1]));
-				float x, y, z;
-				if (d != 0)
-				{
-					x = -(rotation[2][1] - rotation[1][2]) / d;
-					y = -(rotation[0][2] - rotation[2][0]) / d;
-					z = -(rotation[1][0] - rotation[0][1]) / d;
-				}
-				else
-				{
-					double epsilon = 0.0001; // margin to allow for rounding errors
-					double epsilon2 = 0.1;
-
-					double xx = (rotation[0][0] + 1) / 2;
-					double yy = (rotation[1][1] + 1) / 2;
-					double zz = (rotation[2][2] + 1) / 2;
-					double xy = (rotation[0][1] + rotation[1][0]) / 4;
-					double xz = (rotation[0][2] + rotation[2][0]) / 4;
-					double yz = (rotation[1][2] + rotation[2][1]) / 4;
-					if ((xx > yy) && (xx > zz)) { // rotation[0][0] is the largest diagonal term
-						if (xx < epsilon) {
-							x = 0;
-							y = 0.7071f;
-							z = 0.7071f;
-						}
-						else {
-							x = (float)sqrt(xx);
-							y = (float)xy / x;
-							z = (float)xz / x;
-						}
-					}
-					else if (yy > zz) { // rotation[1][1] is the largest diagonal term
-						if (yy < epsilon) {
-							x = (float)0.7071;
-							y = (float)0;
-							z = (float)0.7071;
-						}
-						else {
-							y = (float)sqrt(yy);
-							x = (float)xy / y;
-							z = (float)yz / y;
-						}
-					}
-					else { // rotation[2][2] is the largest diagonal term so base result on this
-						if (zz < epsilon) {
-							x = 0.7071f;
-							y = 0.7071f;
-							z = 0.f;
-						}
-						else {
-							z = (float)sqrt(zz);
-							x = (float)xz / z;
-							y = (float)yz / z;
-						}
-					}
-				}
-				theta = (float)acos(((double)rotation[0][0] + rotation[1][1] + rotation[2][2] - 1.f) / 2.0f);
-				axis = { x, y, z };
-			}
-			if (degrees)
-				theta *= 180 * glm::pi<float>();
-			if (EditTransformVec("axis of rotation", axis) ||
-				ImGui::DragFloat("rotation", &theta, .001f))
-			{
-				if (degrees)
-					theta /= 180 / glm::pi<float>();
-				axis = glm::normalize(axis);
-				auto c = cos(theta);
-				auto s = sin(theta), t = 1 - c;
-				auto x = axis[0], y = axis[1], z = axis[2];
-
-				transform[0][0] = oldScales[0] * (t * x * x + c);
-				transform[0][1] = oldScales[0] * (t * x * y + z * s);
-				transform[0][2] = oldScales[0] * (t * x * z - y * s);
-
-				transform[1][0] = oldScales[1] * (t * x * y - z * s);
-				transform[1][1] = oldScales[1] * (t * y * y + c);
-				transform[1][2] = oldScales[1] * (t * y * z + x * s);
-
-				transform[2][0] = oldScales[2] * (t * x * z + y * s);
-				transform[2][1] = oldScales[2] * (t * y * z - x * s);
-				transform[2][2] = oldScales[2] * (t * z * z + c);
-			}
-		}
-		else if (currentRotationType == "euler angles")
-		{
-			glm::vec3 angles;
-			//float& z = angles[0], & y = angles[1], & x = angles[2];
-			float& x = angles[0], & y = angles[1], & z = angles[2];
-			ImGui::Checkbox("angles in degrees?", &degrees);
-
-			{
-				//float sy = sqrt(rotation[0][0] * rotation[0][0] + rotation[1][0] * rotation[1][0]);
-
-
-				//bool singular = sy < 1e-3f; // If
-
-				//if (singular)
-				//{
-				//	X = atan2(-rotation[1][2], rotation[1][1]);
-				//	attitude = atan2(-rotation[2][0], sy);
-				//	bank = 0;
-				//}
-				//else
-				//{
-				//	X = atan2(rotation[2][1], rotation[2][2]);
-				//	attitude = atan2(-rotation[2][0], sy);
-				//	bank = atan2(rotation[1][0], rotation[0][0]);
-				//}
-
-
-
-
-				if (abs(rotation[2][0]) != 1)
-				{
-					y = __min(-asin(rotation[2][0]), glm::pi<float>() + asin(rotation[2][0]));
-					x = atan2(rotation[2][1], rotation[2][2]);
-					z = atan2(rotation[1][0], rotation[0][0]);
-				}
-				else {
-					z = 0;
-					if (rotation[2][0] == -1)
-					{
-						y = glm::pi<float>() / 2;
-						x = z + atan2(rotation[0][1], rotation[0][2]);
-					}
-					else
-					{
-						y = -glm::pi<float>() / 2;
-						x = -z + atan2(-rotation[0][1], -rotation[0][2]);
-					}
-				}
-
-			}
-
-			if (degrees)
-				angles *= 180.f / glm::pi<float>();
-
-			if (EditTransformVec("euler angles", angles))
-			{
-				if (degrees)
-					angles /= 180.f / glm::pi<float>();
-
-				//if (x < -1.565f || x > 1.565f)
-				//	x = ((x > 0) ? -1 : 1) * 1.568f;
-				if (y < -1.565f || y > 1.565f)
-					y = ((y > 0) ? -1 : 1) * 1.568f;
-				//if (z < -1.565f || z > 1.565f)
-				//	z = ((z > 0) ? -1 : 1) * 1.568f;
-
-				glm::mat3 X = { {1,	0,				0},
-										{0, cos(x), -sin(x)},
-										{0, sin(x),  cos(x)} };
-
-				glm::mat3 Y = { {cos(y),    0,      sin(y)},
-										{0,                1,      0, },
-										{-sin(y),   0,      cos(y)} };
-
-				glm::mat3 Z = { {cos(z), -sin(z), 0},
-								{sin(z),  cos(z), 0},
-								{0,				  0,			  1} };
-
-				rotation = X * Y * Z;
-				for (int i = 0; i < 3; i++)
-				{
-					for (int j = 0; j < 3; j++)
-					{
-						//float precise = 10E-15f;
-						transform[i][j] = oldScales[i] * rotation[i][j];
-						//transform[i][j] = ((int)((oldScales[i] * rotation[i][j])/precise))*precise;
-					}
-				}
-			}
-		}
-
-		else
-		{
-			HZ_ASSERT(false, "INVALID Rotation Type: {0}");
-		}
-	}
-	*/
 	bool SceneHierarchyPanel::EditTransformVec(const std::string& label, glm::vec3& values, float resetValue, float columnWidth)
 	{
 		ImGuiIO& io = ImGui::GetIO();

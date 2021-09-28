@@ -317,6 +317,7 @@ namespace Hazel
 		}
 
 		m_SceneHierarchyPanel.OnImGuiRender();
+		m_ContentBrowserPanel.OnImGuiRender(m_SceneHierarchyPanel);
 
 		//settings
 		{
@@ -389,6 +390,13 @@ namespace Hazel
 			if (ImGui::Button("reset editor camera to defaults?"))
 				m_EditorCamera = EditorCamera(m_EditorCamera);
 
+
+			if (Input::IsMouseButtonPressed(Mouse::ButtonLeft) && !Input::IsKeyPressed(KeyCode::LeftAlt)
+				&& !ImGuizmo::IsOver() && m_SceneHovered)
+			{
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+				m_SceneHovered = false;
+			}
 			ImGui::End();
 		}
 
@@ -419,6 +427,7 @@ namespace Hazel
 				{ m_ViewPortSize.x, m_ViewPortSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 
+			m_SceneHovered = ImGui::IsItemHovered();
 
 
 			auto windowSize = ImGui::GetWindowSize();
@@ -538,6 +547,7 @@ namespace Hazel
 
 			}
 
+
 			ImGui::End();
 		}
 
@@ -556,7 +566,6 @@ namespace Hazel
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
-		dispatcher.Dispatch<MouseButtonPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnMousePressed));
 
 	}
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -618,13 +627,6 @@ namespace Hazel
 			m_SceneHierarchyPanel.SetSelectedEntity(Entity());
 		}
 		}
-		return true;
-	}
-	bool EditorLayer::OnMousePressed(MouseButtonPressedEvent& e)
-	{
-		//selects hovered entity if left click is pressed, not changing camera, and not hovering over imguizmo
-		if (e.GetMouseButton() == Mouse::ButtonLeft && !Input::IsKeyPressed(KeyCode::LeftAlt) && !ImGuizmo::IsOver())
-			m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
 		return true;
 	}
 

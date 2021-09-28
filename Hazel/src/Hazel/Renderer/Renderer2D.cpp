@@ -98,9 +98,7 @@ namespace Hazel {
 		delete[] quadIndices;
 
 		//makes a blank white texture
-		s_Data.whiteTexture = Texture2D::Create(1, 1);
-		uint32_t whiteTextureData = 0xffffffff;
-		s_Data.whiteTexture->SetData(&whiteTextureData, sizeof(whiteTextureData));
+		s_Data.whiteTexture = Texture2D::Create();
 
 		int32_t samplers[s_Data.MaxTexture];
 		for (uint32_t i = 0; i < s_Data.MaxTexture; i++)

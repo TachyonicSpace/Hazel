@@ -2,6 +2,7 @@
 
 #include "Hazel.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Panels/ContentBrowserPanel.h"
 
 namespace Hazel
 {
@@ -54,12 +55,14 @@ namespace Hazel
 		float m_angle = 0, m_Delta = .5;
 
 		bool m_ViewPortFocused = false, m_ViewPortHovered = false, m_UsingEditorCamera = true, entitySelected = false;
+		bool m_SceneHovered = false;
 		int m_GizmoType = 0;
 
 		std::string m_FilePath;
 
 		//panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
+		ContentBrowserPanel m_ContentBrowserPanel;
 	};
 
 }

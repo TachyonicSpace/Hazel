@@ -6,13 +6,12 @@ layout(location = 1) in vec4 a_Color;
 layout(location = 2) in vec2 a_TexCoord;
 layout(location = 3) in float a_TexIndex;
 layout(location = 4) in float a_TilingFactor;
-layout(location = 5) in int   a_EntityID;
-
+layout(location = 5) in int a_EntityID;
 
 layout(std140, binding = 0) uniform Camera
 {
 	mat4 u_ViewProjection;
-} ;
+};
 
 struct VertexOutput
 {
@@ -95,4 +94,6 @@ void main()
 		case 31: texColor *= texture(u_Textures[31], Input.TexCoord * Input.TilingFactor); break;
 	}
 	color = texColor;
+
+	color2 = v_EntityID;
 }
