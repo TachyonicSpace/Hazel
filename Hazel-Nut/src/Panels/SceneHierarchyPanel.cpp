@@ -301,7 +301,11 @@ namespace Hazel
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-						src.Tex = Texture2D::Create(texturePath.string());
+						Ref<Texture2D> texture = Texture2D::Create(texturePath.string());
+						if (texture->IsLoaded())
+							src.Tex = texture;
+						else
+							HZ_WARN("Could not load texture {0}", texturePath.filename().string());
 						strcpy(buffer, texturePath.string().c_str());
 					}
 					ImGui::EndDragDropTarget();

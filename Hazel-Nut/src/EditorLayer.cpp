@@ -86,7 +86,7 @@ namespace Hazel
 		m_FrameBuffer->Bind();
 
 		////render to screen
-		
+
 		switch (m_SceneState)
 		{
 		case SceneState::Edit:
@@ -105,7 +105,7 @@ namespace Hazel
 			break;
 		}
 		}
-		
+
 		//{
 		//	if (m_Scene->ScenePlay)
 		//	{
@@ -309,7 +309,7 @@ namespace Hazel
 			}
 			ImGui::Text("ImGuizmo mode: %s", mode.c_str());
 
-			if (Input::IsKeyPressed(KeyCode::LeftAlt) && m_UsingEditorCamera)
+			if (Input::IsKeyPressed(KeyCode::LeftAlt))
 				ImGui::Text("Mouse mode: Camera Edit\n\t(lft mouse rotate, right zoom, middle pan)");
 			else
 				ImGui::Text("Mouse mode: Scene Edit");
@@ -404,18 +404,9 @@ namespace Hazel
 
 				const glm::mat4* cameraProjection;
 				glm::mat4 cameraView;
-				if (!m_UsingEditorCamera)
-				{
-					auto cameraEntity = m_Scene->GetPrimaryCameraEntity();
-					const auto& camera = cameraEntity.GetComponent<Component::Cameras>().camera;
-					cameraProjection = &camera.GetProjection();
-					cameraView = glm::inverse(cameraEntity.GetComponent<Component::Transform>().GetTransform());
-				}
-				else
-				{
-					cameraProjection = &m_EditorCamera.GetProjection();
-					cameraView = m_EditorCamera.GetViewMatrix();
-				}
+				cameraProjection = &m_EditorCamera.GetProjection();
+				cameraView = m_EditorCamera.GetViewMatrix();
+
 
 				// Entity transform
 				auto& tc = selectedEntity.GetComponent<Component::Transform>();
@@ -568,6 +559,12 @@ namespace Hazel
 
 	void EditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		if (path.extension().string() != ".hazel")
+		{
+			HZ_WARN("Could not load {0} - not a scene file", path.filename().string());
+			return;
+		}
+
 		std::string defaultFilepath = "assets\\scenes\\";
 		std::string filepath = path.string();
 		if ((filepath.size() <= defaultFilepath.size() || filepath.substr(0, defaultFilepath.size()) != defaultFilepath))

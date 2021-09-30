@@ -28,7 +28,7 @@ namespace Hazel {
 			return m_RendererID == ((OpenGLTexture2D&)other).m_RendererID; 
 		}
 
-
+		virtual bool IsLoaded() const override { return m_IsLoaded; }
 		virtual const glm::mat4x2& GetTextureCoordinates() const override;
 		virtual void subTexture(const int& xIndex, const int& yIndex,
 			const int& xSpriteWidth = 128, const int& ySpriteHeight = 128) override;
@@ -38,6 +38,8 @@ namespace Hazel {
 		uint32_t m_Width, m_Height;
 		uint32_t m_RendererID;
 		GLenum m_InternalFormat = 0, m_DataFormat = 0;
+
+		bool m_IsLoaded = false;
 
 		glm::mat4x2 m_TexCoords = { {0, 0}, {1, 0}, {1, 1}, {0, 1} };
 		glm::vec2 m_TexIndicies = { -1, -1 };
