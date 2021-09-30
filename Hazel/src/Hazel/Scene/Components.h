@@ -11,6 +11,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Entity.h"
 
@@ -99,5 +100,36 @@ namespace Hazel
 			}
 		};
 
+		// Physics
+		struct Rigidbody2D
+		{
+			enum class BodyType { Static = 0, Dynamic, Kinematic };
+			BodyType Type = BodyType::Static;
+			bool FixedRotation = false;
+
+			// Storage for runtime
+			void* RuntimeBody = nullptr;
+
+			Rigidbody2D() = default;
+			Rigidbody2D(const Rigidbody2D&) = default;
+		};
+
+		struct BoxCollider2D
+		{
+			glm::vec2 Offset = { 0.0f, 0.0f };
+			glm::vec2 Size = { 0.5f, 0.5f };
+
+			// TODO(Yan): move into physics material in the future maybe
+			float Density = 1.0f;
+			float Friction = 0.5f;
+			float Restitution = 0.0f;
+			float RestitutionThreshold = 0.5f;
+
+			// Storage for runtime
+			void* RuntimeFixture = nullptr;
+
+			BoxCollider2D() = default;
+			BoxCollider2D(const BoxCollider2D&) = default;
+		};
 	}
 }

@@ -16,6 +16,9 @@
     <Filter Include="..\Hazel\vendor\Glad">
       <UniqueIdentifier>{88C9B63E-7458-4008-1D77-540309E550AE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="..\Hazel\vendor\box2d">
+      <UniqueIdentifier>{0F917A17-7BFD-3512-44F1-CD6FB01C587A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="..\Hazel\vendor\imgui">
       <UniqueIdentifier>{2BE4F717-9750-B312-6044-4B70CC6FD57A}</UniqueIdentifier>
     </Filter>
@@ -41,6 +44,9 @@
     </None>
     <None Include="..\..\Hazel\vendor\Glad\premake5.lua">
       <Filter>..\Hazel\vendor\Glad</Filter>
+    </None>
+    <None Include="..\..\Hazel\vendor\box2d\premake5.lua">
+      <Filter>..\Hazel\vendor\box2d</Filter>
     </None>
     <None Include="..\..\Hazel\vendor\imgui\premake5.lua">
       <Filter>..\Hazel\vendor\imgui</Filter>

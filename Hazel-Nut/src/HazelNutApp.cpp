@@ -11,7 +11,7 @@ namespace Hazel
 	class HazelNut : public Application {
 	public:
 		HazelNut(ApplicationCommandLineArgs args)
-			:Application(Hazel::WindowProps("Hazelnut Editor", 1500, 700), args)
+			:Application(Hazel::WindowProps("Hazelnut Editor", 1200, 560), args)
 		{
 			//pushes the file to open on startup into editorLayer
 			PushLayer(new EditorLayer());

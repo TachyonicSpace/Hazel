@@ -34,6 +34,7 @@ project "Hazel"
 		"src",
 		"%{wks.location}",
 		"vendor/spdlog/include",
+		"%{IncludeDir.Box2D}",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
@@ -50,6 +51,7 @@ project "Hazel"
 	links
 	{
 		"GLFW",
+		"Box2D",
 		"Glad",
 		"ImGui",
 		"yaml-cpp",

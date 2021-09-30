@@ -101,7 +101,11 @@ namespace Hazel
 		}
 		case SceneState::Play:
 		{
-			m_Scene->OnUpdateRuntime(ts);
+		if (!m_Scene->OnUpdateRuntime(ts))
+		{
+			HZ_ERROR("Tried Rendering without a primary scene camera");
+			m_Scene->ScenePlay = false;
+		}
 			break;
 		}
 		}
@@ -291,23 +295,14 @@ namespace Hazel
 				name = m_HoveredEntity.GetComponent<Component::Tag>().name;
 			ImGui::Text("hovered entity: %s", name.c_str());
 
-			std::string mode;
-			switch (m_GizmoType)
-			{
-			case -1:
-				mode = "none";
-				break;
-			case 0:
-				mode = "Translation";
-				break;
-			case 1:
-				mode = "Rotation";
-				break;
-			case 2:
-				mode = "Scale";
-				break;
-			}
+			static std::string modes[] = { "none", "Translation", "Rotation", "Scale" };
+			std::string mode = modes[m_GizmoType+1];
 			ImGui::Text("ImGuizmo mode: %s", mode.c_str());
+			name = "";
+			Entity selected = m_SceneHierarchyPanel.GetSelectedEntity();
+			if (selected && selected.HasComponent<Component::Tag>())
+				name = "\n\tselected entity: " + selected.GetComponent<Component::Tag>().name;
+			ImGui::TextColored({ 1, .5, .98, 1 }, "q:none, w:translation, e:rotation, r:scale%s", name.c_str());
 
 			if (Input::IsKeyPressed(KeyCode::LeftAlt))
 				ImGui::Text("Mouse mode: Camera Edit\n\t(lft mouse rotate, right zoom, middle pan)");
@@ -383,6 +378,7 @@ namespace Hazel
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
+					m_SceneHierarchyPanel.SetSelectedEntity({});
 					const wchar_t* path = (const wchar_t*)payload->Data;
 					OpenScene(std::filesystem::path(g_AssetPath) / path);
 				}
@@ -391,7 +387,7 @@ namespace Hazel
 
 			//Gizmo's
 			Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-			if (selectedEntity && m_GizmoType != -1)
+			if (m_SceneState == SceneState::Edit && selectedEntity && m_GizmoType != -1)
 			{
 				ImGuizmo::SetOrthographic(false);
 				ImGuizmo::SetDrawlist();
@@ -595,11 +591,13 @@ namespace Hazel
 	void EditorLayer::OnScenePlay()
 	{
 		m_SceneState = SceneState::Play;
+		m_Scene->OnRuntimeStart();
 	}
 
 	void EditorLayer::OnSceneStop()
 	{
 		m_SceneState = SceneState::Edit;
+		m_Scene->OnRuntimeStop();
 
 	}
 }

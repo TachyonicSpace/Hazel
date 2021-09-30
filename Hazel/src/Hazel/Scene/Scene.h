@@ -4,6 +4,7 @@
 #pragma warning(push, 0)
 #include "entt.hpp"
 #pragma warning(pop)
+class b2World;
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Renderer/Framebuffer.h"
 
@@ -34,6 +35,8 @@ namespace Hazel
 
 		void DestroyEntity(Entity entity);
 
+		void OnRuntimeStart();
+		void OnRuntimeStop();
 
 		bool OnUpdateRuntime(Timestep& t);
 		void OnUpdateEditor(Timestep& ts, EditorCamera& camera);
@@ -62,7 +65,7 @@ namespace Hazel
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
-
+		b2World* m_PhysicsWorld = nullptr;
 		friend class Entity;
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;

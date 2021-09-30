@@ -2,15 +2,38 @@
 //#include "Scene.h"
 
 #include <Hazel/Scene/Components.h>
-#include "Entity.h"
+#include "Entity.h"//includes scene.h
+
 #include "Hazel/Renderer/Renderer2D.h"
 
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
 
+// Box2D
+// This ignores all warnings raised inside External headers
+//#pragma warning(push, 0)
+#include "box2d/b2_world.h"
+#include "box2d/b2_body.h"
+#include "box2d/b2_fixture.h"
+#include "box2d/b2_polygon_shape.h"
+//#pragma warning(pop)
+
 namespace Hazel
 {
+	static b2BodyType Rigidbody2DTypeToBox2DBody(Component::Rigidbody2D::BodyType bodyType)
+	{
+		switch (bodyType)
+		{
+		case Component::Rigidbody2D::BodyType::Static:    return b2_staticBody;
+		case Component::Rigidbody2D::BodyType::Dynamic:   return b2_dynamicBody;
+		case Component::Rigidbody2D::BodyType::Kinematic: return b2_kinematicBody;
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown body type");
+		return b2_staticBody;
+	}
+
 
 	Scene::Scene()
 	{
@@ -83,6 +106,50 @@ namespace Hazel
 		return has;
 	}
 
+	void Scene::OnRuntimeStart()
+	{
+		m_PhysicsWorld = new b2World({ 0.0f, -9.8f });
+
+		auto view = m_Registry.view<Component::Rigidbody2D>();
+		for (auto e : view)
+		{
+			Entity entity = { e, this };
+			auto& transform = entity.GetComponent<Component::Transform>();
+			auto& rb2d = entity.GetComponent<Component::Rigidbody2D>();
+
+			b2BodyDef bodyDef;
+			bodyDef.type = Rigidbody2DTypeToBox2DBody(rb2d.Type);
+			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
+			bodyDef.angle = transform.Rotation.z;
+
+			b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
+			body->SetFixedRotation(rb2d.FixedRotation);
+			rb2d.RuntimeBody = body;
+
+			if (entity.HasComponent<Component::BoxCollider2D>())
+			{
+				auto& bc2d = entity.GetComponent<Component::BoxCollider2D>();
+
+				b2PolygonShape boxShape;
+				boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &boxShape;
+				fixtureDef.density = bc2d.Density;
+				fixtureDef.friction = bc2d.Friction;
+				fixtureDef.restitution = bc2d.Restitution;
+				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
+				body->CreateFixture(&fixtureDef);
+			}
+		}
+	}
+
+	void Scene::OnRuntimeStop()
+	{
+		delete m_PhysicsWorld;
+		m_PhysicsWorld = nullptr;
+	}
+
 	bool Scene::OnUpdateRuntime(Timestep& t)
 	{
 		//update scripts
@@ -101,6 +168,28 @@ namespace Hazel
 
 						nsc.Instance->OnUpdate(t);
 					});
+			}
+		}
+
+		// Physics
+		{
+			const int32_t velocityIterations = 6;
+			const int32_t positionIterations = 2;
+			m_PhysicsWorld->Step(t, velocityIterations, positionIterations);
+
+			// Retrieve transform from Box2D
+			auto view = m_Registry.view<Component::Rigidbody2D>();
+			for (auto e : view)
+			{
+				Entity entity = { e, this };
+				auto& transform = entity.GetComponent<Component::Transform>();
+				auto& rb2d = entity.GetComponent<Component::Rigidbody2D>();
+
+				b2Body* body = (b2Body*)rb2d.RuntimeBody;
+				const auto& position = body->GetPosition();
+				transform.Translation.x = position.x;
+				transform.Translation.y = position.y;
+				transform.Rotation.z = body->GetAngle();
 			}
 		}
 
@@ -232,6 +321,16 @@ namespace Hazel
 
 	template<>
 	void Scene::OnComponentAdded<Component::NativeScript>(Entity entity, Component::NativeScript& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::Rigidbody2D>(Entity entity, Component::Rigidbody2D& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::BoxCollider2D>(Entity entity, Component::BoxCollider2D& component)
 	{
 	}
 }
