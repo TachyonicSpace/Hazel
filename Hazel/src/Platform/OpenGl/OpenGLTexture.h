@@ -13,7 +13,7 @@ namespace Hazel {
 		OpenGLTexture2D();
 		~OpenGLTexture2D();
 
-
+		void RenderSettings();
 
 		virtual uint32_t GetWidth() const override { return m_Width; }
 		virtual uint32_t GetHeight() const override { return m_Height; }
