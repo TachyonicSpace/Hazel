@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Camera.h"
-#include "Texture.h"
-#include "Color.h"
+#include "Hazel/Scene/Components.h"
 
 namespace Hazel {
 
@@ -43,6 +42,8 @@ namespace Hazel {
 
 		static void DrawQuad(uint32_t ID, const glm::mat4& transform, const Color& color, const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f);
 		static void DrawQuad(uint32_t ID, const glm::mat4& transform, Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& color = { 1, 1, 1, 1 });
+
+		static void DrawSprite(const glm::mat4& transform, Component::SpriteRenderer& src, int entityID);
 
 		//stats
 		struct Statistics

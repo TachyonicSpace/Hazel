@@ -20,7 +20,8 @@ namespace Hazel
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event & e) override;
 		
-		void OpenScene(std::string filepath = "");
+		void OpenScene(); 
+		void EditorLayer::OpenScene(const std::filesystem::path& path);
 	public:
 		static EditorLayer* m_MainEditorLayer;
 	private:

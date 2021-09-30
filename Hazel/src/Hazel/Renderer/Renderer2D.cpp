@@ -32,7 +32,6 @@ namespace Hazel {
 		Ref<VertexArray> va;
 		Ref<VertexBuffer> vb;
 		Ref<Shader> texShader;
-		Ref<Texture2D> whiteTexture;
 
 		uint32_t quadIndexCount = 0;
 		QuadVertex* quadVertexBufferBase = nullptr;
@@ -98,7 +97,6 @@ namespace Hazel {
 		delete[] quadIndices;
 
 		//makes a blank white texture
-		s_Data.whiteTexture = Texture2D::Create();
 
 		int32_t samplers[s_Data.MaxTexture];
 		for (uint32_t i = 0; i < s_Data.MaxTexture; i++)
@@ -108,7 +106,7 @@ namespace Hazel {
 		s_Data.texShader = Shader::Create("assets/shaders/Texture.glsl");
 		s_Data.texShader->Bind();
 
-		s_Data.textureSlots[0] = s_Data.whiteTexture;
+		s_Data.textureSlots[0] = Texture2D::Create();
 
 
 		s_Data.quadVertexPositions[0] = { -.5, -.5, 0, 1 };
@@ -350,6 +348,14 @@ namespace Hazel {
 		s_Data.quadIndexCount += 6;
 
 		s_Data.stats.quadCount++;
+	}
+
+	void Renderer2D::DrawSprite(const glm::mat4& transform, Component::SpriteRenderer& src, int entityID)
+	{
+		if (src.Tex)
+			DrawQuad(entityID, transform, src.color, src.Tex, src.TilingFactor);
+		else
+			DrawQuad(entityID, transform, src.color);
 	}
 
 	void Renderer2D::ResetStats() { s_Data.stats = { 0, 0 }; }

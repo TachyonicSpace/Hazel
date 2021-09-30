@@ -15,6 +15,8 @@
 
 namespace Hazel
 {
+	extern const std::filesystem::path g_AssetPath;
+
 	std::vector<Color>& SceneHierarchyPanel::m_SavedColor = Color::ColorPallete;
 	size_t SceneHierarchyPanel::m_SavedColorIndex = 0;
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
@@ -272,30 +274,43 @@ namespace Hazel
 				static char buffer[256];
 				//memset(buffer, 0x00, sizeof(buffer));
 
-				if (ImGui::InputText("Texture address", buffer, 256, ImGuiInputTextFlags_EnterReturnsTrue))
-					src.Tex = (Texture2D::Create(buffer));
-
-				if (ImGui::Button("find new texture address"))
+				if (ImGui::InputText("Texture address", buffer, 256))
 				{
-					std::string defaultFilepath = "D:\\Hazel\\Hazel-Nut\\assets\\textures\\";
-					auto path = FileDialogs::OpenFile("textures");
-					if (path.substr(0, defaultFilepath.length()) == defaultFilepath)
-						path = path.substr(defaultFilepath.length());
-					strcpy_s(buffer, 255, path.c_str());
+					try
+					{
+						std::string defaultFilepath = "D:\\Hazel\\Hazel-Nut\\assets\\textures\\";
+						std::string path = buffer;
+						if (path.substr(0, defaultFilepath.length()) == defaultFilepath)
+							path = path.substr(defaultFilepath.length());
+						path = buffer;
+						//make create crash optionaly;
+						auto tmpTexture = Texture2D::Create(path, true);
+						if (tmpTexture != Texture2D::Create())
+							src.Tex = tmpTexture;
 
-					src.Tex = (Texture2D::Create(buffer));
-				}ImGui::SameLine();
+					}
+					catch (...)
+					{
+
+					}
+				}
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						src.Tex = Texture2D::Create(texturePath.string());
+						strcpy(buffer, texturePath.string().c_str());
+					}
+					ImGui::EndDragDropTarget();
+				}
+
 				if (ImGui::Button("Remove Texture"))
 				{
 					src.Tex = Texture2D::Create();
 				}
-				//if (ImGui::TreeNodeEx((void*)typeid(Component::Transform).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component"))
-				//{
-				//	auto& trans = quad.transformRef();
-				//	EditTransformMatrix(trans);
-
-				//	ImGui::TreePop();
-				//}
 				float& tile = src.TilingFactor;
 				ImGui::DragFloat("tiling factor", &tile);
 				EditColor(src.color);

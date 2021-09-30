@@ -14,6 +14,8 @@
 
 namespace Hazel
 {
+	extern const std::filesystem::path g_AssetPath;
+
 	EditorLayer* EditorLayer::m_MainEditorLayer = nullptr;
 
 	EditorLayer::EditorLayer()
@@ -36,7 +38,7 @@ namespace Hazel
 		auto commandLineArgs = Application::Get().GetCommandLineArgs();
 		if (commandLineArgs.Count > 1)
 		{
-			auto sceneFilePath = commandLineArgs[1];
+			std::string sceneFilePath = commandLineArgs[1];
 			OpenScene(sceneFilePath);
 		}
 
@@ -406,13 +408,6 @@ namespace Hazel
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 			ImGui::Begin("viewPort");
 
-#ifdef playButton
-			if (m_Scene->ScenePlay)
-				m_Scene->ScenePlay = !ImGui::ColorButton("Stop Scene", { .8, .2, .1, 1 });
-			else
-				m_Scene->ScenePlay = ImGui::ColorButton("Stop Scene", { .2, .7, .1, 1 });
-#endif
-
 
 			auto viewportOffset = ImGui::GetCursorPos(); //includes tab bar
 			m_ViewPortFocused = ImGui::IsWindowFocused();
@@ -440,6 +435,16 @@ namespace Hazel
 			m_ViewportBounds[1] = { maxBound.x, maxBound.y };
 
 			Input::SetViewportOffset(minBound.x, minBound.y);
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					OpenScene(std::filesystem::path(g_AssetPath) / path);
+				}
+				ImGui::EndDragDropTarget();
+			}
 
 			//Gizmo's
 			Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
@@ -575,31 +580,34 @@ namespace Hazel
 		m_Scene->OnViewportResize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
 		m_SceneHierarchyPanel.SetContext(m_Scene);
 	}
-	void EditorLayer::OpenScene(std::string filepath)
+	void EditorLayer::OpenScene()
 	{
 		m_SceneHierarchyPanel.SetSelectedEntity({});
 
-		if (filepath == "")
-			filepath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
+		std::string filepath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
 
 
 		if (!filepath.empty())
+			OpenScene(filepath);
+	}
+
+	void EditorLayer::OpenScene(const std::filesystem::path& path)
+	{
+		std::string defaultFilepath = "assets\\scenes\\";
+		std::string filepath = path.string();
+		if ((filepath.size() <= defaultFilepath.size() || filepath.substr(0, defaultFilepath.size()) != defaultFilepath))
+			filepath = defaultFilepath + filepath;
+
+		if (!m_Scene->Empty())
+			m_Scene = NewRef<Scene>();
+		m_Scene->OnViewportResize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
+		m_SceneHierarchyPanel.SetContext(m_Scene);
+
+		SceneSerializer serializer(m_Scene);
+		if (!serializer.Deserialize(filepath))
 		{
-			std::string defaultFilepath = "assets\\scenes\\";
-			if ((filepath.size() <= defaultFilepath.size() || filepath.substr(0, defaultFilepath.size()) != defaultFilepath))
-				filepath = defaultFilepath + filepath;
-
-			if (!m_Scene->Empty())
-				m_Scene = NewRef<Scene>();
-			m_Scene->OnViewportResize((uint32_t)m_ViewPortSize.x, (uint32_t)m_ViewPortSize.y);
-			m_SceneHierarchyPanel.SetContext(m_Scene);
-
-			SceneSerializer serializer(m_Scene);
-			if (!serializer.Deserialize(filepath))
-			{
-				if (!serializer.Deserialize(filepath.substr(defaultFilepath.size())))
-					HZ_CORE_ERROR("invalid file:\n\t{0},\nor at:\t{1}\n please try again.", filepath, filepath.substr(defaultFilepath.size()));
-			}
+			if (!serializer.Deserialize(filepath.substr(defaultFilepath.size())))
+				HZ_CORE_ERROR("invalid file:\n\t{0},\nor at:\t{1}\n please try again.", filepath, filepath.substr(defaultFilepath.size()));
 		}
 	}
 	void EditorLayer::SaveSceneAs()

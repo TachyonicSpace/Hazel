@@ -85,7 +85,7 @@ namespace Hazel {
 			std::string defaultFilepath = "D:\\Hazel\\Hazel-Nut\\assets\\textures\\";
 			/*if (path.size() <= defaultFilepath.size()
 				|| path.substr(0, defaultFilepath.size()) != defaultFilepath)*/
-			if(path.substr(1, 2) != ":\\")
+			if (path.substr(1, 2) != ":\\")
 				(std::string&)path = defaultFilepath + path;
 
 			{
@@ -96,8 +96,10 @@ namespace Hazel {
 			if (!data)
 			{
 				if (error)
+				{
 					HZ_CORE_ERROR("Image Path Not Found: {0}, or: {1}", path0, path);
-				goto blankTexture;
+					throw "invalid Image Path.";
+				}
 			}
 		}
 		m_Width = width;
@@ -165,6 +167,7 @@ namespace Hazel {
 			m_TexCoords[3][1] = ((y + 1) * ySpriteHeight) / m_Height;
 		}
 	}
+
 	const glm::mat4x2& OpenGLTexture2D::GetTextureCoordinates() const
 	{
 		return m_TexCoords;
