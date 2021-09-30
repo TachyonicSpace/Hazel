@@ -2,7 +2,6 @@
 
 #include "Hazel/Core/Core.h"
 #include <filesystem>
-#include "SceneHierarchyPanel.h"
 
 namespace Hazel {
 
@@ -11,7 +10,7 @@ namespace Hazel {
 	public:
 		ContentBrowserPanel();
 
-		void OnImGuiRender(SceneHierarchyPanel& hierarchyPanel);
+		void OnImGuiRender();
 	private:
 		std::filesystem::path m_CurrentDirectory;
 	};

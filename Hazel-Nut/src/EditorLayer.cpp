@@ -48,76 +48,6 @@ namespace Hazel
 
 		m_Delta = 1 / m_Delta;
 
-#if 0
-
-		m_CameraEntity = m_Scene->CreateEntity("first Camera", { .5, .5, 5 });
-		m_CameraEntity.AddComponent<Component::Cameras>(SceneCamera::ProjectionType::Perspective);
-
-
-		m_SecondCamera = m_Scene->CreateEntity("Second Camera");
-		m_SecondCamera.AddComponent<Component::Cameras>().Primary = false;
-
-		class CameraController : public ScriptableEntity
-		{
-		public:
-			void OnCreate()
-			{
-				//auto& transform = GetComponent<Component::Transform>().transform;
-				//transform[3][0] = rand() % 10 - 5.0f;
-			}
-
-			void OnDestroy()
-			{
-			}
-
-			void OnUpdate(Timestep ts) override
-			{
-				auto& trans = GetComponent<Component::Transform>().Translation;
-				auto& rotate = GetComponent<Component::Transform>().Rotation;
-				float moveSpeed = 5;
-				float radianSpeed = .2f;
-
-				if (Input::IsKeyPressed(HZ_KEY_A))
-				{
-					trans.x -= moveSpeed * ts;
-				}
-
-				else if (Input::IsKeyPressed(HZ_KEY_D))
-				{
-					trans.x += moveSpeed * ts;
-				}
-				if (Input::IsKeyPressed(HZ_KEY_W))
-				{
-					trans.y += moveSpeed * ts;
-				}
-				else if (Input::IsKeyPressed(HZ_KEY_S))
-				{
-					trans.y -= moveSpeed * ts;
-				}
-				if (Input::IsKeyPressed(HZ_KEY_Q))
-				{
-					rotate.z += 2 * radianSpeed;
-				}
-
-				else if (Input::IsKeyPressed(HZ_KEY_E))
-				{
-					rotate.z -= 2 * radianSpeed;
-				}
-			}
-		};
-
-		m_CameraEntity.AddComponent<Component::NativeScript>().Bind<CameraController>();
-		m_SecondCamera.AddComponent<Component::NativeScript>().Bind<CameraController>();
-
-		m_SquareEntity = m_Scene->CreateEntity("Blue rect", { 0, 0, 0 });
-		m_SquareEntity.AddComponent<Component::SpriteRenderer>(Color{ 0, 0, 1 });
-
-
-		auto secondEntity = m_Scene->CreateEntity("red rect", { 0, 1.2, 0 });
-		secondEntity.AddComponent<Component::SpriteRenderer>(Color{ 1, 0, 0 });
-
-#endif
-
 		m_SceneHierarchyPanel.SetContext(m_Scene);
 
 		m_MainEditorLayer = this;
@@ -319,7 +249,7 @@ namespace Hazel
 		}
 
 		m_SceneHierarchyPanel.OnImGuiRender();
-		m_ContentBrowserPanel.OnImGuiRender(m_SceneHierarchyPanel);
+		m_ContentBrowserPanel.OnImGuiRender();
 
 		//settings
 		{

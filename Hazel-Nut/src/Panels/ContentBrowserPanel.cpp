@@ -16,7 +16,7 @@ namespace Hazel {
 	{
 	}
 
-	void ContentBrowserPanel::OnImGuiRender(SceneHierarchyPanel& hierarchyPanel)
+	void ContentBrowserPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Content Browser");
 
@@ -48,12 +48,6 @@ namespace Hazel {
 			{
 				if (ImGui::Button(filenameString.c_str()))
 				{
-					Entity e = hierarchyPanel.GetSelectedEntity();
-					if (e != Entity::Null && filenameString.rfind(".png") == filenameString.length() - 4)
-					{
-						auto& tex = e.GetComponent<Component::SpriteRenderer>();
-						tex.Tex = (Texture2D::Create(directoryEntry.path().string()));
-					}
 				}
 			}
 			if (ImGui::BeginDragDropSource())
