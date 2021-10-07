@@ -25,6 +25,10 @@ namespace Hazel
 	public:
 		static EditorLayer* m_MainEditorLayer;
 	private:
+		void ImGuiMenuBar();
+		void Settings();
+		void viewportSettings();
+
 		bool OnKeyPressed(KeyPressedEvent& e);
 
 		void NewScene();

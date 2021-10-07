@@ -167,7 +167,21 @@ namespace Hazel
 
 	void EditorLayer::OnImGuiRender()
 	{
-		//menu Bar
+		ImGuiMenuBar();
+
+		m_SceneHierarchyPanel.OnImGuiRender();
+		m_ContentBrowserPanel.OnImGuiRender();
+
+		Settings();
+		
+		//viewport, main scene
+		viewportSettings();
+
+
+		UI_Toolbar();
+	}
+	void EditorLayer::ImGuiMenuBar()
+	{
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
@@ -210,175 +224,162 @@ namespace Hazel
 
 			ImGui::EndMenuBar();
 		}
-
-
-
-		m_SceneHierarchyPanel.OnImGuiRender();
-		m_ContentBrowserPanel.OnImGuiRender();
-
-		//settings
+	}
+	void EditorLayer::Settings()
+	{
+		ImGui::Begin("Settings");
+		//ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416f);
+		int size = (int)fbspec.Attatchments.Attachments.size();
+		for (int i = size - 1; i >= 0; i--)
 		{
-			ImGui::Begin("Settings");
-			//ImGui::SliderFloat("angle", &m_angle, 0, 2 * 3.1416f);
-			int size = (int)fbspec.Attatchments.Attachments.size();
-			for (int i = size - 1; i >= 0; i--)
+			if (!(fbspec.Attatchments.Attachments[i].m_TextureFormat == FramebufferTextureFormat::RGBA8))
+				size--;
+		}
+		if (size > 1)
+			ImGui::SliderInt("colorBuffer", &colorBufferIndex, 0, size - 1);
+
+		auto& stats = Renderer2D::GetStats();
+
+		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "Draw Calls: %d", Renderer2D::GetStats().drawCalls);
+		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "Quad Count: %d", Renderer2D::GetStats().quadCount);
+		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "frame buffer width: %d", m_FrameBuffer->GetSpecs().Width);
+		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "framebuffer height: %d", m_FrameBuffer->GetSpecs().Height);
+
+
+		std::string name = "Null";
+		if (m_HoveredEntity && m_HoveredEntity.HasComponent<Component::Tag>())
+			name = m_HoveredEntity.GetComponent<Component::Tag>().name;
+		ImGui::Text("hovered entity: %s", name.c_str());
+
+		static std::string modes[] = { "none", "Translation", "Rotation", "Scale" };
+		std::string mode = modes[m_GizmoType + 1];
+		ImGui::Text("ImGuizmo mode: %s", mode.c_str());
+		name = "";
+		Entity selected = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (selected && selected.HasComponent<Component::Tag>())
+			name = "\n\tselected entity: " + selected.GetComponent<Component::Tag>().name;
+		ImGui::TextColored({ 1, .5, .98, 1 }, "q:none, w:translation, e:rotation, r:scale%s", name.c_str());
+
+		if (Input::IsKeyPressed(KeyCode::LeftAlt))
+			ImGui::Text("Mouse mode: Camera Edit\n\t(lft mouse rotate, right zoom, middle pan)");
+		else
+			ImGui::Text("Mouse mode: Scene Edit");
+
+		static float prevTs = timeStep;
+
+		static bool vsync = true;
+		if (ImGui::Checkbox("vsync?", &vsync))
+		{
+			Application::Get().GetWindow().SetVSync(vsync);
+			prevTs = 0.1f;
+		}
+		static short frames = 0;
+		{
+			float times = (1 / 6.0f) / (prevTs + 0.00001f);
+			frames = (int)fmod(frames, times);
+			if (++(frames) == 1)
+				prevTs = timeStep;
+		}
+		ImGui::TextColored({ .8f, .2f, .8f, 1.f }, "frameRate: %f-fps\n\t%f-seconds/frame", 1 / prevTs, prevTs);
+
+		ImGui::Text("camera yaw:%f, pitch:%f, dist:%f", m_EditorCamera.GetYaw(), m_EditorCamera.GetPitch(), m_EditorCamera.GetDistance());
+		if (ImGui::Button("reset editor camera to defaults?"))
+			m_EditorCamera = EditorCamera(m_EditorCamera);
+
+
+		if (Input::IsMouseButtonPressed(Mouse::ButtonLeft) && !Input::IsKeyPressed(KeyCode::LeftAlt)
+			&& !ImGuizmo::IsOver() && m_SceneHovered)
+		{
+			m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+			m_SceneHovered = false;
+		}
+		ImGui::End();
+	}
+	void EditorLayer::viewportSettings()
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
+		ImGui::Begin("viewPort");
+
+
+		auto viewportOffset = ImGui::GetCursorPos(); //includes tab bar
+		m_ViewPortFocused = ImGui::IsWindowFocused();
+		m_ViewPortHovered = ImGui::IsWindowHovered();
+		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewPortFocused && !m_ViewPortHovered);
+
+		auto viewPortSize = ImGui::GetContentRegionAvail();
+		m_ViewPortSize = { viewPortSize.x, viewPortSize.y };
+
+		//drawing the scene to imgui
+		ImGui::Image((void*)(uint64_t)m_FrameBuffer->GetColorAttachmentID(colorBufferIndex),
+			{ m_ViewPortSize.x, m_ViewPortSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+
+		m_SceneHovered = ImGui::IsItemHovered();
+
+
+		auto windowSize = ImGui::GetWindowSize();
+		ImVec2 minBound = ImGui::GetWindowPos();
+		minBound.x += viewportOffset.x;
+		minBound.y += viewportOffset.y;
+
+		ImVec2 maxBound = { minBound.x + windowSize.x - viewportOffset.x, minBound.y + windowSize.y - viewportOffset.y };
+		m_ViewportBounds[0] = { minBound.x, minBound.y };
+		m_ViewportBounds[1] = { maxBound.x, maxBound.y };
+
+		Input::SetViewportOffset(minBound.x, minBound.y);
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
-				if (!(fbspec.Attatchments.Attachments[i].m_TextureFormat == FramebufferTextureFormat::RGBA8))
-					size--;
+				m_SceneHierarchyPanel.SetSelectedEntity({});
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				OpenScene(std::filesystem::path(g_AssetPath) / path);
 			}
-			if (size > 1)
-				ImGui::SliderInt("colorBuffer", &colorBufferIndex, 0, size - 1);
-
-			auto& stats = Renderer2D::GetStats();
-
-			ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "Draw Calls: %d", Renderer2D::GetStats().drawCalls);
-			ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "Quad Count: %d", Renderer2D::GetStats().quadCount);
-			ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "frame buffer width: %d", m_FrameBuffer->GetSpecs().Width);
-			ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "framebuffer height: %d", m_FrameBuffer->GetSpecs().Height);
-
-
-			std::string name = "Null";
-			if (m_HoveredEntity && m_HoveredEntity.HasComponent<Component::Tag>())
-				name = m_HoveredEntity.GetComponent<Component::Tag>().name;
-			ImGui::Text("hovered entity: %s", name.c_str());
-
-			static std::string modes[] = { "none", "Translation", "Rotation", "Scale" };
-			std::string mode = modes[m_GizmoType + 1];
-			ImGui::Text("ImGuizmo mode: %s", mode.c_str());
-			name = "";
-			Entity selected = m_SceneHierarchyPanel.GetSelectedEntity();
-			if (selected && selected.HasComponent<Component::Tag>())
-				name = "\n\tselected entity: " + selected.GetComponent<Component::Tag>().name;
-			ImGui::TextColored({ 1, .5, .98, 1 }, "q:none, w:translation, e:rotation, r:scale%s", name.c_str());
-
-			if (Input::IsKeyPressed(KeyCode::LeftAlt))
-				ImGui::Text("Mouse mode: Camera Edit\n\t(lft mouse rotate, right zoom, middle pan)");
-			else
-				ImGui::Text("Mouse mode: Scene Edit");
-
-			static float prevTs = timeStep;
-
-			static bool vsync = true;
-			if (ImGui::Checkbox("vsync?", &vsync))
-			{
-				Application::Get().GetWindow().SetVSync(vsync);
-				prevTs = 0.1f;
-			}
-			static short frames = 0;
-			{
-				float times = (1 / 6.0f) / (prevTs + 0.00001f);
-				frames = (int)fmod(frames, times);
-				if (++(frames) == 1)
-					prevTs = timeStep;
-			}
-			ImGui::TextColored({ .8f, .2f, .8f, 1.f }, "frameRate: %f-fps\n\t%f-seconds/frame", 1 / prevTs, prevTs);
-
-			ImGui::Text("camera yaw:%f, pitch:%f, dist:%f", m_EditorCamera.GetYaw(), m_EditorCamera.GetPitch(), m_EditorCamera.GetDistance());
-			if (ImGui::Button("reset editor camera to defaults?"))
-				m_EditorCamera = EditorCamera(m_EditorCamera);
-
-
-			if (Input::IsMouseButtonPressed(Mouse::ButtonLeft) && !Input::IsKeyPressed(KeyCode::LeftAlt)
-				&& !ImGuizmo::IsOver() && m_SceneHovered)
-			{
-				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
-				m_SceneHovered = false;
-			}
-			ImGui::End();
+			ImGui::EndDragDropTarget();
 		}
 
-
-		//viewport, main scene
+		//Gizmo's
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (m_SceneState == SceneState::Edit && selectedEntity && m_GizmoType != -1)
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
-			ImGui::Begin("viewPort");
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+
+			float windowWidth = (float)ImGui::GetWindowWidth();
+			float windowHeight = (float)ImGui::GetWindowHeight();
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+			// Camera
+
+			const glm::mat4* cameraProjection;
+			glm::mat4 cameraView;
+			cameraProjection = &m_EditorCamera.GetProjection();
+			cameraView = m_EditorCamera.GetViewMatrix();
 
 
-			auto viewportOffset = ImGui::GetCursorPos(); //includes tab bar
-			m_ViewPortFocused = ImGui::IsWindowFocused();
-			m_ViewPortHovered = ImGui::IsWindowHovered();
-			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewPortFocused && !m_ViewPortHovered);
+			// Entity transform
+			auto& tc = selectedEntity.GetComponent<Component::Transform>();
+			glm::mat4 transform = tc.GetTransform();
 
-			auto viewPortSize = ImGui::GetContentRegionAvail();
-			m_ViewPortSize = { viewPortSize.x, viewPortSize.y };
+			bool snapping = Input::IsKeyPressed(Key::LeftControl);
+			float snapValue = (m_GizmoType == ImGuizmo::OPERATION::ROTATE) ? 45.f : .5f;
 
-			//drawing the scene to imgui
-			ImGui::Image((void*)(uint64_t)m_FrameBuffer->GetColorAttachmentID(colorBufferIndex),
-				{ m_ViewPortSize.x, m_ViewPortSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			float snapValues[3] = { snapValue, snapValue, snapValue };
 
+			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(*cameraProjection), (ImGuizmo::OPERATION)m_GizmoType,
+				ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, (snapping) ? snapValues : nullptr);
 
-			m_SceneHovered = ImGui::IsItemHovered();
-
-
-			auto windowSize = ImGui::GetWindowSize();
-			ImVec2 minBound = ImGui::GetWindowPos();
-			minBound.x += viewportOffset.x;
-			minBound.y += viewportOffset.y;
-
-			ImVec2 maxBound = { minBound.x + windowSize.x - viewportOffset.x, minBound.y + windowSize.y - viewportOffset.y };
-			m_ViewportBounds[0] = { minBound.x, minBound.y };
-			m_ViewportBounds[1] = { maxBound.x, maxBound.y };
-
-			Input::SetViewportOffset(minBound.x, minBound.y);
-
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-				{
-					m_SceneHierarchyPanel.SetSelectedEntity({});
-					const wchar_t* path = (const wchar_t*)payload->Data;
-					OpenScene(std::filesystem::path(g_AssetPath) / path);
-				}
-				ImGui::EndDragDropTarget();
-			}
-
-			//Gizmo's
-			Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-			if (m_SceneState == SceneState::Edit && selectedEntity && m_GizmoType != -1)
-			{
-				ImGuizmo::SetOrthographic(false);
-				ImGuizmo::SetDrawlist();
-
-				float windowWidth = (float)ImGui::GetWindowWidth();
-				float windowHeight = (float)ImGui::GetWindowHeight();
-				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-
-				// Camera
-
-				const glm::mat4* cameraProjection;
-				glm::mat4 cameraView;
-				cameraProjection = &m_EditorCamera.GetProjection();
-				cameraView = m_EditorCamera.GetViewMatrix();
-
-
-				// Entity transform
-				auto& tc = selectedEntity.GetComponent<Component::Transform>();
-				glm::mat4 transform = tc.GetTransform();
-
-				bool snapping = Input::IsKeyPressed(Key::LeftControl);
-				float snapValue = (m_GizmoType == ImGuizmo::OPERATION::ROTATE) ? 45.f : .5f;
-
-				float snapValues[3] = { snapValue, snapValue, snapValue };
-
-				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(*cameraProjection), (ImGuizmo::OPERATION)m_GizmoType,
-					ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, (snapping) ? snapValues : nullptr);
-
-				if (ImGuizmo::IsUsing() && !Input::IsKeyPressed(KeyCode::LeftAlt))
-					Math::DecomposeTransform(transform, tc);
+			if (ImGuizmo::IsUsing() && !Input::IsKeyPressed(KeyCode::LeftAlt))
+				Math::DecomposeTransform(transform, tc);
 
 
 
-			}
-			ImGui::End();
 		}
-
 
 		ImGui::PopStyleVar();
-
-
-		UI_Toolbar();
+		ImGui::End();
 	}
-
 	void EditorLayer::UI_Toolbar()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
