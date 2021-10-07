@@ -1,8 +1,8 @@
 #include "hzpch.h"
-//#include "Scene.h"
+#include "Scene.h"
 
 #include <Hazel/Scene/Components.h>
-#include "Entity.h"//includes scene.h
+#include "Entity.h"
 
 #include "Hazel/Renderer/Renderer2D.h"
 
@@ -43,7 +43,15 @@ namespace Hazel
 		const glm::vec3& rotation /* = glm::vec3(0) */,
 		const glm::vec3& scale /* = glm::vec3(1) */)
 	{
+		return CreateEntityWithUUID(UUID(), name, translation, rotation, scale);
+	}
+
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name, const glm::vec3& translation /* = glm::vec3(0) */,
+		const glm::vec3& rotation /* = glm::vec3(0) */,
+		const glm::vec3& scale /* = glm::vec3(1) */) 
+	{
 		Entity e(m_Registry.create(), this);
+		e.AddComponent<Component::ID>(uuid);
 
 		if (!ValidEntity(name))
 			e.AddComponent<Component::Tag>(name);
@@ -294,7 +302,12 @@ namespace Hazel
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
-		//static_assert(false);
+		// static_assert(false);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::ID>(Entity entity, Component::ID& component)
+	{
 	}
 
 	template<>

@@ -103,7 +103,7 @@ namespace Hazel
 			if (tag == "N/A")
 				return;
 
-		tag += "\n\tid:" + std::to_string((uint32_t)node);
+		tag += "\n\tid:" + std::to_string(node.GetUUID());
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= (m_SelectedContext == node) ? ImGuiTreeNodeFlags_Selected : 0;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;

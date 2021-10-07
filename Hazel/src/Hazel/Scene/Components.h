@@ -7,19 +7,31 @@
 
 #include <Hazel/Renderer/Color.h>
 #include <Hazel/Renderer/Camera.h>
-#include <Hazel/Renderer/Shape.h>
+#include "Hazel/Core/UUID.h"
+#include <Hazel/Renderer/Texture.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Entity.h"
 
 namespace Hazel
 {
 
+	// Forward declaration for native script
+	class ScriptableEntity;
+
+
 	namespace Component
 	{
+		struct ID
+		{
+			UUID id;
+
+			ID() = default;
+			ID(const ID&) = default;
+		};
+
 		struct Tag
 		{
 			std::string name;

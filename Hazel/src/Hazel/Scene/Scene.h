@@ -6,6 +6,7 @@
 #pragma warning(pop)
 class b2World;
 #include "Hazel/Core/Timestep.h"
+#include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/Framebuffer.h"
 
 #include <Hazel/Renderer/Camera.h>
@@ -15,6 +16,7 @@ class b2World;
 namespace Hazel
 {
 	class Entity;
+	class ScriptableEntity;
 
 	class Scene
 	{
@@ -26,6 +28,9 @@ namespace Hazel
 		};
 
 		Entity CreateEntity();
+		Entity CreateEntityWithUUID(UUID uuid, const std::string& name, const glm::vec3& transform = glm::vec3(0),
+			const glm::vec3& rotation = glm::vec3(0),
+			const glm::vec3& scale = glm::vec3(1));
 		Entity CreateEntity(const glm::vec3& transform = glm::vec3(0),
 							const glm::vec3& rotation = glm::vec3(0),
 							const glm::vec3& scale = glm::vec3(1));
