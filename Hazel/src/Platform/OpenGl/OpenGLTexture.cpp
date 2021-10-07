@@ -47,7 +47,6 @@ namespace Hazel {
 
 		if (path == "")
 		{
-		blankTexture:
 
 			m_InternalFormat = GL_RGBA8;
 			m_DataFormat = GL_RGBA;

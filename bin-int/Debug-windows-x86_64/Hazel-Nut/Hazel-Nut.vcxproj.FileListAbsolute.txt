@@ -1,0 +1,2 @@
+D:\Hazel\bin\Debug-windows-x86_64\Hazel-Nut\Hazel-Nut.exe.lastcodeanalysissucceeded
+D:\Hazel\bin-int\Debug-windows-x86_64\Hazel-Nut\NativeCodeAnalysis.read.1.tlog

@@ -108,6 +108,9 @@
     <ClInclude Include="src\Hazel\Core\Timestep.h">
       <Filter>src\Hazel\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Hazel\Core\UUID.h">
+      <Filter>src\Hazel\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Hazel\Core\Window.h">
       <Filter>src\Hazel\Core</Filter>
     </ClInclude>
@@ -1503,7 +1506,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\Core\UUID.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Core\Application.cpp">
@@ -1516,6 +1518,9 @@
       <Filter>src\Hazel\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\Core\NeuralNetwork.cpp">
+      <Filter>src\Hazel\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\Core\UUID.cpp">
       <Filter>src\Hazel\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\Core\Window.cpp">
@@ -1626,6 +1631,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\Core\UUID.cpp" />
   </ItemGroup>
 </Project>

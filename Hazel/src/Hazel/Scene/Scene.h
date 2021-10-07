@@ -1,17 +1,17 @@
 #pragma once
 
 
-#pragma warning(push, 0)
-#include "entt.hpp"
-#pragma warning(pop)
-class b2World;
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/Framebuffer.h"
 
 #include <Hazel/Renderer/Camera.h>
 
+class b2World;
+#pragma warning(push, 0)
+#include "entt.hpp"
 #include <glm/glm.hpp>
+#pragma warning(pop)
 
 namespace Hazel
 {

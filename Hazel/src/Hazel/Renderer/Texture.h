@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Hazel/Core/Core.h"
+
+#pragma warning(push, 0)
 #include "glm/glm.hpp"
 #include <string>
+#pragma warning(pop)
 
 //#define Texture2D
 

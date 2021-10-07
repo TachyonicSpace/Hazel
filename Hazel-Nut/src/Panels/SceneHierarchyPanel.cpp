@@ -1,10 +1,12 @@
 #include "SceneHierarchyPanel.h"
 
-#include "imgui/imgui.h"
-#include <imgui/imgui_internal.h>
-
 #include "Hazel/Scene/Components.h"
 #include "Hazel/Utils/PlatformUtils.h"
+
+#pragma warning(push, 0)
+#include "imgui/imgui.h"
+#include <imgui/imgui_internal.h>
+#pragma warning(pop)
 
 /* The Microsoft C++ compiler is non-compliant with the C++ standard and needs
  * the following definition to disable a security warning on std::strncpy().
