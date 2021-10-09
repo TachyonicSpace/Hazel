@@ -38,6 +38,59 @@ namespace Hazel
 	Scene::Scene()
 	{
 	}
+	template<typename Comp>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		auto view = src.view<Comp>();
+		for (auto e : view)
+		{
+			UUID uuid = src.get<Component::ID>(e).id;
+			HZ_CORE_ASSERT(enttMap.find(uuid) != enttMap.end());
+			entt::entity dstEnttID = enttMap.at(uuid);
+
+			auto& component = src.get<Comp>(e);
+			dst.emplace_or_replace<Comp>(dstEnttID, component);
+		}
+	}
+
+	template<typename Component>
+	static void CopyComponentIfExists(Entity dst, Entity src)
+	{
+		if (src.HasComponent<Component>())
+			dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
+	}
+
+	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = NewRef<Scene>();
+
+		newScene->m_ViewportWidth = other->m_ViewportWidth;
+		newScene->m_ViewportHeight = other->m_ViewportHeight;
+
+		auto& srcSceneRegistry = other->m_Registry;
+		auto& dstSceneRegistry = newScene->m_Registry;
+		std::unordered_map<UUID, entt::entity> enttMap;
+
+		// Create entities in new scene
+		auto idView = srcSceneRegistry.view<Component::ID>();
+		for (auto e : idView)
+		{
+			UUID uuid = srcSceneRegistry.get<Component::ID>(e).id;
+			const auto& name = srcSceneRegistry.get<Component::Tag>(e).name;
+			Entity newEntity = newScene->CreateEntityWithUUID(uuid, name);
+			enttMap[uuid] = (entt::entity)newEntity;
+		}
+
+		// Copy components (except IDComponent and TagComponent)
+		CopyComponent<Component::Transform>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Component::SpriteRenderer>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Component::Cameras>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Component::NativeScript>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Component::Rigidbody2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Component::BoxCollider2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
+
+		return newScene;
+	}
 
 	Entity Scene::CreateEntity(const std::string& name, const glm::vec3& translation /* = glm::vec3(0) */,
 		const glm::vec3& rotation /* = glm::vec3(0) */,
@@ -48,21 +101,12 @@ namespace Hazel
 
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name, const glm::vec3& translation /* = glm::vec3(0) */,
 		const glm::vec3& rotation /* = glm::vec3(0) */,
-		const glm::vec3& scale /* = glm::vec3(1) */) 
+		const glm::vec3& scale /* = glm::vec3(1) */)
 	{
 		Entity e(m_Registry.create(), this);
 		e.AddComponent<Component::ID>(uuid);
 
-		if (!ValidEntity(name))
-			e.AddComponent<Component::Tag>(name);
-		else
-		{
-			int num = -1;
-			auto newName = name + "(";
-			while (ValidEntity(newName + std::to_string(++num) + ")")) {}
-
-			e.AddComponent<Component::Tag>(newName + std::to_string(num) + ")");
-		}
+		e.AddComponent<Component::Tag>(name);
 
 		e.AddComponent<Component::Transform>(translation, rotation, scale);
 		return e;
@@ -286,7 +330,18 @@ namespace Hazel
 
 		Renderer2D::EndScene();
 	}
+	void Scene::DuplicateEntity(Entity entity)
+	{
+		std::string name = entity.GetName();
+		Entity newEntity = CreateEntity(name);
 
+		CopyComponentIfExists<Component::Transform>(newEntity, entity);
+		CopyComponentIfExists<Component::SpriteRenderer>(newEntity, entity);
+		CopyComponentIfExists<Component::Cameras>(newEntity, entity);
+		CopyComponentIfExists<Component::NativeScript>(newEntity, entity);
+		CopyComponentIfExists<Component::Rigidbody2D>(newEntity, entity);
+		CopyComponentIfExists<Component::BoxCollider2D>(newEntity, entity);
+	}
 	Hazel::Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = m_Registry.view<Component::Cameras>();

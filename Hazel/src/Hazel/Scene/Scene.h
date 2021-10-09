@@ -27,6 +27,8 @@ namespace Hazel
 			HZ_CORE_WARN("destroying scene");
 		};
 
+		static Ref<Scene> Copy(Ref<Scene> other);
+
 		Entity CreateEntity();
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name, const glm::vec3& transform = glm::vec3(0),
 			const glm::vec3& rotation = glm::vec3(0),
@@ -49,7 +51,7 @@ namespace Hazel
 		bool Empty();
 
 		void DrawIDBuffer(Ref<Framebuffer> target, EditorCamera& cam);
-
+		void DuplicateEntity(Entity entity);
 		Entity GetPrimaryCameraEntity();
 
 		template <typename ... Args>

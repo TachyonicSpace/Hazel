@@ -36,6 +36,7 @@ namespace Hazel
 	void SceneHierarchyPanel::OnImGuiRender(bool displayAllEntities)
 	{
 		//all entities
+		if (m_context)
 		{
 			ImGui::Begin("Scene Hierarchy");
 

@@ -21,7 +21,8 @@ namespace Hazel
 		virtual void OnEvent(Event & e) override;
 		
 		void OpenScene(); 
-		void EditorLayer::OpenScene(const std::filesystem::path& path);
+		void EditorLayer::OpenScene(const std::filesystem::path& path);		
+		void SaveScene();
 	public:
 		static EditorLayer* m_MainEditorLayer;
 	private:
@@ -34,8 +35,13 @@ namespace Hazel
 		void NewScene();
 		void SaveSceneAs();
 
+
+		void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
+
 		void OnScenePlay();
 		void OnSceneStop();
+
+		void OnDuplicateEntity();
 
 		// UI Panels
 		void UI_Toolbar();
@@ -52,7 +58,9 @@ namespace Hazel
 		EditorCamera m_EditorCamera;
 
 
-		Ref<Scene> m_Scene;
+		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_EditorScene;
+		std::filesystem::path m_EditorScenePath;
 		Entity m_HoveredEntity;
 
 		Ref<Texture2D> m_checkerboard;
