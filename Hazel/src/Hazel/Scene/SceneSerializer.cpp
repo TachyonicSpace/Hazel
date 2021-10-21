@@ -232,6 +232,18 @@ namespace Hazel {
 			out << YAML::EndMap; // Component::BoxCollider2D
 		}
 
+		if (entity.HasComponent<Component::InitialPhysicsState>())
+		{
+			out << YAML::Key << "InitialPhysicsStateComponent";
+			out << YAML::BeginMap;
+
+			auto& initComponent = entity.GetComponent<Component::InitialPhysicsState>();
+			out << YAML::Key << "Velocity" << YAML::Value << initComponent.velocity;
+			out << YAML::Key << "Angular Velocity" << YAML::Value << initComponent.angularVelocity;
+
+			out << YAML::EndMap;
+		}
+
 		out << YAML::EndMap; // Entity
 	}
 
@@ -357,6 +369,14 @@ namespace Hazel {
 					bc2d.Friction = boxCollider2DComponent["Friction"].as<float>();
 					bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
 					bc2d.RestitutionThreshold = boxCollider2DComponent["RestitutionThreshold"].as<float>();
+				}
+
+				auto InitialPhysicsStateComponent = entity["InitialPhysicsStateComponent"];
+				if (InitialPhysicsStateComponent)
+				{
+					auto& ips = deserializedEntity.AddComponent<Component::InitialPhysicsState>();
+					ips.velocity = InitialPhysicsStateComponent["Velocity"].as<glm::vec2>();
+					ips.angularVelocity = InitialPhysicsStateComponent["Angular Velocity"].as<float>();
 				}
 			}
 		}

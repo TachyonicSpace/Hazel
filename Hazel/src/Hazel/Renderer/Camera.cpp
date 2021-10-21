@@ -184,7 +184,7 @@ namespace Hazel {
 
 	//zooms camera on mouse scroll
 	bool EditorCamera::OnMouseScroll(MouseScrolledEvent& e)
-	{
+	{//move to editor layer to test if hovered over the scene
 		float delta = e.GetYOffset() * 0.1f;
 		MouseZoom(delta);
 		UpdateView();

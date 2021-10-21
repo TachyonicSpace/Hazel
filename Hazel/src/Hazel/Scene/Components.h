@@ -143,5 +143,31 @@ namespace Hazel
 			BoxCollider2D() = default;
 			BoxCollider2D(const BoxCollider2D&) = default;
 		};
+
+		struct InitialPhysicsState
+		{
+			glm::vec2 velocity = { 0, 0 };
+			float angularVelocity = 0;
+
+			InitialPhysicsState() = default;
+			InitialPhysicsState(const InitialPhysicsState&) = default;
+		};
 	}
 }
+
+/*	places to update components at
+
+SceneSeralizer:145 & 305, 
+
+Scene, 
+	Copy()
+	OnRuntimeStart()
+	OnUpdateRuntime()
+	DuplicateEntity()
+	OnComponentAdded()
+
+ScenehierarchyPanel
+	DrawComponents()
+	AddComponentsPopup()
+
+*/

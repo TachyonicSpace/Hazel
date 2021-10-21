@@ -88,6 +88,7 @@ namespace Hazel
 		CopyComponent<Component::NativeScript>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Component::Rigidbody2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Component::BoxCollider2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Component::InitialPhysicsState>(dstSceneRegistry, srcSceneRegistry, enttMap);
 
 		return newScene;
 	}
@@ -173,6 +174,14 @@ namespace Hazel
 			bodyDef.type = Rigidbody2DTypeToBox2DBody(rb2d.Type);
 			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
 			bodyDef.angle = transform.Rotation.z;
+
+			if (entity.HasComponent<Component::InitialPhysicsState>())
+			{
+				auto& initState = entity.GetComponent<Component::InitialPhysicsState>();
+
+				bodyDef.linearVelocity.Set(initState.velocity.x, initState.velocity.y);
+				bodyDef.angularVelocity = initState.angularVelocity;
+			}
 
 			b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
 			body->SetFixedRotation(rb2d.FixedRotation);
@@ -341,6 +350,7 @@ namespace Hazel
 		CopyComponentIfExists<Component::NativeScript>(newEntity, entity);
 		CopyComponentIfExists<Component::Rigidbody2D>(newEntity, entity);
 		CopyComponentIfExists<Component::BoxCollider2D>(newEntity, entity);
+		CopyComponentIfExists<Component::InitialPhysicsState>(newEntity, entity);
 	}
 	Hazel::Entity Scene::GetPrimaryCameraEntity()
 	{
@@ -399,6 +409,11 @@ namespace Hazel
 
 	template<>
 	void Scene::OnComponentAdded<Component::BoxCollider2D>(Entity entity, Component::BoxCollider2D& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::InitialPhysicsState>(Entity entity, Component::InitialPhysicsState& component)
 	{
 	}
 }

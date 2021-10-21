@@ -20,6 +20,9 @@ Entities:
       Friction: 0.5
       Restitution: 0
       RestitutionThreshold: 0.5
+    InitialPhysicsStateComponent:
+      Velocity: [0, 0.0599999987]
+      Angular Velocity: 0
   - Entity: 5087151058080689990
     TagComponent:
       Tag: Floor
@@ -72,8 +75,8 @@ Entities:
     TagComponent:
       Tag: Sprite
     TransformComponent:
-      Translation: [0, 0, 0.225150004]
-      Rotation: [0, 0, 0.795944214]
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
       Scale: [0.361100405, 0.37560001, 0.84799999]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
@@ -88,3 +91,6 @@ Entities:
       Friction: 0.100000001
       Restitution: 0.819999993
       RestitutionThreshold: 0.5
+    InitialPhysicsStateComponent:
+      Velocity: [0, 4]
+      Angular Velocity: 0

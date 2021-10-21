@@ -553,6 +553,8 @@ namespace Hazel
 		else
 			SaveSceneAs();
 
+		HZ_CORE_INFO("Saving Scene: {0}", m_EditorScenePath);
+
 	}
 
 	void EditorLayer::SaveSceneAs()

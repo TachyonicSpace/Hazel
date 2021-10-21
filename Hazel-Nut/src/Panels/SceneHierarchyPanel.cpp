@@ -51,6 +51,7 @@ namespace Hazel
 				m_SelectedContext = {};
 
 			// Right-click on blank space
+			// todo: add physics sprite
 			if (ImGui::BeginPopupContextWindow(0, 1, false))
 			{
 				if (ImGui::MenuItem("Create Empty Entity"))
@@ -360,6 +361,12 @@ namespace Hazel
 				ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
 			});
 
+		DrawComponent<Component::InitialPhysicsState>("Initial Physics State", ent, [](auto& component)
+			{
+				ImGui::DragFloat2("Velocity", glm::value_ptr(component.velocity), .01);
+				ImGui::DragFloat("angular Velocity", &component.angularVelocity, .01);
+			});
+
 		if (ent.deleted)
 		{
 			m_context->DestroyEntity(ent);
@@ -402,6 +409,15 @@ namespace Hazel
 			if (ImGui::MenuItem("Box Collider 2D"))
 			{
 				m_SelectedContext.AddComponent<Component::BoxCollider2D>();
+				ImGui::CloseCurrentPopup();
+			}
+		}
+
+		if (!m_SelectedContext.HasComponent<Component::InitialPhysicsState>())
+		{
+			if (ImGui::MenuItem("Initial Physics State"))
+			{
+				m_SelectedContext.AddComponent<Component::InitialPhysicsState>();
 				ImGui::CloseCurrentPopup();
 			}
 		}
