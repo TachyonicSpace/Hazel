@@ -11,6 +11,23 @@ extern Hazel::Application* Hazel::CreateApplication(ApplicationCommandLineArgs a
 
 int main(int argc, char** argv)
 {
+	std::error_code PathNotFound;
+	char drive = 'C';
+	auto initPath = std::filesystem::current_path();
+	while (drive != 'Z' + 1)
+	{
+		std::string newPath = ":\\Hazel\\Hazel-Nut";
+		newPath = drive + newPath;
+		std::filesystem::current_path(newPath, PathNotFound);
+
+		if (PathNotFound == std::error_code())
+			break;
+		PathNotFound = std::error_code();
+		drive++;
+	}
+	if (drive == 'Z' + 1)
+		std::filesystem::current_path(initPath);
+
 	//starts hazel logging system
 	Hazel::Log::Init();
 
