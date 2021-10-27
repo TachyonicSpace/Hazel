@@ -20,7 +20,9 @@ namespace Hazel
 		virtual void OnEvent(Event& e) override;
 
 		void Begin();
+		void BeginDocking();
 		void End();
+		void EndDocking();
 		void BlockEvents(bool block) { m_BlockEvents = block; }
 
 		void SetDarkThemeColors();

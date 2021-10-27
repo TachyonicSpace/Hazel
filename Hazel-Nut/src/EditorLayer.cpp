@@ -168,6 +168,8 @@ namespace Hazel
 
 	void EditorLayer::OnImGuiRender()
 	{
+		Application::Get().GetImGuiLayer()->BeginDocking();
+
 		ImGuiMenuBar();
 
 		m_SceneHierarchyPanel.OnImGuiRender();
@@ -180,6 +182,8 @@ namespace Hazel
 
 
 		UI_Toolbar();
+
+		Application::Get().GetImGuiLayer()->EndDocking();
 	}
 	void EditorLayer::ImGuiMenuBar()
 	{

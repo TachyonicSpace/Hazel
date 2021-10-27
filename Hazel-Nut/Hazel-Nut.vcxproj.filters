@@ -13,7 +13,6 @@
     <ClInclude Include="src\Panels\SceneHierarchyPanel.h">
       <Filter>Panels</Filter>
     </ClInclude>
-    <ClInclude Include="resource1.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EditorLayer.cpp" />
@@ -24,11 +23,5 @@
     <ClCompile Include="src\Panels\SceneHierarchyPanel.cpp">
       <Filter>Panels</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Hazel-Nut1.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\Resources\Branding\Hazel_Logo_Text_Light_Square.ico" />
   </ItemGroup>
 </Project>

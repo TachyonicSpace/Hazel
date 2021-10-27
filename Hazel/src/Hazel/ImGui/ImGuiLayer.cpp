@@ -93,8 +93,10 @@ namespace Hazel {
 		ImGui::NewFrame();
 
 		ImGuizmo::BeginFrame();
+	}
 
-
+	void ImGuiLayer::BeginDocking()
+	{
 		//docking in imgui
 		{
 			static bool opt_fullscreen_persistant = true;
@@ -154,7 +156,6 @@ namespace Hazel {
 	void ImGuiLayer::End()
 	{
 		HZ_PROFILE_FUNCTION();
-		ImGui::End();
 
 
 		ImGuiIO& io = ImGui::GetIO();
@@ -172,6 +173,11 @@ namespace Hazel {
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backupCurrentContext);
 		}
+	}
+
+	void ImGuiLayer::EndDocking()
+	{
+		ImGui::End();
 	}
 
 	//sets our dark theme color, may edit to allow multiple themes

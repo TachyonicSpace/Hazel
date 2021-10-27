@@ -13,8 +13,5 @@
     <ClCompile Include="src\DNA.cpp" />
     <ClCompile Include="src\Rocket.cpp" />
     <ClCompile Include="src\SandboxApp.cpp" />
-    <ClCompile Include="src\app\Window.cpp">
-      <Filter>app</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
