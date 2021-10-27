@@ -14,6 +14,7 @@ namespace Hazel {
 
 		bool Deserialize(const std::string& filepath);
 		bool DeserializeRuntime(const std::string& filepath);
+		bool DeserializeOldScenes(const std::string& filepath);
 	private:
 		Ref<Scene> m_Scene;
 	};

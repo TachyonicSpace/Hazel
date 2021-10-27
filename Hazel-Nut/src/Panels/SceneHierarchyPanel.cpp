@@ -349,6 +349,8 @@ namespace Hazel
 				}
 
 				ImGui::Checkbox("Fixed Rotation", &component.FixedRotation);
+				ImGui::DragFloat2("Starting Velocity", glm::value_ptr(component.velocity));
+				ImGui::DragFloat("AngularVelocity", &component.angularVelocity);
 			});
 
 		DrawComponent<Component::BoxCollider2D>("Box Collider 2D", ent, [](auto& component)
@@ -361,10 +363,14 @@ namespace Hazel
 				ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
 			});
 
-		DrawComponent<Component::InitialPhysicsState>("Initial Physics State", ent, [](auto& component)
+		DrawComponent<Component::CircleCollider2D>("Circle Collider 2D", ent, [](auto& component)
 			{
-				ImGui::DragFloat2("Velocity", glm::value_ptr(component.velocity), .01);
-				ImGui::DragFloat("angular Velocity", &component.angularVelocity, .01);
+				ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
+				ImGui::DragFloat("Radius", &component.Radius);
+				ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
 			});
 
 		if (ent.deleted)
@@ -413,11 +419,11 @@ namespace Hazel
 			}
 		}
 
-		if (!m_SelectedContext.HasComponent<Component::InitialPhysicsState>())
+		if (!m_SelectedContext.HasComponent<Component::CircleCollider2D>())
 		{
-			if (ImGui::MenuItem("Initial Physics State"))
+			if (ImGui::MenuItem("Circle Collider 2D"))
 			{
-				m_SelectedContext.AddComponent<Component::InitialPhysicsState>();
+				m_SelectedContext.AddComponent<Component::CircleCollider2D>();
 				ImGui::CloseCurrentPopup();
 			}
 		}

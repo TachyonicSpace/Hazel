@@ -42,6 +42,8 @@ namespace Hazel
 
 		void DestroyEntity(Entity entity);
 
+		Entity FindEntity(const UUID& id);
+
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 

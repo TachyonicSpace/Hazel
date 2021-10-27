@@ -1,6 +1,6 @@
 # Binaries
 **/bin/
-bin-int/
+**/bin-int/
 
 # Hazel files
 *.log
@@ -13,7 +13,7 @@ bin-int/
 **.vcxproj.user
 
 # Directories
-Hazel/vendor/VulkanSDK
+Hazel/vendor
 Hazelnut/assets/cache
 scripts/__pycache__
 

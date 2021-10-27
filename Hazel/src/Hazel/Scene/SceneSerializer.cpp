@@ -213,6 +213,9 @@ namespace Hazel {
 			out << YAML::Key << "BodyType" << YAML::Value << RigidBody2DBodyTypeToString(rb2dComponent.Type);
 			out << YAML::Key << "FixedRotation" << YAML::Value << rb2dComponent.FixedRotation;
 
+			out << YAML::Key << "Velocity" << YAML::Value << rb2dComponent.velocity;
+			out << YAML::Key << "AngularVelocity" << YAML::Value << rb2dComponent.angularVelocity;
+
 			out << YAML::EndMap; // Component::Rigidbody2D
 		}
 
@@ -232,14 +235,18 @@ namespace Hazel {
 			out << YAML::EndMap; // Component::BoxCollider2D
 		}
 
-		if (entity.HasComponent<Component::InitialPhysicsState>())
+		if (entity.HasComponent<Component::CircleCollider2D>())
 		{
-			out << YAML::Key << "InitialPhysicsStateComponent";
+			out << YAML::Key << "CircleCollider2DComponent";
 			out << YAML::BeginMap;
 
-			auto& initComponent = entity.GetComponent<Component::InitialPhysicsState>();
-			out << YAML::Key << "Velocity" << YAML::Value << initComponent.velocity;
-			out << YAML::Key << "Angular Velocity" << YAML::Value << initComponent.angularVelocity;
+			auto& cc2dComponent = entity.GetComponent<Component::CircleCollider2D>();
+			out << YAML::Key << "Offset" << YAML::Value << cc2dComponent.Offset;
+			out << YAML::Key << "Radius" << YAML::Value << cc2dComponent.Radius;
+			out << YAML::Key << "Density" << YAML::Value << cc2dComponent.Density;
+			out << YAML::Key << "Friction" << YAML::Value << cc2dComponent.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << cc2dComponent.Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << cc2dComponent.RestitutionThreshold;
 
 			out << YAML::EndMap;
 		}
@@ -291,97 +298,112 @@ namespace Hazel {
 		}
 		if (data.IsNull() || !data["Scene"])
 			return false;
-
-		std::string sceneName = data["Scene"].as<std::string>();
-		HZ_CORE_TRACE("Deserializing scene '{0}'", sceneName);
-
-		auto entities = data["Entities"];
-		if (entities)
+		try
 		{
-			for (auto entity : entities)
+			std::string sceneName = data["Scene"].as<std::string>();
+			HZ_CORE_TRACE("Deserializing scene '{0}'", sceneName);
+
+			auto entities = data["Entities"];
+			if (entities)
 			{
-				uint64_t uuid = entity["Entity"].as<uint64_t>();
-
-				std::string name;
-				auto tagComponent = entity["TagComponent"];
-				if (tagComponent)
-					name = tagComponent["Tag"].as<std::string>();
-
-				HZ_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
-
-				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
-
-				auto transformComponent = entity["TransformComponent"];
-				if (transformComponent)
+				for (auto entity : entities)
 				{
-					// Entities always have transforms
-					auto& tc = deserializedEntity.GetComponent<Component::Transform>();
-					tc.Translation = transformComponent["Translation"].as<glm::vec3>();
-					tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
-					tc.Scale = transformComponent["Scale"].as<glm::vec3>();
-				}
+					uint64_t uuid = entity["Entity"].as<uint64_t>();
 
-				auto cameraComponent = entity["CameraComponent"];
-				if (cameraComponent)
-				{
-					auto& cc = deserializedEntity.AddComponent<Component::Cameras>();
+					std::string name;
+					auto tagComponent = entity["TagComponent"];
+					if (tagComponent)
+						name = tagComponent["Tag"].as<std::string>();
 
-					auto& cameraProps = cameraComponent["Camera"];
-					cc.camera.SetProjectionType((SceneCamera::ProjectionType)cameraProps["ProjectionType"].as<int>());
+					HZ_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
-					cc.camera.SetPerspectiveVerticalFOV(cameraProps["PerspectiveFOV"].as<float>());
-					cc.camera.SetPerspectiveNearClip(cameraProps["PerspectiveNear"].as<float>());
-					cc.camera.SetPerspectiveFarClip(cameraProps["PerspectiveFar"].as<float>());
+					Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
 
-					cc.camera.SetOrthographicSize(cameraProps["OrthographicSize"].as<float>());
-					cc.camera.SetOrthographicNearClip(cameraProps["OrthographicNear"].as<float>());
-					cc.camera.SetOrthographicFarClip(cameraProps["OrthographicFar"].as<float>());
+					auto transformComponent = entity["TransformComponent"];
+					if (transformComponent)
+					{
+						// Entities always have transforms
+						auto& tc = deserializedEntity.GetComponent<Component::Transform>();
+						tc.Translation = transformComponent["Translation"].as<glm::vec3>();
+						tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
+						tc.Scale = transformComponent["Scale"].as<glm::vec3>();
+					}
 
-					cc.Primary = cameraComponent["Primary"].as<bool>();
-					cc.fixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
-				}
+					auto cameraComponent = entity["CameraComponent"];
+					if (cameraComponent)
+					{
+						auto& cc = deserializedEntity.AddComponent<Component::Cameras>();
 
-				auto spriteRendererComponent = entity["SpriteRendererComponent"];
-				if (spriteRendererComponent)
-				{
-					auto& src = deserializedEntity.AddComponent<Component::SpriteRenderer>();
-					src.color = spriteRendererComponent["Color"].as<glm::vec4>();
-					if (spriteRendererComponent["tiling factor"])
-						src.TilingFactor = spriteRendererComponent["tiling factor"].as<float>();
-				}
+						auto& cameraProps = cameraComponent["Camera"];
+						cc.camera.SetProjectionType((SceneCamera::ProjectionType)cameraProps["ProjectionType"].as<int>());
+
+						cc.camera.SetPerspectiveVerticalFOV(cameraProps["PerspectiveFOV"].as<float>());
+						cc.camera.SetPerspectiveNearClip(cameraProps["PerspectiveNear"].as<float>());
+						cc.camera.SetPerspectiveFarClip(cameraProps["PerspectiveFar"].as<float>());
+
+						cc.camera.SetOrthographicSize(cameraProps["OrthographicSize"].as<float>());
+						cc.camera.SetOrthographicNearClip(cameraProps["OrthographicNear"].as<float>());
+						cc.camera.SetOrthographicFarClip(cameraProps["OrthographicFar"].as<float>());
+
+						cc.Primary = cameraComponent["Primary"].as<bool>();
+						cc.fixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
+					}
+
+					auto spriteRendererComponent = entity["SpriteRendererComponent"];
+					if (spriteRendererComponent)
+					{
+						auto& src = deserializedEntity.AddComponent<Component::SpriteRenderer>();
+						src.color = spriteRendererComponent["Color"].as<glm::vec4>();
+						if (spriteRendererComponent["tiling factor"])
+							src.TilingFactor = spriteRendererComponent["tiling factor"].as<float>();
+					}
 
 
-				auto rigidbody2DComponent = entity["Rigidbody2DComponent"];
-				if (rigidbody2DComponent)
-				{
-					auto& rb2d = deserializedEntity.AddComponent<Component::Rigidbody2D>();
-					rb2d.Type = RigidBody2DBodyTypeFromString(rigidbody2DComponent["BodyType"].as<std::string>());
-					rb2d.FixedRotation = rigidbody2DComponent["FixedRotation"].as<bool>();
-				}
+					auto rigidbody2DComponent = entity["Rigidbody2DComponent"];
+					if (rigidbody2DComponent)
+					{
+						auto& rb2d = deserializedEntity.AddComponent<Component::Rigidbody2D>();
+						rb2d.Type = RigidBody2DBodyTypeFromString(rigidbody2DComponent["BodyType"].as<std::string>());
+						rb2d.FixedRotation = rigidbody2DComponent["FixedRotation"].as<bool>();
+						if (rigidbody2DComponent["Velocity"])
+						{
+							rb2d.velocity = rigidbody2DComponent["Velocity"].as<glm::vec2>();
+							rb2d.angularVelocity = rigidbody2DComponent["AngularVelocity"].as<float>();
+						}
+					}
 
-				auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
-				if (boxCollider2DComponent)
-				{
-					auto& bc2d = deserializedEntity.AddComponent<Component::BoxCollider2D>();
-					bc2d.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
-					bc2d.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
-					bc2d.Density = boxCollider2DComponent["Density"].as<float>();
-					bc2d.Friction = boxCollider2DComponent["Friction"].as<float>();
-					bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
-					bc2d.RestitutionThreshold = boxCollider2DComponent["RestitutionThreshold"].as<float>();
-				}
+					auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
+					if (boxCollider2DComponent)
+					{
+						auto& bc2d = deserializedEntity.AddComponent<Component::BoxCollider2D>();
+						bc2d.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
+						bc2d.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
+						bc2d.Density = boxCollider2DComponent["Density"].as<float>();
+						bc2d.Friction = boxCollider2DComponent["Friction"].as<float>();
+						bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
+						bc2d.RestitutionThreshold = boxCollider2DComponent["RestitutionThreshold"].as<float>();
+					}
 
-				auto InitialPhysicsStateComponent = entity["InitialPhysicsStateComponent"];
-				if (InitialPhysicsStateComponent)
-				{
-					auto& ips = deserializedEntity.AddComponent<Component::InitialPhysicsState>();
-					ips.velocity = InitialPhysicsStateComponent["Velocity"].as<glm::vec2>();
-					ips.angularVelocity = InitialPhysicsStateComponent["Angular Velocity"].as<float>();
+					auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
+					if (boxCollider2DComponent)
+					{
+						auto& bc2d = deserializedEntity.AddComponent<Component::CircleCollider2D>();
+						bc2d.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
+						bc2d.Radius = circleCollider2DComponent["Radius"].as<float>();
+						bc2d.Density = circleCollider2DComponent["Density"].as<float>();
+						bc2d.Friction = circleCollider2DComponent["Friction"].as<float>();
+						bc2d.Restitution = circleCollider2DComponent["Restitution"].as<float>();
+						bc2d.RestitutionThreshold = circleCollider2DComponent["RestitutionThreshold"].as<float>();
+					}
 				}
 			}
-		}
 
-		return true;
+			return true;
+		}
+		catch (...)
+		{
+			DeserializeOldScenes(filepath);
+		}
 	}
 
 	bool SceneSerializer::DeserializeRuntime(const std::string& filepath)
@@ -389,6 +411,130 @@ namespace Hazel {
 		// Not implemented
 		HZ_CORE_ASSERT(false);
 		return false;
+	}
+
+	bool SceneSerializer::DeserializeOldScenes(const std::string& filepath)
+	{
+
+		YAML::Node data = YAML::LoadFile(filepath);
+		try
+		{
+
+
+			if (data.IsNull() || !data["Scene"])
+				return false;
+
+			std::string sceneName = data["Scene"].as<std::string>();
+			HZ_CORE_TRACE("Deserializing scene '{0}'", sceneName);
+
+			auto entities = data["Entities"];
+			if (entities)
+			{
+				for (auto entity : entities)
+				{
+					uint64_t uuid = entity["Entity"].as<uint64_t>();
+
+					std::string name;
+					auto tagComponent = entity["TagComponent"];
+					if (tagComponent)
+						name = tagComponent["Tag"].as<std::string>();
+
+					HZ_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
+
+					Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
+
+					auto transformComponent = entity["TransformComponent"];
+					if (transformComponent)
+					{
+						// Entities always have transforms
+						auto& tc = deserializedEntity.GetComponent<Component::Transform>();
+						tc.Translation = transformComponent["Translation"].as<glm::vec3>();
+						tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
+						tc.Scale = transformComponent["Scale"].as<glm::vec3>();
+					}
+
+					auto cameraComponent = entity["CameraComponent"];
+					if (cameraComponent)
+					{
+						auto& cc = deserializedEntity.AddComponent<Component::Cameras>();
+
+						auto& cameraProps = cameraComponent["Camera"];
+						cc.camera.SetProjectionType((SceneCamera::ProjectionType)cameraProps["ProjectionType"].as<int>());
+
+						cc.camera.SetPerspectiveVerticalFOV(cameraProps["PerspectiveFOV"].as<float>());
+						cc.camera.SetPerspectiveNearClip(cameraProps["PerspectiveNear"].as<float>());
+						cc.camera.SetPerspectiveFarClip(cameraProps["PerspectiveFar"].as<float>());
+
+						cc.camera.SetOrthographicSize(cameraProps["OrthographicSize"].as<float>());
+						cc.camera.SetOrthographicNearClip(cameraProps["OrthographicNear"].as<float>());
+						cc.camera.SetOrthographicFarClip(cameraProps["OrthographicFar"].as<float>());
+
+						cc.Primary = cameraComponent["Primary"].as<bool>();
+						cc.fixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
+					}
+
+					auto spriteRendererComponent = entity["SpriteRendererComponent"];
+					if (spriteRendererComponent)
+					{
+						auto& src = deserializedEntity.AddComponent<Component::SpriteRenderer>();
+						src.color = spriteRendererComponent["Color"].as<glm::vec4>();
+						if (spriteRendererComponent["tiling factor"])
+							src.TilingFactor = spriteRendererComponent["tiling factor"].as<float>();
+					}
+
+
+					auto rigidbody2DComponent = entity["Rigidbody2DComponent"];
+					if (rigidbody2DComponent)
+					{
+						auto& rb2d = deserializedEntity.AddComponent<Component::Rigidbody2D>();
+						rb2d.Type = RigidBody2DBodyTypeFromString(rigidbody2DComponent["BodyType"].as<std::string>());
+						rb2d.FixedRotation = rigidbody2DComponent["FixedRotation"].as<bool>();
+					}
+
+					auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
+					if (boxCollider2DComponent)
+					{
+						auto& bc2d = deserializedEntity.AddComponent<Component::BoxCollider2D>();
+						bc2d.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
+						bc2d.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
+						bc2d.Density = boxCollider2DComponent["Density"].as<float>();
+						bc2d.Friction = boxCollider2DComponent["Friction"].as<float>();
+						bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
+						bc2d.RestitutionThreshold = boxCollider2DComponent["RestitutionThreshold"].as<float>();
+					}
+
+					auto InitialPhysicsStateComponent = entity["InitialPhysicsStateComponent"];
+					if (InitialPhysicsStateComponent)
+					{
+						if (deserializedEntity.HasComponent<Component::Rigidbody2D>())
+						{
+							auto& ips = deserializedEntity.GetComponent<Component::Rigidbody2D>();
+							ips.velocity = InitialPhysicsStateComponent["Velocity"].as<glm::vec2>();
+							ips.angularVelocity = InitialPhysicsStateComponent["Angular Velocity"].as<float>();
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+		catch (...)
+		{
+			try
+			{
+
+			}
+			catch (...)
+			{
+				try
+				{
+
+				}
+				catch (...)
+				{
+				}
+			}
+		}
 	}
 
 }

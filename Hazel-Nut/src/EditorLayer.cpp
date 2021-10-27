@@ -108,7 +108,9 @@ namespace Hazel
 			break;
 		}
 		}
-
+		/*Renderer2D::BeginScene(EditorCamera(45, (m_ViewPortSize.x / m_ViewPortSize.y), .1, 1000));
+		Renderer2D::DrawQuad({ 0, 0 }, { 1, 1 }, 0, { 1, 0, 1 });//todo:add neural network here
+		Renderer2D::EndScene();*/
 		//{
 		//	if (m_ActiveScene->ScenePlay)
 		//	{

@@ -17,6 +17,7 @@
 #include "box2d/b2_body.h"
 #include "box2d/b2_fixture.h"
 #include "box2d/b2_polygon_shape.h"
+#include "box2d/b2_circle_shape.h"
 #pragma warning(pop)
 
 namespace Hazel
@@ -60,6 +61,19 @@ namespace Hazel
 			dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
 	}
 
+	Entity Scene::FindEntity(const UUID& id)
+	{
+		auto view = m_Registry.view<Component::ID>();
+		for (auto e : view)
+		{
+			UUID uuid = m_Registry.get<Component::ID>(e).id;
+			if (uuid != id)
+				continue;
+			return { e, (Scene*)this };
+		}
+		return Entity::Null;
+	}
+
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
 		Ref<Scene> newScene = NewRef<Scene>();
@@ -88,7 +102,7 @@ namespace Hazel
 		CopyComponent<Component::NativeScript>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Component::Rigidbody2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Component::BoxCollider2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<Component::InitialPhysicsState>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Component::CircleCollider2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
 
 		return newScene;
 	}
@@ -174,14 +188,8 @@ namespace Hazel
 			bodyDef.type = Rigidbody2DTypeToBox2DBody(rb2d.Type);
 			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
 			bodyDef.angle = transform.Rotation.z;
-
-			if (entity.HasComponent<Component::InitialPhysicsState>())
-			{
-				auto& initState = entity.GetComponent<Component::InitialPhysicsState>();
-
-				bodyDef.linearVelocity.Set(initState.velocity.x, initState.velocity.y);
-				bodyDef.angularVelocity = initState.angularVelocity;
-			}
+			bodyDef.linearVelocity.Set(rb2d.velocity.x, rb2d.velocity.y);
+			bodyDef.angularVelocity = rb2d.angularVelocity;
 
 			b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
 			body->SetFixedRotation(rb2d.FixedRotation);
@@ -200,6 +208,22 @@ namespace Hazel
 				fixtureDef.friction = bc2d.Friction;
 				fixtureDef.restitution = bc2d.Restitution;
 				fixtureDef.restitutionThreshold = bc2d.RestitutionThreshold;
+				body->CreateFixture(&fixtureDef);
+			}
+
+			if (entity.HasComponent<Component::CircleCollider2D>())
+			{
+				auto& cc2d = entity.GetComponent<Component::CircleCollider2D>();
+
+				b2CircleShape circleShape;
+				circleShape.m_radius = cc2d.Radius;
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &circleShape;
+				fixtureDef.density = cc2d.Density;
+				fixtureDef.friction = cc2d.Friction;
+				fixtureDef.restitution = cc2d.Restitution;
+				fixtureDef.restitutionThreshold = cc2d.RestitutionThreshold;
 				body->CreateFixture(&fixtureDef);
 			}
 		}
@@ -350,7 +374,7 @@ namespace Hazel
 		CopyComponentIfExists<Component::NativeScript>(newEntity, entity);
 		CopyComponentIfExists<Component::Rigidbody2D>(newEntity, entity);
 		CopyComponentIfExists<Component::BoxCollider2D>(newEntity, entity);
-		CopyComponentIfExists<Component::InitialPhysicsState>(newEntity, entity);
+		CopyComponentIfExists<Component::CircleCollider2D>(newEntity, entity);
 	}
 	Hazel::Entity Scene::GetPrimaryCameraEntity()
 	{
@@ -413,7 +437,7 @@ namespace Hazel
 	}
 
 	template<>
-	void Scene::OnComponentAdded<Component::InitialPhysicsState>(Entity entity, Component::InitialPhysicsState& component)
+	void Scene::OnComponentAdded<Component::CircleCollider2D>(Entity entity, Component::CircleCollider2D& component)
 	{
 	}
 }

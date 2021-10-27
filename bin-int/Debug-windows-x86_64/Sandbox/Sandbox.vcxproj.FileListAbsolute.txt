@@ -1,2 +1,0 @@
-D:\Hazel\bin\Debug-windows-x86_64\Sandbox\Sandbox.exe.lastcodeanalysissucceeded
-D:\Hazel\bin-int\Debug-windows-x86_64\Sandbox\NativeCodeAnalysis.read.1.tlog

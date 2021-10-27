@@ -119,6 +119,10 @@ namespace Hazel
 			BodyType Type = BodyType::Static;
 			bool FixedRotation = false;
 
+			//initialPhisics State
+			glm::vec2 velocity = { 0, 0 };
+			float angularVelocity = 0;
+
 			// Storage for runtime
 			void* RuntimeBody = nullptr;
 
@@ -144,13 +148,22 @@ namespace Hazel
 			BoxCollider2D(const BoxCollider2D&) = default;
 		};
 
-		struct InitialPhysicsState
+		struct CircleCollider2D
 		{
-			glm::vec2 velocity = { 0, 0 };
-			float angularVelocity = 0;
+			glm::vec2 Offset = { 0.0f, 0.0f };
+			float Radius = 1;
 
-			InitialPhysicsState() = default;
-			InitialPhysicsState(const InitialPhysicsState&) = default;
+			// TODO(Yan): move into physics material in the future maybe
+			float Density = 1.0f;
+			float Friction = 0.5f;
+			float Restitution = 0.0f;
+			float RestitutionThreshold = 0.5f;
+
+			// Storage for runtime
+			void* RuntimeFixture = nullptr;
+
+			CircleCollider2D() = default;
+			CircleCollider2D(const CircleCollider2D&) = default;
 		};
 	}
 }
