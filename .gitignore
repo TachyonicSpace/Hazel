@@ -11,6 +11,7 @@
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
+**.idb
 
 # Directories
 Hazel/vendor
