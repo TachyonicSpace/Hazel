@@ -13,5 +13,8 @@
     <ClCompile Include="src\DNA.cpp" />
     <ClCompile Include="src\Rocket.cpp" />
     <ClCompile Include="src\SandboxApp.cpp" />
+    <ClCompile Include="src\RocketProgram.cpp" />
+    <ClCompile Include="src\NeuralNetworkProgram.cpp" />
+    <ClCompile Include="src\NeuralNetwork.cpp" />
   </ItemGroup>
 </Project>

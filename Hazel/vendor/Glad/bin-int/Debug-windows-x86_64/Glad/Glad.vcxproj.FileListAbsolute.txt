@@ -1,2 +1,0 @@
-D:\Hazel\Hazel\vendor\Glad\bin\Debug-windows-x86_64\Glad\Glad.lib.lastcodeanalysissucceeded
-D:\Hazel\Hazel\vendor\Glad\bin-int\Debug-windows-x86_64\Glad\NativeCodeAnalysis.read.1.tlog
