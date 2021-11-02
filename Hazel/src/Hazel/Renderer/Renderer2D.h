@@ -50,6 +50,7 @@ namespace Hazel {
 		{
 			uint32_t drawCalls = 0;
 			uint32_t quadCount = 0;
+			uint32_t quadsPerDrawCall = 0;
 		};
 
 		static void ResetStats();

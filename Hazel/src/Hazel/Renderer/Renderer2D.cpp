@@ -126,7 +126,7 @@ namespace Hazel {
 
 	static void StartNewBatch()
 	{
-		//Renderer2D::EndScene();
+		Renderer2D::EndScene();
 
 		s_Data.quadIndexCount = 0;
 		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
@@ -142,7 +142,10 @@ namespace Hazel {
 		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
-		StartNewBatch();
+		s_Data.quadIndexCount = 0;
+		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+
+		s_Data.TextureSlotIndex = 1;
 	}
 	void Renderer2D::BeginScene(const OrthographicCamera& cam)
 	{
@@ -151,7 +154,10 @@ namespace Hazel {
 		s_Data.CameraBuffer.ViewProjection = cam.GetViewProjectionMatrix();
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 		
-		StartNewBatch();
+		s_Data.quadIndexCount = 0;
+		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+
+		s_Data.TextureSlotIndex = 1;
 	}
 	void Renderer2D::BeginScene(const EditorCamera& camera)
 	{
@@ -160,7 +166,10 @@ namespace Hazel {
 		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjection();
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 		
-		StartNewBatch();
+		s_Data.quadIndexCount = 0;
+		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+
+		s_Data.TextureSlotIndex = 1;
 	}
 	void Renderer2D::EndScene()
 	{
@@ -358,7 +367,7 @@ namespace Hazel {
 			DrawQuad(entityID, transform, src.color);
 	}
 
-	void Renderer2D::ResetStats() { s_Data.stats = { 0, 0 }; }
+	void Renderer2D::ResetStats() { s_Data.stats = { 0, 0, Renderer2DData::MaxQuads }; }
 
 	Renderer2D::Statistics& Renderer2D::GetStats() { return s_Data.stats; }
 }
