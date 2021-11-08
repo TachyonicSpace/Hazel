@@ -80,7 +80,7 @@ namespace Hazel
 
 		enum class SceneState
 		{
-			Edit = 0, Play = 1
+			Edit = 0, Play = 1, Simulate = 2
 		};
 		SceneState m_SceneState = SceneState::Edit;
 
@@ -89,7 +89,7 @@ namespace Hazel
 		ContentBrowserPanel m_ContentBrowserPanel;
 
 		// Editor resources
-		Ref<Texture2D> m_IconPlay, m_IconStop;
+		Ref<Texture2D> m_IconPlay, m_IconStop, m_IconSimulate;
 	};
 
 }

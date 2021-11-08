@@ -29,6 +29,7 @@ namespace Hazel
 		m_checkerboard = Texture2D::Create("assets/textures/Checkerboard.png");
 		m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
 		m_IconStop = Texture2D::Create("Resources/Icons/StopButton.png");
+		m_IconSimulate = Texture2D::Create("Resources/Icons/SimulateButton.png");
 
 		fbspec.Attatchments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 		fbspec.Width = 1280;
@@ -90,7 +91,7 @@ namespace Hazel
 		{
 		case SceneState::Edit:
 		{
-			if (m_ViewPortFocused)
+			if (m_ViewPortHovered)
 				m_Camera.OnUpdate(ts);
 
 			m_EditorCamera.OnUpdate(ts);
@@ -100,11 +101,26 @@ namespace Hazel
 		}
 		case SceneState::Play:
 		{
+
+			m_ActiveScene->UpdateScripts(ts);
+			m_ActiveScene->UpdatePhysics(ts);
 			if (!m_ActiveScene->OnUpdateRuntime(ts))
 			{
 				HZ_ERROR("Tried Rendering without a primary scene camera");
 				m_ActiveScene->ScenePlay = false;
 			}
+			break;
+		}
+		case SceneState::Simulate:
+		{
+			if (m_ViewPortHovered)
+				m_Camera.OnUpdate(ts);
+
+			m_EditorCamera.OnUpdate(ts);
+
+			m_ActiveScene->UpdateScripts(ts);
+			m_ActiveScene->UpdatePhysics(ts);
+			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 			break;
 		}
 		}
@@ -399,14 +415,23 @@ namespace Hazel
 		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 		float size = ImGui::GetWindowHeight() - 4.0f;
-		Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
-		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+		Ref<Texture2D> icon = m_SceneState != SceneState::Edit ? m_IconStop : m_IconPlay;
+		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f) - ((m_SceneState==SceneState::Edit) * size *.50));
 		if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
 		{
 			if (m_SceneState == SceneState::Edit)
 				OnScenePlay();
-			else if (m_SceneState == SceneState::Play)
+			else if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Simulate)
 				OnSceneStop();
+		}
+		if (m_SceneState == SceneState::Edit)
+		{
+			ImGui::SameLine();
+			if (ImGui::ImageButton((ImTextureID)m_IconSimulate->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+			{
+				OnScenePlay();
+				m_SceneState = SceneState::Simulate;
+			}
 		}
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor(3);

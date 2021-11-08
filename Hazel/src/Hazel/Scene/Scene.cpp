@@ -310,10 +310,6 @@ namespace Hazel
 
 	bool Scene::OnUpdateRuntime(Timestep& t)
 	{
-		Scene::UpdateScripts(t);
-
-		Scene::UpdatePhysics(t);
-
 		// Render 2D
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
