@@ -56,11 +56,18 @@ namespace Hazel {
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
-	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount)
+	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount, RenderType Primitives /*= RenderType::GL_TRIANGLES*/)
 	{
 		va->Bind();
 		auto count = indexCount ? indexCount : va->GetIndexBuffer()->GetCount();
-		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+
+		/*
+		GL_POINTS
+		GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP
+		GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN
+		*/
+
+		glDrawElements((GLenum)Primitives, count, GL_UNSIGNED_INT, nullptr);
 	}
 	void OpenGLRendererAPI::SetViewport(uint32_t xMin, uint32_t yMin, uint32_t xMax, uint32_t yMax)
 	{
