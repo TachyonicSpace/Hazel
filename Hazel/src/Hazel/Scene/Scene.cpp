@@ -98,6 +98,7 @@ namespace Hazel
 		// Copy components (except IDComponent and TagComponent)
 		CopyComponent<Component::Transform>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Component::SpriteRenderer>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Component::CircleRenderer>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Component::Cameras>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Component::NativeScript>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		CopyComponent<Component::Rigidbody2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
@@ -299,16 +300,29 @@ namespace Hazel
 		{
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
-			auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
-			for (auto entity : group)
+			//draw quads
 			{
-				auto& [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
+				auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
+				for (auto entity : group)
+				{
+					auto& [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
 
-				Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
+					Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
+				}
 			}
 
-			Renderer2D::EndScene();
-			return true;
+			// Draw circles
+			{
+				auto view = m_Registry.view<Component::Transform, Component::CircleRenderer>();
+				for (auto entity : view)
+				{
+					auto [transform, circle] = view.get<Component::Transform, Component::CircleRenderer>(entity);
+
+					Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
+				}
+				Renderer2D::EndScene();
+			}
+				return true;
 		}
 		else
 			return false;
@@ -318,13 +332,29 @@ namespace Hazel
 	{
 		Renderer2D::BeginScene(camera);
 
-		auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
-		for (auto entity : group)
-		{
-			auto [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
 
-			Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
-		}
+			//draw quads
+			{
+				auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
+				for (auto entity : group)
+				{
+					auto& [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
+
+					Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
+				}
+			}
+
+			// Draw circles
+			{
+				auto view = m_Registry.view<Component::Transform, Component::CircleRenderer>();
+				for (auto entity : view)
+				{
+					auto [transform, circle] = view.get<Component::Transform, Component::CircleRenderer>(entity);
+
+					Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
+				}
+				Renderer2D::EndScene();
+			}
 
 		//todo::draw cameras here
 
@@ -370,6 +400,7 @@ namespace Hazel
 
 		CopyComponentIfExists<Component::Transform>(newEntity, entity);
 		CopyComponentIfExists<Component::SpriteRenderer>(newEntity, entity);
+		CopyComponentIfExists<Component::CircleRenderer>(newEntity, entity);
 		CopyComponentIfExists<Component::Cameras>(newEntity, entity);
 		CopyComponentIfExists<Component::NativeScript>(newEntity, entity);
 		CopyComponentIfExists<Component::Rigidbody2D>(newEntity, entity);
@@ -413,6 +444,11 @@ namespace Hazel
 
 	template<>
 	void Scene::OnComponentAdded<Component::SpriteRenderer>(Entity entity, Component::SpriteRenderer& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<Component::CircleRenderer>(Entity entity, Component::CircleRenderer& component)
 	{
 	}
 

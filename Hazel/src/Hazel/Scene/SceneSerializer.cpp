@@ -204,6 +204,19 @@ namespace Hazel {
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
 
+		if (entity.HasComponent<Component::CircleRenderer>())
+		{
+			out << YAML::Key << "CircleRendererComponent";
+			out << YAML::BeginMap;
+
+			auto& circleRendererComponent = entity.GetComponent<Component::CircleRenderer>();
+			out << YAML::Key << "color" << YAML::Value << circleRendererComponent.Color;
+			out << YAML::Key << "thickness" << YAML::Value << circleRendererComponent.Thickness;
+			out << YAML::Key << "fade" << YAML::Value << circleRendererComponent.Fade;
+
+			out << YAML::EndMap;
+		}
+
 		if (entity.HasComponent<Component::Rigidbody2D>())
 		{
 			out << YAML::Key << "Rigidbody2DComponent";
@@ -356,6 +369,15 @@ namespace Hazel {
 						src.color = spriteRendererComponent["Color"].as<glm::vec4>();
 						if (spriteRendererComponent["tiling factor"])
 							src.TilingFactor = spriteRendererComponent["tiling factor"].as<float>();
+					}
+
+					auto circleRendererComponent = entity["CircleRendererComponent"];
+					if (circleRendererComponent)
+					{
+						auto& crc = deserializedEntity.AddComponent<Component::CircleRenderer>();
+						crc.Color = circleRendererComponent["color"].as<glm::vec4>();
+						crc.Thickness = circleRendererComponent["thickness"].as<float>();
+						crc.Fade = circleRendererComponent["fade"].as<float>();
 					}
 
 

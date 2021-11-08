@@ -326,6 +326,14 @@ namespace Hazel
 
 			});
 
+		DrawComponent<Component::CircleRenderer>("Circle Renderer", ent, [&](auto& src) {
+
+			ImGui::ColorEdit4("Color", glm::value_ptr(src.Color));
+			ImGui::DragFloat("Thickness", &src.Thickness, 0.025f, 0.0f, 1.0f);
+			ImGui::DragFloat("Fade", &src.Fade, 0.00025f, 0.0f, 1.0f);
+			
+			});
+
 		DrawComponent<Component::Rigidbody2D>("Rigidbody 2D", ent, [](auto& component)
 			{
 				const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
@@ -400,6 +408,16 @@ namespace Hazel
 				ImGui::CloseCurrentPopup();
 			}
 		}
+
+		if (!m_SelectedContext.HasComponent<Component::CircleRenderer>())
+		{
+			if (ImGui::MenuItem("Circle Renderer"))
+			{
+				m_SelectedContext.AddComponent<Component::CircleRenderer>();
+				ImGui::CloseCurrentPopup();
+			}
+		}
+
 
 		if (!m_SelectedContext.HasComponent<Component::Rigidbody2D>())
 		{
