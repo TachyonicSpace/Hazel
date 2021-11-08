@@ -185,13 +185,20 @@ SceneSeralizer:145 & 305,
 
 Scene, 
 	Copy()
-	OnRuntimeStart()
-	OnUpdateRuntime()
+	UpdatePhysics
+	updateScripts
 	DuplicateEntity()
 	OnComponentAdded()
 
 ScenehierarchyPanel
 	DrawComponents()
 	AddComponentsPopup()
+
+
+//where to add new render types
+Scene::RenderShapes;
+Renderer2d
+	shader
+		vertex array and vertex buffer, index buffer, renderer2d draw function and draw calls in flush.
 
 */

@@ -236,48 +236,83 @@ namespace Hazel
 		m_PhysicsWorld = nullptr;
 	}
 
+	void Scene::RenderShapes(bool renderCameras)
+	{
+		//draw quads
+		{
+			auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
+			for (auto entity : group)
+			{
+				auto& [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
+
+				Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
+			}
+		}
+
+		// Draw circles
+		{
+			auto view = m_Registry.view<Component::Transform, Component::CircleRenderer>();
+			for (auto entity : view)
+			{
+				auto [transform, circle] = view.get<Component::Transform, Component::CircleRenderer>(entity);
+
+				Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
+			}
+		}
+
+
+		//todo::draw cameras here
+		if (renderCameras)
+		{
+		}
+	}
+
+	void Scene::UpdateScripts(Timestep& t) 
+	{
+		//on Scene play
+		if (ScenePlay)
+		{
+			m_Registry.view<Component::NativeScript>().each([=](auto entity, auto& nsc)
+				{
+					if (!nsc.Instance)
+					{
+						nsc.Instance = nsc.InstantiateScript();
+						nsc.Instance->m_Entity = { entity, this };
+						nsc.Instance->OnCreate();
+					}
+
+					nsc.Instance->OnUpdate(t);
+				});
+		}
+	}
+
+	void Scene::UpdatePhysics(Timestep& t)
+	{
+		const int32_t velocityIterations = 6;
+		const int32_t positionIterations = 2;
+		m_PhysicsWorld->Step(t, velocityIterations, positionIterations);
+
+		// Retrieve transform from Box2D
+		auto view = m_Registry.view<Component::Rigidbody2D>();
+		for (auto e : view)
+		{
+			Entity entity = { e, this };
+			auto& transform = entity.GetComponent<Component::Transform>();
+			auto& rb2d = entity.GetComponent<Component::Rigidbody2D>();
+
+			b2Body* body = (b2Body*)rb2d.RuntimeBody;
+			const auto& position = body->GetPosition();
+			transform.Translation.x = position.x;
+			transform.Translation.y = position.y;
+			transform.Rotation.z = body->GetAngle();
+		}
+	}
+
 	bool Scene::OnUpdateRuntime(Timestep& t)
 	{
-		//update scripts
-		{
-			//on Scene play
-			if (ScenePlay)
-			{
-				m_Registry.view<Component::NativeScript>().each([=](auto entity, auto& nsc)
-					{
-						if (!nsc.Instance)
-						{
-							nsc.Instance = nsc.InstantiateScript();
-							nsc.Instance->m_Entity = { entity, this };
-							nsc.Instance->OnCreate();
-						}
+		Scene::UpdateScripts(t);
 
-						nsc.Instance->OnUpdate(t);
-					});
-			}
-		}
-
-		// Physics
-		{
-			const int32_t velocityIterations = 6;
-			const int32_t positionIterations = 2;
-			m_PhysicsWorld->Step(t, velocityIterations, positionIterations);
-
-			// Retrieve transform from Box2D
-			auto view = m_Registry.view<Component::Rigidbody2D>();
-			for (auto e : view)
-			{
-				Entity entity = { e, this };
-				auto& transform = entity.GetComponent<Component::Transform>();
-				auto& rb2d = entity.GetComponent<Component::Rigidbody2D>();
-
-				b2Body* body = (b2Body*)rb2d.RuntimeBody;
-				const auto& position = body->GetPosition();
-				transform.Translation.x = position.x;
-				transform.Translation.y = position.y;
-				transform.Rotation.z = body->GetAngle();
-			}
-		}
+		Scene::UpdatePhysics(t);
 
 		// Render 2D
 		Camera* mainCamera = nullptr;
@@ -299,29 +334,10 @@ namespace Hazel
 		if (mainCamera)
 		{
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-
-			//draw quads
-			{
-				auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
-				for (auto entity : group)
-				{
-					auto& [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
-
-					Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
-				}
-			}
-
-			// Draw circles
-			{
-				auto view = m_Registry.view<Component::Transform, Component::CircleRenderer>();
-				for (auto entity : view)
-				{
-					auto [transform, circle] = view.get<Component::Transform, Component::CircleRenderer>(entity);
-
-					Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
-				}
-				Renderer2D::EndScene();
-			}
+			
+			Scene::RenderShapes(false);
+			
+			Renderer2D::EndScene();
 				return true;
 		}
 		else
@@ -331,33 +347,7 @@ namespace Hazel
 	void Scene::OnUpdateEditor(Timestep& ts, EditorCamera& camera)
 	{
 		Renderer2D::BeginScene(camera);
-
-
-			//draw quads
-			{
-				auto group = m_Registry.group<Component::Transform>(entt::get<Component::SpriteRenderer>);
-				for (auto entity : group)
-				{
-					auto& [transform, sprite] = group.get<Component::Transform, Component::SpriteRenderer>(entity);
-
-					Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.color, sprite.Tex, sprite.TilingFactor);
-				}
-			}
-
-			// Draw circles
-			{
-				auto view = m_Registry.view<Component::Transform, Component::CircleRenderer>();
-				for (auto entity : view)
-				{
-					auto [transform, circle] = view.get<Component::Transform, Component::CircleRenderer>(entity);
-
-					Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
-				}
-				Renderer2D::EndScene();
-			}
-
-		//todo::draw cameras here
-
+		Scene::RenderShapes(true);
 		Renderer2D::EndScene();
 	}
 

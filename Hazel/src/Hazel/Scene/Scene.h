@@ -50,6 +50,13 @@ namespace Hazel
 		bool OnUpdateRuntime(Timestep& t);
 		void OnUpdateEditor(Timestep& ts, EditorCamera& camera);
 		void OnViewportResize(uint32_t width, uint32_t height);
+		
+		
+		void RenderShapes(bool renderCameras);
+		void UpdatePhysics(Timestep& t);
+		void UpdateScripts(Timestep& t);
+
+		
 		bool Empty();
 
 		void DrawIDBuffer(Ref<Framebuffer> target, EditorCamera& cam);
