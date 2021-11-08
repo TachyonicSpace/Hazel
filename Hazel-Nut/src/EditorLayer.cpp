@@ -237,6 +237,9 @@ namespace Hazel
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 					SaveSceneAs();
 
+				if (ImGui::MenuItem("Change Working Directory"))
+					std::filesystem::current_path() = FileDialogs::OpenFolder();
+
 				if (ImGui::MenuItem("Exit"))
 					Application::Get().Close();
 

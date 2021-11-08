@@ -8,6 +8,9 @@
 
 #include "Hazel/Core/Application.h"
 
+#include <filesystem>
+#include <Shlobj.h>
+
 namespace Hazel {
 
 	std::string FileDialogs::OpenFile(const char* filter)
@@ -47,5 +50,38 @@ namespace Hazel {
 		}
 		return std::string();
 	}
+
+	std::string FileDialogs::OpenFolder(std::string initialFolder /*= ""*/)
+	{
+		std::string result = "";
+		IFileOpenDialog* dialog;
+		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileOpenDialog, (void**)&dialog)))
+		{
+			DWORD options;
+			dialog->GetOptions(&options);
+			dialog->SetOptions(options | FOS_PICKFOLDERS);
+			if (SUCCEEDED(dialog->Show(NULL)))
+			{
+				IShellItem* selectedItem;
+				if (SUCCEEDED(dialog->GetResult(&selectedItem)))
+				{
+					PWSTR pszFilePath;
+					if (SUCCEEDED(selectedItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszFilePath)))
+					{
+						std::filesystem::path p = pszFilePath;
+						result = p.string();
+						CoTaskMemFree(pszFilePath);
+					}
+
+					selectedItem->Release();
+				}
+			}
+
+			dialog->Release();
+		}
+
+		return result;
+	}
+
 
 }
