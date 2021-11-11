@@ -407,7 +407,7 @@ namespace Hazel {
 					}
 
 					auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
-					if (boxCollider2DComponent)
+					if (circleCollider2DComponent)
 					{
 						auto& bc2d = deserializedEntity.AddComponent<Component::CircleCollider2D>();
 						bc2d.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
@@ -424,6 +424,7 @@ namespace Hazel {
 		}
 		catch (...)
 		{
+			HZ_CORE_ERROR("ERROR DECODING SCENE, USING LEGACY DESERIALIZERS");
 			DeserializeOldScenes(filepath);
 		}
 	}

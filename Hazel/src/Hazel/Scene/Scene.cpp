@@ -258,6 +258,8 @@ namespace Hazel
 
 				Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
 			}
+			Renderer2D::DrawRect({ 0, 0, 0 }, { 1, 1 }, Color::Lime);
+			Renderer2D::DrawLine(glm::vec3(-.5, -.5, 0), glm::vec3(.5, .5, 0), Color::Brown);
 		}
 
 

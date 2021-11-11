@@ -1,5 +1,6 @@
 #include "hzpch.h"
 #include "OpenGLRendererAPI.h"
+#include "Hazel/Core/Application.h"
 
 #include "glad/glad.h"
 
@@ -29,13 +30,13 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		#ifdef HZ_DEBUG
+#ifdef HZ_DEBUG
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(OpenGLMessageCallback, nullptr);
 
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
-		#endif
+#endif
 
 
 
@@ -46,11 +47,13 @@ namespace Hazel {
 		}
 
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_LINE_SMOOTH);
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
 	{
-		glClearColor(color.r, color.g, color.b, color.a);
+		if (!(Application::Get().m_Minimized))
+			glClearColor(color.r, color.g, color.b, color.a);
 	}
 	void OpenGLRendererAPI::Clear()
 	{
@@ -67,10 +70,21 @@ namespace Hazel {
 		GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN
 		*/
 
-		glDrawElements((GLenum)Primitives, count, GL_UNSIGNED_INT, nullptr);
+		if (!(Application::Get().m_Minimized))
+		{
+			if (Primitives == RendererAPI::RenderType::LINES || Primitives == RendererAPI::RenderType::LINE_STRIP || Primitives == RendererAPI::RenderType::LINE_LOOP)
+				glDrawArrays((GLenum)Primitives, 0, indexCount);
+			else
+				glDrawElements((GLenum)Primitives, count, GL_UNSIGNED_INT, nullptr);
+		}
 	}
+	void OpenGLRendererAPI::SetLineWidth(float width)
+	{
+		glLineWidth(width);
+	}
+
 	void OpenGLRendererAPI::SetViewport(uint32_t xMin, uint32_t yMin, uint32_t xMax, uint32_t yMax)
 	{
 		glViewport(xMin, yMin, xMax, yMax);
 	}
-	}
+}

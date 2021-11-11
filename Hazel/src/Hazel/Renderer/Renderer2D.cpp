@@ -33,6 +33,16 @@ namespace Hazel {
 		int EntityID;
 	};
 
+	struct LineVertex
+	{
+		glm::vec3 Position;
+		glm::vec4 Color;
+
+		// Editor-only
+		int EntityID;
+	};
+
+
 
 	//data for the renderer
 	struct Renderer2DData
@@ -50,6 +60,11 @@ namespace Hazel {
 		Ref<VertexBuffer> circleVertexBuffer;
 		Ref<Shader> circleShader;
 
+		Ref<VertexArray> LineVertexArray;
+		Ref<VertexBuffer> LineVertexBuffer;
+		Ref<Shader> LineShader;
+
+
 		uint32_t quadIndexCount = 0;
 		QuadVertex* quadVertexBufferBase = nullptr;
 		QuadVertex* quadVertexBufferPtr = nullptr;
@@ -57,6 +72,13 @@ namespace Hazel {
 		uint32_t circleIndexCount = 0;
 		CircleVertex* circleVertexBufferBase = nullptr;
 		CircleVertex* circleVertexBufferPtr = nullptr;
+
+		uint32_t LineVertexCount = 0;
+		LineVertex* LineVertexBufferBase = nullptr;
+		LineVertex* LineVertexBufferPtr = nullptr;
+
+		float LineWidth = 1.0f;
+
 
 		std::array<Ref<Texture2D>, MaxTexture> textureSlots;
 		uint32_t TextureSlotIndex = 1; //0 = whiteTexture
@@ -131,6 +153,20 @@ namespace Hazel {
 		s_Data.circleVertexBufferBase = new CircleVertex[s_Data.MaxVerticies];
 		s_Data.circleVertexArray->AddIndexBuffer(quadib);
 
+
+		// Lines
+		s_Data.LineVertexArray = VertexArray::Create();
+
+		s_Data.LineVertexBuffer = VertexBuffer::Create(s_Data.MaxVerticies * sizeof(LineVertex));
+		s_Data.LineVertexBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float4, "a_Color"    },
+			{ ShaderDataType::Int,    "a_EntityID" }
+			});
+		s_Data.LineVertexArray->AddVertexBuffer(s_Data.LineVertexBuffer);
+		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVerticies];
+
+
 		delete[] quadIndices;
 
 		//makes a blank white texture
@@ -142,7 +178,7 @@ namespace Hazel {
 		//loads the shader to be used
 		s_Data.quadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
 		s_Data.circleShader = Shader::Create("assets/shaders/Renderer2D_Circle.glsl");
-		s_Data.quadShader->Bind();
+		s_Data.LineShader = Shader::Create("assets/shaders/Renderer2D_Lines.glsl");
 
 		s_Data.textureSlots[0] = Texture2D::Create();
 
@@ -172,6 +208,10 @@ namespace Hazel {
 		s_Data.circleIndexCount = 0;
 		s_Data.circleVertexBufferPtr = s_Data.circleVertexBufferBase;
 
+		s_Data.LineVertexCount = 0;
+		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
+
+
 		s_Data.TextureSlotIndex = 1;
 	}
 
@@ -189,6 +229,9 @@ namespace Hazel {
 		s_Data.circleIndexCount = 0;
 		s_Data.circleVertexBufferPtr = s_Data.circleVertexBufferBase;
 
+		s_Data.LineVertexCount = 0;
+		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
+
 		s_Data.TextureSlotIndex = 1;
 	}
 	void Renderer2D::BeginScene(const OrthographicCamera& cam)
@@ -204,6 +247,9 @@ namespace Hazel {
 		s_Data.circleIndexCount = 0;
 		s_Data.circleVertexBufferPtr = s_Data.circleVertexBufferBase;
 
+		s_Data.LineVertexCount = 0;
+		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
+
 		s_Data.TextureSlotIndex = 1;
 	}
 	void Renderer2D::BeginScene(const EditorCamera& camera)
@@ -218,6 +264,9 @@ namespace Hazel {
 
 		s_Data.circleIndexCount = 0;
 		s_Data.circleVertexBufferPtr = s_Data.circleVertexBufferBase;
+
+		s_Data.LineVertexCount = 0;
+		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
 
 		s_Data.TextureSlotIndex = 1;
 	}
@@ -255,87 +304,19 @@ namespace Hazel {
 
 			s_Data.stats.drawCalls++;
 		}
-	}
-
-
-	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
-	{
-		DrawQuad({ pos.x, pos.y, 0 }, size, color, tex, tilingFactor);
-	}
-	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
-	{
-		DrawQuad(pos, size, (Ref<Texture2D>)tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
-	{
-		DrawQuad({ pos.x, pos.y, 0 }, size, tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
-	{
-		DrawQuad(pos, size, 0, tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const float& radianAngle, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
-	{
-		DrawQuad({ pos.x, pos.y, 0 }, size, radianAngle, color, tex, tilingFactor);
-	}
-	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
-	{
-		DrawQuad(pos, size, radianAngle, (Ref<Texture2D>)tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const float& radianAngle, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
-	{
-		DrawQuad({ pos.x, pos.y, 0 }, size, radianAngle, tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const float& radianAngle, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
-	{
-
-		HZ_PROFILE_FUNCTION();
-
-		glm::mat4 transform;
-		if (radianAngle == 0)
+		if (s_Data.LineVertexCount)
 		{
-			transform = glm::translate(glm::mat4(1), pos) *
-				glm::scale(glm::mat4(1), { size.x, size.y, 1 });
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.LineVertexBufferPtr - (uint8_t*)s_Data.LineVertexBufferBase);
+			s_Data.LineVertexBuffer->SetData(s_Data.LineVertexBufferBase, dataSize);
+
+			s_Data.LineShader->Bind();
+			RenderCommand::SetLineWidth(s_Data.LineWidth);
+			RenderCommand::DrawIndexed(s_Data.LineVertexArray, s_Data.LineVertexCount, RendererAPI::RenderType::LINES);
+			s_Data.stats.drawCalls++;
 		}
-		else
-		{
-			transform = glm::translate(glm::mat4(1), pos) *
-				glm::rotate(glm::mat4(1), radianAngle, { 0, 0, 1 }) *
-				glm::scale(glm::mat4(1), { size.x, size.y, 1 });
-		}
-
-		DrawQuad(-1, transform, tex, tilingFactor, color);
-
 	}
 
-	void Renderer2D::DrawQuad(const uint32_t ID, const glm::vec2& pos, const glm::vec2& size, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
-	{
-		DrawQuad(ID, { pos.x, pos.y, 0 }, size, color, tex, tilingFactor);
-	}
-	void Renderer2D::DrawQuad(const uint32_t ID, const glm::vec3& pos, const glm::vec2& size, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
-	{
-		DrawQuad(ID, pos, size, (Ref<Texture2D>)tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const uint32_t ID, const glm::vec2& pos, const glm::vec2& size, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
-	{
-		DrawQuad(ID, { pos.x, pos.y, 0 }, size, tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const uint32_t ID, const glm::vec3& pos, const glm::vec2& size, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
-	{
-		DrawQuad(ID, pos, size, 0, tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const uint32_t ID, const glm::vec2& pos, const glm::vec2& size, const float& radianAngle, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
-	{
-		DrawQuad(ID, { pos.x, pos.y, 0 }, size, radianAngle, color, tex, tilingFactor);
-	}
-	void Renderer2D::DrawQuad(const uint32_t ID, const glm::vec3& pos, const glm::vec2& size, const float& radianAngle, const Color& color, const Ref<Texture2D>& tex, float tilingFactor)
-	{
-		DrawQuad(ID, pos, size, radianAngle, (Ref<Texture2D>)tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const uint32_t ID, const glm::vec2& pos, const glm::vec2& size, const float& radianAngle, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
-	{
-		DrawQuad(ID, { pos.x, pos.y, 0 }, size, radianAngle, tex, tilingFactor, color);
-	}
+
 	void Renderer2D::DrawQuad(const uint32_t ID, const glm::vec3& pos, const glm::vec2& size, const float& radianAngle, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
 	{
 
@@ -358,20 +339,6 @@ namespace Hazel {
 
 	}
 
-
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Color& color, const Ref<Texture2D>& tex /*= nullptr*/, float tilingFactor /*= 1.f*/)
-	{
-		DrawQuad(-1, transform, (Ref<Texture2D>)tex, tilingFactor, color);
-	}
-	void Renderer2D::DrawQuad(const glm::mat4& transform, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
-	{
-		DrawQuad(-1, transform, (Ref<Texture2D>)tex, tilingFactor, color);
-	}
-
-	void Renderer2D::DrawQuad(uint32_t ID, const glm::mat4& transform, const Color& color, const Ref<Texture2D>& tex /*= nullptr*/, float tilingFactor /*= 1.f*/)
-	{
-		DrawQuad(ID, transform, (Ref<Texture2D>)tex, tilingFactor, color);
-	}
 	void Renderer2D::DrawQuad(uint32_t ID, const glm::mat4& transform, Ref<Texture2D>& tex, float tilingFactor, const Color& color)
 	{
 
@@ -447,6 +414,48 @@ namespace Hazel {
 	}
 
 
+	void Renderer2D::DrawLine(const glm::vec3& p0, glm::vec3& p1, const Color& color, int entityID)
+	{
+		s_Data.LineVertexBufferPtr->Position = p0;
+		s_Data.LineVertexBufferPtr->Color = color.GetVec4();
+		s_Data.LineVertexBufferPtr->EntityID = entityID;
+		s_Data.LineVertexBufferPtr++;
+
+		s_Data.LineVertexBufferPtr->Position = p1;
+		s_Data.LineVertexBufferPtr->Color = color.GetVec4();
+		s_Data.LineVertexBufferPtr->EntityID = entityID;
+		s_Data.LineVertexBufferPtr++;
+
+		s_Data.LineVertexCount += 2;
+	}
+
+	void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const Color& color, int entityID)
+	{
+		glm::vec3 p0 = glm::vec3(position.x - size.x * 0.5f, position.y - size.y * 0.5f, position.z);
+		glm::vec3 p1 = glm::vec3(position.x + size.x * 0.5f, position.y - size.y * 0.5f, position.z);
+		glm::vec3 p2 = glm::vec3(position.x + size.x * 0.5f, position.y + size.y * 0.5f, position.z);
+		glm::vec3 p3 = glm::vec3(position.x - size.x * 0.5f, position.y + size.y * 0.5f, position.z);
+
+		DrawLine(p0, p1, color);
+		DrawLine(p1, p2, color);
+		DrawLine(p2, p3, color);
+		DrawLine(p3, p0, color);
+	}
+
+	void Renderer2D::DrawRect(const glm::mat4& transform, const Color& color, int entityID)
+	{
+		glm::vec3 lineVertices[4];
+		for (size_t i = 0; i < 4; i++)
+			lineVertices[i] = transform * s_Data.quadVertexPositions[i];
+
+		DrawLine(lineVertices[0], lineVertices[1], color);
+		DrawLine(lineVertices[1], lineVertices[2], color);
+		DrawLine(lineVertices[2], lineVertices[3], color);
+		DrawLine(lineVertices[3], lineVertices[0], color);
+	}
+
+
+
 	void Renderer2D::DrawSprite(const glm::mat4& transform, Component::SpriteRenderer& src, int entityID)
 	{
 		if (src.Tex)
@@ -454,6 +463,17 @@ namespace Hazel {
 		else
 			DrawQuad(entityID, transform, src.color);
 	}
+
+	float Renderer2D::GetLineWidth()
+	{
+		return s_Data.LineWidth;
+	}
+
+	void Renderer2D::SetLineWidth(float width)
+	{
+		s_Data.LineWidth = width;
+	}
+
 
 	void Renderer2D::ResetStats() { s_Data.stats = { 0, 0, Renderer2DData::MaxQuads }; }
 

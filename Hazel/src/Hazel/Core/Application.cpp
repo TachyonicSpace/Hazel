@@ -10,9 +10,9 @@
 namespace Hazel {
 
 	//allows convenient ways to bind events to custom functions
-	#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
+#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
-	//application pointer
+//application pointer
 	Application* Application::s_Instance = nullptr;
 
 	Hazel::Application::Application(const WindowProps& props, ApplicationCommandLineArgs args)
@@ -93,8 +93,8 @@ namespace Hazel {
 	void Hazel::Application::Run()
 	{
 		HZ_PROFILE_FUNCTION();
-		
-		
+
+
 		while (m_Running)
 		{
 
@@ -105,30 +105,28 @@ namespace Hazel {
 			Timestep ts = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			//stops updating frame if window is minimized
-			if (!m_Minimized)
+
+			//renders main scene first
 			{
-				//renders main scene first
-				{
-					HZ_PROFILE_SCOPE("layerStack update");
+				HZ_PROFILE_SCOPE("layerStack update");
 
-					for (Layer* l : m_LayerStack)
-						l->OnUpdate(ts);
-				}
-
-
-				//then renders imgui stuff
-				m_ImGuiLayer->Begin();
-				{
-					HZ_PROFILE_SCOPE("layerStack imgui update");
-
-					for (Layer* l : m_LayerStack)
-						l->OnImGuiRender();
-				}
-				m_ImGuiLayer->End();
-
-
+				for (Layer* l : m_LayerStack)
+					l->OnUpdate(ts);
 			}
+
+
+			//then renders imgui stuff
+			m_ImGuiLayer->Begin();
+			{
+				HZ_PROFILE_SCOPE("layerStack imgui update");
+
+				for (Layer* l : m_LayerStack)
+					l->OnImGuiRender();
+			}
+			m_ImGuiLayer->End();
+
+
+
 			//updates window itself
 			m_Window->OnUpdate();
 		}

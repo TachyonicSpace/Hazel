@@ -26,9 +26,14 @@ namespace Hazel {
 			s_RendererAPI->Clear();
 		}
 
-		inline static void DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount = 0, RendererAPI::RenderType PrimativeType = RendererAPI::RenderType::GL_TRIANGLES)
+		inline static void DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount = 0, RendererAPI::RenderType PrimativeType = RendererAPI::RenderType::TRIANGLES)
 		{
 			s_RendererAPI->DrawIndexed(va, indexCount, PrimativeType);
+		}
+
+		static void SetLineWidth(float width)
+		{
+			s_RendererAPI->SetLineWidth(width);
 		}
 	private:
 		static Scope<RendererAPI> s_RendererAPI;

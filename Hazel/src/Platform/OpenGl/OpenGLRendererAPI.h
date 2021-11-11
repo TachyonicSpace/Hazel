@@ -14,7 +14,9 @@ namespace Hazel {
 		virtual void SetClearColor(const glm::vec4& color) override;
 		virtual void Clear() override;
 
-		virtual void DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount = 0, RenderType Primitives = RenderType::GL_TRIANGLES) override;
+		virtual void DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount = 0, RenderType Primitives = RenderType::TRIANGLES) override;
+
+		virtual void SetLineWidth(float width) override;
 	};
 
 }

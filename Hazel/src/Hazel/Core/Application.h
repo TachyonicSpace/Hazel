@@ -56,6 +56,7 @@ namespace Hazel {
 
 		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
+		bool m_Minimized = false;
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
@@ -64,7 +65,6 @@ namespace Hazel {
 		Ref<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer = nullptr;
 		bool m_Running = true;
-		bool m_Minimized = false;
 		bool m_Restart = false;
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0;

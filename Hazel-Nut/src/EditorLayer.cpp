@@ -312,7 +312,7 @@ namespace Hazel
 
 
 		if (Input::IsMouseButtonPressed(Mouse::ButtonLeft) && !Input::IsKeyPressed(KeyCode::LeftAlt)
-			&& !ImGuizmo::IsOver() && m_SceneHovered)
+			&& !ImGuizmo::IsOver() && m_HoveredEntity)
 		{
 			m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
 			m_SceneHovered = false;
@@ -419,7 +419,7 @@ namespace Hazel
 
 		float size = ImGui::GetWindowHeight() - 4.0f;
 		Ref<Texture2D> icon = m_SceneState != SceneState::Edit ? m_IconStop : m_IconPlay;
-		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f) - ((m_SceneState==SceneState::Edit) * size *.50));
+		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f) - ((float)(m_SceneState==SceneState::Edit) * size *.50));
 		if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
 		{
 			if (m_SceneState == SceneState::Edit)
@@ -521,9 +521,7 @@ namespace Hazel
 		}
 		case Key::Delete:
 		{
-			Entity tmp = { m_SceneHierarchyPanel.GetSelectedEntity(), m_ActiveScene.get() };
-			m_ActiveScene->DestroyEntity(tmp);
-			m_SceneHierarchyPanel.SetSelectedEntity(Entity());
+			m_SceneHierarchyPanel.GetSelectedEntity().deleted = true;
 		}
 		}
 		return true;
