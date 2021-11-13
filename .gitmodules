@@ -12,10 +12,10 @@
 	url = https://github.com/TheCherno/imgui
 [submodule "Hazel/vendor/yaml-cpp"]
 	path = Hazel/vendor/yaml-cpp
-	url = https://github.com/thecherno/yaml-cpp
+	url = https://github.com/TheCherno/yaml-cpp
 [submodule "Hazel/vendor/imguizmo"]
 	path = Hazel/vendor/imguizmo
-	url = https://github.com/thecherno/imguizmo
+	url = https://github.com/TheCherno/imguizmo
 [submodule "Hazel/vendor/shaderc"]
 	path = Hazel/vendor/shaderc
 	url = https://github.com/google/shaderc
@@ -24,4 +24,4 @@
 	url = https://github.com/KhronosGroup/SPIRV-Cross
 [submodule "Hazel/vendor/box2d"]
 	path = Hazel/vendor/box2d
-	url = https://github.com/thecherno/box2d
+	url = https://github.com/TheCherno/box2d
