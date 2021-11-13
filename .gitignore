@@ -12,9 +12,11 @@
 **.vcxproj.filters
 **.vcxproj.user
 **.idb
-**.recipe
 
 # Directories
-Hazel/vendor/VulkanSDK
+Hazel/vendor
 Hazelnut/assets/cache
 scripts/__pycache__
+
+#submodules
+Hazel/vendor
