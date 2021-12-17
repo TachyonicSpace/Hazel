@@ -311,7 +311,7 @@ namespace Hazel {
 
 			s_Data.LineShader->Bind();
 			RenderCommand::SetLineWidth(s_Data.LineWidth);
-			RenderCommand::DrawIndexed(s_Data.LineVertexArray, s_Data.LineVertexCount, RendererAPI::RenderType::LINES);
+			RenderCommand::DrawIndexed(s_Data.LineVertexArray, s_Data.LineVertexCount, RenderType::LINES);
 			s_Data.stats.drawCalls++;
 		}
 	}
@@ -456,7 +456,7 @@ namespace Hazel {
 
 
 
-	void Renderer2D::DrawSprite(const glm::mat4& transform, Component::SpriteRenderer& src, int entityID)
+	void Renderer2D::DrawSprite(const glm::mat4& transform, Components::SpriteRenderer& src, int entityID)
 	{
 		if (src.Tex)
 			DrawQuad(entityID, transform, src.color, src.Tex, src.TilingFactor);

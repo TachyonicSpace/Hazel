@@ -1,0 +1,48 @@
+#pragma once
+
+namespace Hazel
+{
+	enum class RenderType
+	{
+		POINTS = 0x0000,
+		LINES, LINE_LOOP, LINE_STRIP,
+		TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN
+	};
+
+	namespace Blending
+	{
+		enum class Types
+		{
+			ZERO = 0,
+			ONE,
+			SRC_COLOR,
+			ONE_MINUS_SRC_COLOR,
+			DST_COLOR,
+			ONE_MINUS_DEST_COLOR,
+			SRC_ALPHA,
+			ONE_MINUS_SRC_ALPHA,
+			DST_ALPHA,
+			ONE_MINUS_DST_ALPHA,
+
+			CONSTANT_COLOR,
+			ONE_MINUS_CONSTANT_COLOR,
+			CONSTANT_ALPHA,
+			ONE_MINUS_CONSTANT_ALPHA,
+			SRC1_ALPHA,
+			ONE_MINUS_SRC1_ALPHA,
+			SRC1_COLOR,
+			ONE_MINUS_SRC1_COLOR
+		};
+
+		enum class Functions
+		{
+			FUNC_ADD = 0,
+			FUNC_SUBTRACT,
+			FUNC_REVERSE_SUBTRACT,
+			MIN,
+			MAX
+		};
+
+		
+	}
+}

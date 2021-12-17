@@ -124,7 +124,7 @@ namespace Hazel {
 		static void DrawRect(const glm::vec3& position, const glm::vec2& size, const Color& color, int entityID = -1);
 		static void DrawRect(const glm::mat4& transform, const Color& color, int entityID = -1);
 
-		static void DrawSprite(const glm::mat4& transform, Component::SpriteRenderer& src, int entityID);
+		static void DrawSprite(const glm::mat4& transform, Components::SpriteRenderer& src, int entityID);
 
 		//stats
 		struct Statistics

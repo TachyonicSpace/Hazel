@@ -48,7 +48,7 @@ namespace Hazel
 		template <typename T>
 		bool HasComponent()
 		{
-			return m_Scene->m_Registry.has<T>(m_EntityHandle);
+			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
 		}
 
 		template <typename T>
@@ -70,7 +70,7 @@ namespace Hazel
 		template <typename T>
 		static bool HasComponent(const Scene& scene, entt::entity ent)
 		{
-			return scene.m_Registry.has<T>(ent);
+			return scene.m_Registry.all_of<T>(ent);
 		}
 
 		template <typename T>
@@ -85,8 +85,8 @@ namespace Hazel
 		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 
-		UUID GetUUID() { return GetComponent<Component::ID>().id; }		
-		const std::string& GetName() { return GetComponent<Component::Tag>().name; }
+		UUID GetUUID() { return GetComponent<Components::ID>().id; }		
+		const std::string& GetName() { return GetComponent<Components::Tag>().name; }
 
 		bool operator==(const Entity& other) const {
 			return

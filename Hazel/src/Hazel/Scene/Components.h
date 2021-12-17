@@ -22,7 +22,7 @@ namespace Hazel
 	class ScriptableEntity;
 
 
-	namespace Component
+	namespace Components
 	{
 		struct ID
 		{
@@ -162,7 +162,7 @@ namespace Hazel
 		struct CircleCollider2D
 		{
 			glm::vec2 Offset = { 0.0f, 0.0f };
-			float Radius = 1;
+			float Radius = .5f;
 
 			// TODO(Yan): move into physics material in the future maybe
 			float Density = 1.0f;

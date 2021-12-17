@@ -28,6 +28,7 @@ namespace Hazel
 	private:
 		void ImGuiMenuBar();
 		void Settings();
+		void RendererSettings();
 		void viewportSettings();
 
 		bool OnKeyPressed(KeyPressedEvent& e);
@@ -42,6 +43,8 @@ namespace Hazel
 		void OnSceneStop();
 
 		void OnDuplicateEntity();
+
+		void OnOverlayRender();
 
 		// UI Panels
 		void UI_Toolbar();
@@ -75,6 +78,8 @@ namespace Hazel
 		bool m_ViewPortFocused = false, m_ViewPortHovered = false, entitySelected = false;
 		bool m_SceneHovered = false;
 		int m_GizmoType = 0;
+
+		bool m_ShowPhysicsColliders = true;
 
 		std::string m_FilePath;
 

@@ -4,13 +4,25 @@ Entities:
     TagComponent:
       Tag: Circle
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [2.38418579e-07, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CircleRendererComponent:
       color: [1, 0.0442478061, 0.0442478061, 1]
       thickness: 0.150000006
       fade: 0.00499999989
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+      Velocity: [0, 0]
+      AngularVelocity: 0
+    CircleCollider2DComponent:
+      Offset: [0, 0]
+      Radius: 0.5
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
   - Entity: 8628487796826406497
     TagComponent:
       Tag: Floor
@@ -59,11 +71,11 @@ Entities:
     TagComponent:
       Tag: Floor
     TransformComponent:
-      Translation: [-1.86442041, -1.09168768, 0]
+      Translation: [-1.7852658, -0.661439359, 0.800000012]
       Rotation: [0, 0, -0.345676333]
       Scale: [2.52328324, 0.460669428, 1]
     SpriteRendererComponent:
-      Color: [0.949800014, 0.455300003, 0.0659999996, 1]
+      Color: [0.949019611, 0.454901963, 0.0666666701, 0.58431375]
       tiling factor: 1
     Rigidbody2DComponent:
       BodyType: Static
@@ -114,7 +126,7 @@ Entities:
       BodyType: Dynamic
       FixedRotation: false
       Velocity: [0, 0]
-      AngularVelocity: 0
+      AngularVelocity: 2
     BoxCollider2DComponent:
       Offset: [0, 0]
       Size: [0.5, 0.5]

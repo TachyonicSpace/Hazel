@@ -165,9 +165,9 @@ namespace Hazel {
 
 			if (Input::IsMouseButtonPressed(Mouse::ButtonLeft))
 				MouseRotate(delta);
-			else if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
-				MousePan(delta);
 			else if (Input::IsMouseButtonPressed(Mouse::ButtonRight))
+				MousePan(delta);
+			else if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
 				MouseZoom((delta.x-delta.y) );
 			m_InitialMousePosition = mouse;
 		}

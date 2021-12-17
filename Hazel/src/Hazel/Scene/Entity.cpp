@@ -10,7 +10,7 @@ namespace Hazel
 	Entity::Entity(std::string name, entt::entity handle, Scene* scene)
 		:m_EntityHandle(handle), m_Scene(scene)
 	{
-		AddComponent<Component::Tag>(name);
+		AddComponent<Components::Tag>(name);
 	}
 	Entity::Entity(entt::entity handle, Scene* scene)
 		:m_EntityHandle(handle), m_Scene(scene)

@@ -12,6 +12,36 @@
 #include <Hazel/Math/Math.h>
 
 
+const char* blendingTypes[] = {
+					"ZERO",
+		"ONE",
+		"SRC_COLOR",
+		"ONE_MINUS_SRC_COLOR",
+		"DST_COLOR",
+		"ONE_MINUS_DEST_COLOR",
+		"SRC_ALPHA",
+		"ONE_MINUS_SRC_ALPHA",
+		"DST_ALPHA",
+		"ONE_MINUS_DST_ALPHA",
+
+		"CONSTANT_COLOR",
+		"ONE_MINUS_CONSTANT_COLOR",
+		"CONSTANT_ALPHA",
+		"ONE_MINUS_CONSTANT_ALPHA",
+		"SRC1_ALPHA",
+		"ONE_MINUS_SRC1_ALPHA",
+		"SRC1_COLOR",
+		"ONE_MINUS_SRC1_COLOR"
+};
+const char* blendingFunction[] = {
+	"FUNC_ADD",
+	"FUNC_SUBTRACT",
+	"FUNC_REVERSE_SUBTRACT",
+	"MIN",
+	"MAX"
+};
+
+
 namespace Hazel
 {
 	extern const std::filesystem::path g_AssetPath;
@@ -175,7 +205,7 @@ namespace Hazel
 			}
 		}
 
-
+		OnOverlayRender();
 		m_FrameBuffer->UnBind();
 		timeStep = ts.GetSeconds();
 	}
@@ -192,6 +222,7 @@ namespace Hazel
 		m_ContentBrowserPanel.OnImGuiRender();
 
 		Settings();
+		RendererSettings();
 
 		//viewport, main scene
 		viewportSettings();
@@ -267,12 +298,13 @@ namespace Hazel
 		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "Draw Calls: %d", Renderer2D::GetStats().drawCalls);
 		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "Quad Count: %d", Renderer2D::GetStats().quadCount);
 		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "frame buffer width: %d", m_FrameBuffer->GetSpecs().Width);
-		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "framebuffer height: %d", m_FrameBuffer->GetSpecs().Height);
+		ImGui::TextColored({ .8f, .2f, .2f, 1.f }, "framebuffer height: %d\n\n", m_FrameBuffer->GetSpecs().Height);
 
+		ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
 
 		std::string name = "Null";
-		if (m_HoveredEntity && m_HoveredEntity.HasComponent<Component::Tag>())
-			name = m_HoveredEntity.GetComponent<Component::Tag>().name;
+		if (m_HoveredEntity && m_HoveredEntity.HasComponent<Components::Tag>())
+			name = m_HoveredEntity.GetComponent<Components::Tag>().name;
 		ImGui::Text("hovered entity: %s", name.c_str());
 
 		static std::string modes[] = { "none", "Translation", "Rotation", "Scale" };
@@ -280,9 +312,9 @@ namespace Hazel
 		ImGui::Text("ImGuizmo mode: %s", mode.c_str());
 		name = "";
 		Entity selected = m_SceneHierarchyPanel.GetSelectedEntity();
-		if (selected && selected.HasComponent<Component::Tag>())
-			name = "\n\tselected entity: " + selected.GetComponent<Component::Tag>().name;
-		ImGui::TextColored({ 1, .5, .98, 1 }, "q:none, w:translation, e:rotation, r:scale%s", name.c_str());
+		if (selected && selected.HasComponent<Components::Tag>())
+			name = "\n\tselected entity: " + selected.GetComponent<Components::Tag>().name;
+		ImGui::TextColored({ 1, .5f, .98f, 1 }, "q:none, w:translation, e:rotation, r:scale%s", name.c_str());
 
 		if (Input::IsKeyPressed(KeyCode::LeftAlt))
 			ImGui::Text("Mouse mode: Camera Edit\n\t(lft mouse rotate, right zoom, middle pan)");
@@ -309,14 +341,67 @@ namespace Hazel
 		ImGui::Text("camera yaw:%f, pitch:%f, dist:%f", m_EditorCamera.GetYaw(), m_EditorCamera.GetPitch(), m_EditorCamera.GetDistance());
 		if (ImGui::Button("reset editor camera to defaults?"))
 			m_EditorCamera = EditorCamera(m_EditorCamera);
+		ImGui::End();
+	}
+	void EditorLayer::RendererSettings()
+	{
+		ImGui::Begin("RendererSettings");
 
+		Blending::Functions blendFunc = RenderCommand::GetBlendFunc();
+		Blending::Types src = RenderCommand::GetSrcFactor(), dst = RenderCommand::GetDstFactor();
 
-		if (Input::IsMouseButtonPressed(Mouse::ButtonLeft) && !Input::IsKeyPressed(KeyCode::LeftAlt)
-			&& !ImGuizmo::IsOver() && m_HoveredEntity)
 		{
-			m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
-			m_SceneHovered = false;
+			const char* currentSrcBlendingType = blendingTypes[(int)src];
+
+			if (ImGui::BeginCombo("Src blending Type", currentSrcBlendingType))
+			{
+				for (int i = 0; i < 18; i++)
+				{
+					bool isSelected = currentSrcBlendingType == blendingTypes[i];
+					if (ImGui::Selectable(blendingTypes[i], isSelected))
+					{
+						RenderCommand::SetSrcFactor((Blending::Types)i);
+					}
+				}
+
+				ImGui::EndCombo();
+			}
 		}
+		{
+			const char* currentDstBlendingType = blendingTypes[(int)dst];
+
+			if (ImGui::BeginCombo("Dst blending Type", currentDstBlendingType))
+			{
+				for (int i = 0; i < 13; i++)
+				{
+					bool isSelected = currentDstBlendingType == blendingTypes[i];
+					if (ImGui::Selectable(blendingTypes[i], isSelected))
+					{
+						RenderCommand::SetDstFactor((Blending::Types)i);
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+		}
+		{
+			const char* currentBlendingFunc = blendingFunction[(int)blendFunc];
+
+			if (ImGui::BeginCombo("Blending Function Type", currentBlendingFunc))
+			{
+				for (int i = 0; i < 5; i++)
+				{
+					bool isSelected = currentBlendingFunc == blendingFunction[i];
+					if (ImGui::Selectable(blendingFunction[i], isSelected))
+					{
+						RenderCommand::SetBlendFunc((Blending::Functions)i);
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+		}
+
 		ImGui::End();
 	}
 	void EditorLayer::viewportSettings()
@@ -383,7 +468,7 @@ namespace Hazel
 
 
 			// Entity transform
-			auto& tc = selectedEntity.GetComponent<Component::Transform>();
+			auto& tc = selectedEntity.GetComponent<Components::Transform>();
 			glm::mat4 transform = tc.GetTransform();
 
 			bool snapping = Input::IsKeyPressed(Key::LeftControl);
@@ -400,6 +485,15 @@ namespace Hazel
 
 
 		}
+
+		if (Input::IsMouseButtonPressed(Mouse::ButtonLeft) && !Input::IsKeyPressed(KeyCode::LeftAlt)
+			&& !ImGuizmo::IsOver() && m_ViewPortHovered)
+		{
+			m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+			m_SceneHovered = false;
+		}
+
+
 
 		ImGui::PopStyleVar();
 		ImGui::End();
@@ -419,7 +513,7 @@ namespace Hazel
 
 		float size = ImGui::GetWindowHeight() - 4.0f;
 		Ref<Texture2D> icon = m_SceneState != SceneState::Edit ? m_IconStop : m_IconPlay;
-		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f) - ((float)(m_SceneState==SceneState::Edit) * size *.50));
+		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f) - ((float)(m_SceneState==SceneState::Edit) * size *.50f));
 		if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
 		{
 			if (m_SceneState == SceneState::Edit)
@@ -439,6 +533,62 @@ namespace Hazel
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor(3);
 		ImGui::End();
+	}
+
+
+	void EditorLayer::OnOverlayRender()
+	{
+		bool isCameraForward = true;
+		if (m_SceneState == SceneState::Play)
+		{
+			Entity camera = m_ActiveScene->GetPrimaryCameraEntity();
+			Renderer2D::BeginScene(camera.GetComponent<Components::Cameras>().camera, camera.GetComponent<Components::Transform>().GetTransform());
+		}
+		else
+		{
+			Renderer2D::BeginScene(m_EditorCamera);
+			isCameraForward = m_EditorCamera.GetForwardDirection().z <= 0;
+		}
+
+		if (m_ShowPhysicsColliders)
+		{
+			// Box Colliders
+			{
+				auto view = m_ActiveScene->GetAllEntitiesWith<Components::Transform, Components::BoxCollider2D>();
+				for (auto entity : view)
+				{
+					auto [tc, bc2d] = view.get<Components::Transform, Components::BoxCollider2D>(entity);
+
+					glm::vec3 translation = tc.Translation + glm::vec3(bc2d.Offset, 0.001f);
+					glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
+
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+						* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
+						* glm::scale(glm::mat4(1.0f), scale);
+
+					Renderer2D::DrawRect(transform, glm::vec4(0, 1, 0, 1));
+				}
+			}
+
+			// Circle Colliders
+			{
+				auto view = m_ActiveScene->GetAllEntitiesWith<Components::Transform, Components::CircleCollider2D>();
+				for (auto entity : view)
+				{
+					auto [tc, cc2d] = view.get<Components::Transform, Components::CircleCollider2D>(entity);
+
+					glm::vec3 translation = tc.Translation + glm::vec3(cc2d.Offset, 0.001f * (2*((int)isCameraForward)-1));
+					glm::vec3 scale = tc.Scale * glm::vec3(cc2d.Radius * 2.0f);
+
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+						* glm::scale(glm::mat4(1.0f), scale);
+
+					Renderer2D::DrawCircle(transform, glm::vec4(0, 1, 0, 1), 0.03f);
+				}
+			}
+		}
+
+		Renderer2D::EndScene();
 	}
 
 

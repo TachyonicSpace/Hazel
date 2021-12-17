@@ -10,7 +10,6 @@
 class b2World;
 #pragma warning(push, 0)
 #include "entt.hpp"
-#include <glm/glm.hpp>
 #pragma warning(pop)
 
 namespace Hazel
@@ -62,6 +61,13 @@ namespace Hazel
 		void DrawIDBuffer(Ref<Framebuffer> target, EditorCamera& cam);
 		void DuplicateEntity(Entity entity);
 		Entity GetPrimaryCameraEntity();
+
+
+		template<typename... componentTypes>
+		auto GetAllEntitiesWith()
+		{
+			return m_Registry.view<componentTypes...>();
+		}
 
 		template <typename ... Args>
 		void each(Args&& ... args)

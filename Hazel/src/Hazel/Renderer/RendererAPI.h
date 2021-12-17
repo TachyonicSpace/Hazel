@@ -6,6 +6,8 @@
 
 #include "VertexArray.h"
 
+#include "RenderSettingsEnums.h"
+
 namespace Hazel {
 
 	class RendererAPI
@@ -14,12 +16,6 @@ namespace Hazel {
 		enum class API
 		{
 			None = 0, OpenGL
-		};
-		enum class RenderType
-		{
-			POINTS = 0x0000,
-			LINES, LINE_LOOP, LINE_STRIP,
-			TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN
 		};
 
 	public:
@@ -33,6 +29,13 @@ namespace Hazel {
 
 		virtual void DrawIndexed(const Ref<VertexArray>& va, uint32_t indexCount = 0, RenderType Primitives = RenderType::TRIANGLES) = 0;
 
+		virtual Blending::Types GetSrcFactor() = 0;
+		virtual Blending::Types GetDstFactor() = 0;
+		virtual Blending::Functions GetBlendFunc() = 0;
+
+		virtual void SetSrcFactor(const Blending::Types& bt) = 0;
+		virtual void SetDstFactor(const Blending::Types& bt) = 0;
+		virtual void SetBlendFunc(const Blending::Functions& bf) = 0;
 
 		virtual void SetLineWidth(float width) = 0;
 
@@ -40,6 +43,11 @@ namespace Hazel {
 		static Scope<RendererAPI> Create();
 	private:
 		static API s_API;
+	protected:
+		Blending::Types srcFactor, dstFactor;
+		Blending::Functions blendFunc;
 	};
 
 }
+
+
