@@ -197,11 +197,28 @@ public:
 				HZ_PROFILE_SCOPE("Training Network");
 				for (int i = 0; i < 100; i++)
 				{
-					for (auto point : data)
+					int* dataIndex = new int[data.size()];
+					for (int i = 0; i < data.size(); i++)
 					{
-						if (point.needsTraining(nn))
-							point.train(nn);
+						dataIndex[i] = i;
 					}
+					for (int i = 0; i < data.size(); i++)
+					{
+						for (int j = 0; j < data.size(); j++)
+						{
+							unsigned int i0 = rand() % data.size();
+							unsigned int j0 = rand() % data.size();
+							auto tmp = dataIndex[i0];
+							dataIndex[i0] = dataIndex[j0];
+							dataIndex[j0] = tmp;
+						}
+					}
+					for (int i = 0; i < data.size(); i++)
+					{
+						if (data[dataIndex[i]].needsTraining(nn))
+							data[dataIndex[i]].train(nn);
+					}
+					delete[] dataIndex;
 				}
 			}
 			if (ImGui::SliderInt("layers", &layers, 0, 10))

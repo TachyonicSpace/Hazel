@@ -67,6 +67,7 @@ namespace Hazel
 		m_FrameBuffer = Framebuffer::Create(fbspec);
 
 		m_ActiveScene = NewRef<Scene>();
+		m_EditorScene = m_ActiveScene;
 
 		auto commandLineArgs = Application::Get().GetCommandLineArgs();
 		if (commandLineArgs.Count > 1)
@@ -521,7 +522,7 @@ namespace Hazel
 			else if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Simulate)
 				OnSceneStop();
 		}
-		if (m_SceneState == SceneState::Edit)
+		else if (m_SceneState == SceneState::Edit)
 		{
 			ImGui::SameLine();
 			if (ImGui::ImageButton((ImTextureID)m_IconSimulate->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
@@ -539,7 +540,7 @@ namespace Hazel
 	void EditorLayer::OnOverlayRender()
 	{
 		bool isCameraForward = true;
-		if (m_SceneState == SceneState::Play)
+		if (m_SceneState == SceneState::Play && m_ActiveScene->GetPrimaryCameraEntity())
 		{
 			Entity camera = m_ActiveScene->GetPrimaryCameraEntity();
 			Renderer2D::BeginScene(camera.GetComponent<Components::Cameras>().camera, camera.GetComponent<Components::Transform>().GetTransform());

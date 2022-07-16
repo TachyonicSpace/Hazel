@@ -28,6 +28,7 @@ namespace Hazel
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& scene)
 	{
 		m_context = scene;
+		m_SelectedContext = {};
 	}
 
 	template<typename T, typename UIFunction>

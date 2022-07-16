@@ -78,6 +78,9 @@ namespace Hazel
 	{
 		Ref<Scene> newScene = NewRef<Scene>();
 
+		if (!other)
+			return newScene;
+
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 

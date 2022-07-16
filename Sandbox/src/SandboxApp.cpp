@@ -1,13 +1,25 @@
 #define HZ_MAIN
 #define _USE_MATH_DEFINES
-//#include "RocketProgram.cpp"
-#include "NeuralNetworkProgram.cpp"
+
+#define runningProject 1
+
+#if runningProject == 0
+	#include "RocketProgram.cpp"
+	#define layerToAdd RocketLayer
+	#else
+#if runningProject == 1
+	#include "NeuralNetworkProgram.cpp"
+	#define layerToAdd NeuralNetworkLayer
+	#endif
+#endif
+
+
 
 class Sandbox : public Hazel::Application {
 public:
 	Sandbox()
 		:Application({ "Sandbox" }) {//, 900, 500}) {
-		PushLayer(new NeuralNetworkLayer());
+		PushLayer(new layerToAdd());
 	}
 
 	~Sandbox() {
