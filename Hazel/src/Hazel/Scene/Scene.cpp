@@ -39,22 +39,20 @@ namespace Hazel
 	Scene::Scene()
 	{
 	}
-	template<typename... Components>
+	template<typename... Component>
 	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
 	{
 		([&]()
 			{
-
-				auto view = src.view<Components>();
-				for (auto e : view)
+				auto view = src.view<Component>();
+				for (auto srcEntity : view)
 				{
-					UUID uuid = src.get<Components::ID>(e).id;
-					HZ_CORE_ASSERT(enttMap.find(uuid) != enttMap.end());
-					entt::entity dstEnttID = enttMap.at(uuid);
+					entt::entity dstEntity = enttMap.at(src.get<Components::ID>(srcEntity).id);
 
-					auto& component = src.get<Components>(e);
-					dst.emplace_or_replace<Components>(dstEnttID, component);
+					auto& srcComponent = src.get<Component>(srcEntity);
+					dst.emplace_or_replace<Component>(dstEntity, srcComponent);
 				}
+
 			}(), ...);
 	}
 
@@ -62,7 +60,7 @@ namespace Hazel
 	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src,
 		const std::unordered_map<UUID, entt::entity>& enttMap)
 	{
-		CopyComponent<Component>(dst, src, enttMap);
+		CopyComponent<Component...>(dst, src, enttMap);
 	}
 
 	template<typename... Component>
