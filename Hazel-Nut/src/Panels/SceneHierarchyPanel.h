@@ -23,11 +23,13 @@ namespace Hazel {
 		bool RemoveSelectedEntity();
 
 	private:
+		template<typename T>
+		void DisplayAddComponentEntry(const std::string& entryName);
+
 		void DrawEntityNode(Entity node, bool displayAllEntities = false);
 		void EditTransformMatrix(glm::mat4& transform, bool details = true); 
 		bool EditTransformVec(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
 		void EditColor(Color& col);
-		void AddComponentsPopup();
 	private:
 		Ref<Scene> m_context;
 		Entity m_SelectedContext;

@@ -214,7 +214,6 @@ Scene,
 
 ScenehierarchyPanel
 	DrawComponents()
-	AddComponentsPopup()
 
 
 //where to add new render types

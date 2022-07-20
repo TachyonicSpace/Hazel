@@ -173,13 +173,17 @@ namespace Hazel
 			if (ImGui::MenuItem("Delete entity?"))
 				ent.deleted = true;
 
-			AddComponentsPopup();
 			ImGui::EndPopup();
 		}
 
 		if (ImGui::BeginPopup("AddComponent"))
 		{
-			AddComponentsPopup();
+			DisplayAddComponentEntry<CameraComponent>("Camera");
+			DisplayAddComponentEntry<SpriteRendererComponent>("Sprite Renderer");
+			DisplayAddComponentEntry<CircleRendererComponent>("Circle Renderer");
+			DisplayAddComponentEntry<Rigidbody2DComponent>("Rigidbody 2D");
+			DisplayAddComponentEntry<BoxCollider2DComponent>("Box Collider 2D");
+			DisplayAddComponentEntry<CircleCollider2DComponent>("Circle Collider 2D");
 
 			ImGui::EndPopup();
 		}
@@ -390,59 +394,14 @@ namespace Hazel
 		}
 	}
 
-	void SceneHierarchyPanel::AddComponentsPopup()
-	{
-		if (!m_SelectedContext.HasComponent<Components::Cameras>())
-		{
-			if (ImGui::MenuItem("Camera"))
-			{
-				m_SelectedContext.AddComponent<Components::Cameras>();
-				ImGui::CloseCurrentPopup();
-			}
-		}
 
-		if (!m_SelectedContext.HasComponent<Components::SpriteRenderer>())
+	template<typename T>
+	void SceneHierarchyPanel::DisplayAddComponentEntry(const std::string& entryName) {
+		if (!m_SelectedContext.HasComponent<T>())
 		{
-			if (ImGui::MenuItem("Sprite Renderer"))
+			if (ImGui::MenuItem(entryName.c_str()))
 			{
-				m_SelectedContext.AddComponent<Components::SpriteRenderer>();
-				ImGui::CloseCurrentPopup();
-			}
-		}
-
-		if (!m_SelectedContext.HasComponent<Components::CircleRenderer>())
-		{
-			if (ImGui::MenuItem("Circle Renderer"))
-			{
-				m_SelectedContext.AddComponent<Components::CircleRenderer>();
-				ImGui::CloseCurrentPopup();
-			}
-		}
-
-
-		if (!m_SelectedContext.HasComponent<Components::Rigidbody2D>())
-		{
-			if (ImGui::MenuItem("Rigidbody 2D"))
-			{
-				m_SelectedContext.AddComponent<Components::Rigidbody2D>();
-				ImGui::CloseCurrentPopup();
-			}
-		}
-
-		if (!m_SelectedContext.HasComponent<Components::BoxCollider2D>())
-		{
-			if (ImGui::MenuItem("Box Collider 2D"))
-			{
-				m_SelectedContext.AddComponent<Components::BoxCollider2D>();
-				ImGui::CloseCurrentPopup();
-			}
-		}
-
-		if (!m_SelectedContext.HasComponent<Components::CircleCollider2D>())
-		{
-			if (ImGui::MenuItem("Circle Collider 2D"))
-			{
-				m_SelectedContext.AddComponent<Components::CircleCollider2D>();
+				m_SelectedContext.AddComponent<T>();
 				ImGui::CloseCurrentPopup();
 			}
 		}
