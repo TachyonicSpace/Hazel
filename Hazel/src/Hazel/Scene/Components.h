@@ -177,6 +177,28 @@ namespace Hazel
 			CircleCollider2D(const CircleCollider2D&) = default;
 		};
 	}
+
+#define IDComponent Components::ID
+#define TagComponent Components::Tag
+#define TransformComponent Components::Transform
+#define SpriteRendererComponent Components::SpriteRenderer
+#define CircleRendererComponent Components::CircleRenderer
+#define CameraComponent Components::Cameras
+#define NativeScriptComponent Components::NativeScript
+#define Rigidbody2DComponent Components::Rigidbody2D
+#define BoxCollider2DComponent Components::BoxCollider2D
+#define CircleCollider2DComponent Components::CircleCollider2D
+
+
+	template<typename... Component>
+	struct ComponentGroup
+	{
+
+	};
+	using AllComponents =
+		ComponentGroup<TransformComponent, SpriteRendererComponent, CircleRendererComponent,
+		CameraComponent, NativeScriptComponent, Rigidbody2DComponent,
+		BoxCollider2DComponent, CircleCollider2DComponent>;
 }
 
 /*	places to update components at

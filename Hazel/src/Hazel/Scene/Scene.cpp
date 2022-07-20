@@ -39,26 +39,45 @@ namespace Hazel
 	Scene::Scene()
 	{
 	}
-	template<typename Comp>
+	template<typename... Components>
 	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
 	{
-		auto view = src.view<Comp>();
-		for (auto e : view)
-		{
-			UUID uuid = src.get<Components::ID>(e).id;
-			HZ_CORE_ASSERT(enttMap.find(uuid) != enttMap.end());
-			entt::entity dstEnttID = enttMap.at(uuid);
+		([&]()
+			{
 
-			auto& component = src.get<Comp>(e);
-			dst.emplace_or_replace<Comp>(dstEnttID, component);
-		}
+				auto view = src.view<Components>();
+				for (auto e : view)
+				{
+					UUID uuid = src.get<Components::ID>(e).id;
+					HZ_CORE_ASSERT(enttMap.find(uuid) != enttMap.end());
+					entt::entity dstEnttID = enttMap.at(uuid);
+
+					auto& component = src.get<Components>(e);
+					dst.emplace_or_replace<Components>(dstEnttID, component);
+				}
+			}(), ...);
 	}
 
-	template<typename Component>
+	template<typename... Component>
+	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src,
+		const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		CopyComponent<Component>(dst, src, enttMap);
+	}
+
+	template<typename... Component>
 	static void CopyComponentIfExists(Entity dst, Entity src)
 	{
+		([&]() {
 		if (src.HasComponent<Component>())
 			dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
+			}(), ...);
+	}
+
+	template<typename... Component>
+	static void CopyComponentIfExists(ComponentGroup<Component...>, Entity dst, Entity src)
+	{
+		CopyComponentIfExists(dst, src);
 	}
 
 	Entity Scene::FindEntity(const UUID& id)
@@ -99,14 +118,7 @@ namespace Hazel
 		}
 
 		// Copy components (except IDComponent and TagComponent)
-		CopyComponent<Components::Transform>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<Components::SpriteRenderer>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<Components::CircleRenderer>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<Components::Cameras>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<Components::NativeScript>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<Components::Rigidbody2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<Components::BoxCollider2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<Components::CircleCollider2D>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent(AllComponents{}, dstSceneRegistry, srcSceneRegistry, enttMap);
 
 		return newScene;
 	}
@@ -388,14 +400,7 @@ namespace Hazel
 		std::string name = entity.GetName();
 		Entity newEntity = CreateEntity(name);
 
-		CopyComponentIfExists<Components::Transform>(newEntity, entity);
-		CopyComponentIfExists<Components::SpriteRenderer>(newEntity, entity);
-		CopyComponentIfExists<Components::CircleRenderer>(newEntity, entity);
-		CopyComponentIfExists<Components::Cameras>(newEntity, entity);
-		CopyComponentIfExists<Components::NativeScript>(newEntity, entity);
-		CopyComponentIfExists<Components::Rigidbody2D>(newEntity, entity);
-		CopyComponentIfExists<Components::BoxCollider2D>(newEntity, entity);
-		CopyComponentIfExists<Components::CircleCollider2D>(newEntity, entity);
+		CopyComponentIfExists(AllComponents{}, newEntity, entity);
 	}
 	Hazel::Entity Scene::GetPrimaryCameraEntity()
 	{
