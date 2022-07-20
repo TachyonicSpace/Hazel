@@ -422,9 +422,9 @@ namespace Hazel {
 
 			return true;
 		}
-		catch (...)
+		catch (YAML::ParserException e)
 		{
-			HZ_CORE_ERROR("ERROR DECODING SCENE, USING LEGACY DESERIALIZERS");
+			HZ_CORE_ERROR("ERROR DECODING SCENE, USING LEGACY DESERIALIZERS, error at {0}", filepath, e.what());
 			DeserializeOldScenes(filepath);
 		}
 	}
