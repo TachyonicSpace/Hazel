@@ -20,6 +20,10 @@ namespace Hazel {
 		Entity& GetSelectedEntity() { return m_SelectedContext; }
 		Entity GetSelectedEntity() const { return m_SelectedContext; }
 		Entity SetSelectedEntity(const Entity& ent) { return (m_SelectedContext = ent); }
+		void DeleteSelectedEntity() {
+			m_context->DestroyEntity(m_SelectedContext);
+			m_SelectedContext = {};
+		}
 		bool RemoveSelectedEntity();
 
 	private:
@@ -27,7 +31,7 @@ namespace Hazel {
 		void DisplayAddComponentEntry(const std::string& entryName);
 
 		void DrawEntityNode(Entity node, bool displayAllEntities = false);
-		void EditTransformMatrix(glm::mat4& transform, bool details = true); 
+		void EditTransformMatrix(glm::mat4& transform, bool details = true);
 		bool EditTransformVec(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
 		void EditColor(Color& col);
 	private:

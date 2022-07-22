@@ -5,7 +5,7 @@
 
 #include "input.h"
 
-#include "GLFW/glfw3.h"
+#include "Hazel/Utils/PlatformUtils.h"
 
 namespace Hazel {
 
@@ -15,8 +15,8 @@ namespace Hazel {
 //application pointer
 	Application* Application::s_Instance = nullptr;
 
-	Hazel::Application::Application(const WindowProps& props, ApplicationCommandLineArgs args)
-		:m_CommandLineArgs(args)
+	Hazel::Application::Application(const ApplicationSpecification& specs)
+		:m_Specification(specs)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -24,8 +24,12 @@ namespace Hazel {
 		HZ_CORE_ASSERT(!s_Instance, "Application already exist!!");
 		s_Instance = this;
 
+		// Set working directory here
+		if (!m_Specification.WorkingDirectory.empty())
+			std::filesystem::current_path(m_Specification.WorkingDirectory);
+
 		//creates a window with events
-		m_Window = Window::Create(props);
+		m_Window = Window::Create(WindowProps(m_Specification.Name, m_Specification.length, m_Specification.width));
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
 		auto currentWorkingDir = std::filesystem::current_path();
@@ -101,7 +105,7 @@ namespace Hazel {
 			HZ_PROFILE_SCOPE("run Loop");
 
 			//gets the time of each frame
-			float time = (float)glfwGetTime();
+			float time = Time::GetTime();
 			Timestep ts = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 

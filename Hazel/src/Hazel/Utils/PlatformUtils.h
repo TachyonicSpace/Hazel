@@ -11,6 +11,11 @@ namespace Hazel {
 		static std::string OpenFile(const char* filter);
 		static std::string SaveFile(const char* filter);
 		static std::string OpenFolder(std::string initialFolder = "");
-	};
 
+	};
+	class Time
+	{
+	public:
+		static float GetTime();
+	};
 }

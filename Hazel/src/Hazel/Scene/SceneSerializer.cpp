@@ -198,7 +198,7 @@ namespace Hazel {
 
 			auto& spriteRendererComponent = entity.GetComponent<Components::SpriteRenderer>();
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.color.GetVec4();
-			//out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Tex; not implimented
+			out << YAML::Key << "TexturePath" << YAML::Value << spriteRendererComponent.Tex->GetPath();
 			out << YAML::Key << "tiling factor" << YAML::Value << spriteRendererComponent.TilingFactor;
 
 			out << YAML::EndMap; // SpriteRendererComponent
@@ -367,6 +367,11 @@ namespace Hazel {
 					{
 						auto& src = deserializedEntity.AddComponent<Components::SpriteRenderer>();
 						src.color = spriteRendererComponent["Color"].as<glm::vec4>();
+						if (spriteRendererComponent["TexturePath"])
+							src.Tex = Texture2D::Create(spriteRendererComponent["TexturePath"].as<std::string>());
+
+						if (spriteRendererComponent["TilingFactor"])
+							src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 						if (spriteRendererComponent["tiling factor"])
 							src.TilingFactor = spriteRendererComponent["tiling factor"].as<float>();
 					}

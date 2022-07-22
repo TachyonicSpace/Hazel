@@ -69,7 +69,7 @@ namespace Hazel
 		m_ActiveScene = NewRef<Scene>();
 		m_EditorScene = m_ActiveScene;
 
-		auto commandLineArgs = Application::Get().GetCommandLineArgs();
+		auto commandLineArgs = Application::Get().GetApplicationSpecification().CommandLineArgs;
 		if (commandLineArgs.Count > 1)
 		{
 			std::string sceneFilePath = commandLineArgs[1];
@@ -77,6 +77,7 @@ namespace Hazel
 		}
 
 		m_EditorCamera = EditorCamera(30.f, 1, .1f, 1000.f);
+		Renderer2D::SetLineWidth(4.0f);
 
 		m_Delta = 1.f;
 
@@ -155,33 +156,6 @@ namespace Hazel
 			break;
 		}
 		}
-		/*Renderer2D::BeginScene(EditorCamera(45, (m_ViewPortSize.x / m_ViewPortSize.y), .1, 1000));
-		Renderer2D::DrawQuad({ 0, 0 }, { 1, 1 }, 0, { 1, 0, 1 });//todo:add neural network here
-		Renderer2D::EndScene();*/
-		//{
-		//	if (m_ActiveScene->ScenePlay)
-		//	{
-		//		if (!m_ActiveScene->OnUpdateRuntime(ts))
-		//		{
-		//			HZ_ERROR("Tried Rendering without a primary scene camera");
-		//			m_ActiveScene->ScenePlay = false;
-		//		}
-		//	}
-		//	if (!m_ActiveScene->ScenePlay)
-		//	{
-		//		if (m_UsingEditorCamera)
-		//			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
-		//		else
-		//		{
-		//			if (!m_ActiveScene->OnUpdateRuntime(ts))
-		//			{
-		//				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
-		//				m_UsingEditorCamera = true;
-		//				HZ_ERROR("Tried Rendering without a primary scene camera");
-		//			}
-		//		}
-		//	}
-		//}
 
 		//mouse picking
 		{
@@ -264,7 +238,10 @@ namespace Hazel
 				{
 					SceneSerializer serializer(m_ActiveScene);
 					serializer.Serialize("assets/scenes/Example.hazel");
-				}
+				}				
+				
+				if (ImGui::MenuItem("Save", "Ctrl+S"))
+					SaveScene();
 
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 					SaveSceneAs();
@@ -494,8 +471,6 @@ namespace Hazel
 			m_SceneHovered = false;
 		}
 
-
-
 		ImGui::PopStyleVar();
 		ImGui::End();
 	}
@@ -589,6 +564,15 @@ namespace Hazel
 			}
 		}
 
+		// Draw selected entity outline 
+		if (Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity()) {
+			TransformComponent transform = selectedEntity.GetComponent<TransformComponent>();
+			transform.Translation += -.002f*(m_EditorCamera.GetForwardDirection()-transform.Translation);
+			transform.Scale *= .98f;
+			//Red
+			Renderer2D::DrawRect(transform.GetTransform(), glm::vec4(1, .5, .25, 1));
+		}
+
 		Renderer2D::EndScene();
 	}
 
@@ -598,7 +582,8 @@ namespace Hazel
 	{
 		m_Camera.OnEvent(e);
 		//if (e.GetEventType() == EventType::MouseButtonPressed)
-		m_EditorCamera.OnEvent(e);
+		if(m_SceneState == SceneState::Edit)
+			m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
@@ -672,7 +657,7 @@ namespace Hazel
 		}
 		case Key::Delete:
 		{
-			m_SceneHierarchyPanel.GetSelectedEntity().deleted = true;
+			m_SceneHierarchyPanel.DeleteSelectedEntity();
 		}
 		}
 		return true;
