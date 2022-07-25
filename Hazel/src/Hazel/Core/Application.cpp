@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Hazel/Renderer/Renderer.h"
+#include "Hazel/Scripting/ScriptEngine.h"
 
 #include "input.h"
 
@@ -36,6 +37,7 @@ namespace Hazel {
 		std::filesystem::current_path("D:\\Hazel\\Hazel-Nut");
 		//starts the renderer to allow drawing
 		Renderer::Init();
+		ScriptEngine::Init();
 
 		//makes a layer to allow for imgui to be used
 		m_ImGuiLayer = new ImGuiLayer();
@@ -48,6 +50,7 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
+		ScriptEngine::Shutdown();
 		Renderer::Shutdown();
 	}
 

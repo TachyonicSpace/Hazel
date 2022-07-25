@@ -28,6 +28,9 @@
     <Filter Include="..\Hazel-Nut">
       <UniqueIdentifier>{888E7EC3-74F1-0D68-1D77-461E09B9D9EA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="..\Hazel-ScriptCore">
+      <UniqueIdentifier>{0F90FBDB-7BF1-D8E9-045F-1F9C70BF0FA9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="..\Sandbox">
       <UniqueIdentifier>{3F7B6B1D-2B33-AD6A-943A-86C68011485B}</UniqueIdentifier>
     </Filter>
@@ -35,6 +38,9 @@
   <ItemGroup>
     <None Include="..\..\Hazel-Nut\premake5.lua">
       <Filter>..\Hazel-Nut</Filter>
+    </None>
+    <None Include="..\..\Hazel-ScriptCore\premake5.lua">
+      <Filter>..\Hazel-ScriptCore</Filter>
     </None>
     <None Include="..\..\Hazel\premake5.lua">
       <Filter>..\Hazel</Filter>

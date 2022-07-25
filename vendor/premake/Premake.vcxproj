@@ -78,6 +78,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="..\..\Hazel-Nut\premake5.lua" />
+    <None Include="..\..\Hazel-ScriptCore\premake5.lua" />
     <None Include="..\..\Hazel\premake5.lua" />
     <None Include="..\..\Hazel\vendor\GLFW\premake5.lua" />
     <None Include="..\..\Hazel\vendor\Glad\premake5.lua" />

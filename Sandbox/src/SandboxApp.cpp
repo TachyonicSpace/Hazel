@@ -17,8 +17,8 @@
 
 class Sandbox : public Hazel::Application {
 public:
-	Sandbox()
-		:Application({ "Sandbox" }) {//, 900, 500}) {
+	Sandbox(Hazel::ApplicationSpecification specs)
+		:Application(specs) {//, 900, 500}) {
 		PushLayer(new layerToAdd());
 	}
 
@@ -28,5 +28,10 @@ public:
 };
 
 Hazel::Application* Hazel::CreateApplication(Hazel::ApplicationCommandLineArgs args) {
-	return new Sandbox;
+	ApplicationSpecification spec;
+	spec.Name = "Sandbox";
+	spec.WorkingDirectory = "../Sandbox";
+	spec.CommandLineArgs = args;
+
+	return new Sandbox(spec);
 }
