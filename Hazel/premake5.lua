@@ -56,6 +56,7 @@ project "Hazel"
 		"Glad",
 		"ImGui",
 		"yaml-cpp",
+		"Hazel-ScriptCore",
 		"opengl32.lib",
 
 		"%{Library.mono}"

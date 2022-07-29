@@ -7,5 +7,9 @@
   </ProjectOutputs>
   <ContentFiles />
   <SatelliteDlls />
-  <NonRecipeFileRefs />
+  <NonRecipeFileRefs>
+    <NonRecipeFileRef>
+      <FullPath>D:\Hazel\Hazel-ScriptCore\Hazel-ScriptCore.csproj</FullPath>
+    </NonRecipeFileRef>
+  </NonRecipeFileRefs>
 </Project>
