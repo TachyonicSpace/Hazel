@@ -62,21 +62,21 @@ namespace Hazel
 				if (ImGui::MenuItem("Create New Sprite Entity"))
 				{
 					auto newSprite = m_context->CreateEntity("New Sprite");
-					newSprite.AddComponent<Components::SpriteRenderer>();
+					newSprite.AddComponent<SpriteRendererComponent>();
 				}
 
 				if (ImGui::MenuItem("Create New Orthographic Camera Entity"))
 				{
 					auto newCamera = m_context->CreateEntity("New Orthographic Camera");
-					newCamera.AddComponent<Components::Cameras>();
-					newCamera.GetComponent<Components::Cameras>().camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
+					newCamera.AddComponent<CameraComponent>();
+					newCamera.GetComponent<CameraComponent>().camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
 				}
 
 				if (ImGui::MenuItem("Create New Perspective Camera Entity"))
 				{
 					auto newCamera = m_context->CreateEntity("New Perspective Camera");
-					newCamera.AddComponent<Components::Cameras>();
-					newCamera.GetComponent<Components::Cameras>().camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
+					newCamera.AddComponent<CameraComponent>();
+					newCamera.GetComponent<CameraComponent>().camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
 				}
 				ImGui::EndPopup();
 			}
@@ -103,7 +103,7 @@ namespace Hazel
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity node, bool displayAllEntities)
 	{
-		auto tag = node.GetComponent<Components::Tag>().name;
+		auto tag = node.GetComponent<TagComponent>().name;
 		if (!displayAllEntities)
 			if (tag == "N/A")
 				return;
@@ -148,9 +148,9 @@ namespace Hazel
 
 	void SceneHierarchyPanel::DrawComponents(Entity ent)
 	{
-		if (ent.HasComponent<Components::Tag>())
+		if (ent.HasComponent<TagComponent>())
 		{
-			auto& tag = ent.GetComponent<Components::Tag>().name;
+			auto& tag = ent.GetComponent<TagComponent>().name;
 
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
@@ -190,7 +190,7 @@ namespace Hazel
 
 		ImGui::PopItemWidth();
 
-		DrawComponent<Components::Transform>("Transform", ent, [&](auto& transform)
+		DrawComponent<TransformComponent>("Transform", ent, [&](auto& transform)
 			{
 				EditTransformVec("translation", transform.Translation);
 				static bool degrees = true;
@@ -206,7 +206,7 @@ namespace Hazel
 				EditTransformVec("Scale", transform.Scale, 1.0f);
 			});
 
-		DrawComponent<Components::Cameras>("Camera", ent, [&](auto& CameraComp)
+		DrawComponent<CameraComponent>("Camera", ent, [&](auto& CameraComp)
 			{
 				auto& camera = CameraComp.camera;
 
@@ -278,7 +278,7 @@ namespace Hazel
 
 			});
 
-		DrawComponent<Components::SpriteRenderer>("Sprite", ent, [&](auto& src)
+		DrawComponent<SpriteRendererComponent>("Sprite", ent, [&](auto& src)
 			{
 				static char buffer[256];
 				//memset(buffer, 0x00, sizeof(buffer));
@@ -331,7 +331,7 @@ namespace Hazel
 
 			});
 
-		DrawComponent<Components::CircleRenderer>("Circle Renderer", ent, [&](auto& src) {
+		DrawComponent<CircleRendererComponent>("Circle Renderer", ent, [&](auto& src) {
 
 			ImGui::ColorEdit4("Color", glm::value_ptr(src.Color));
 			ImGui::DragFloat("Thickness", &src.Thickness, 0.025f, 0.0f, 1.0f);
@@ -339,7 +339,7 @@ namespace Hazel
 			
 			});
 
-		DrawComponent<Components::Rigidbody2D>("Rigidbody 2D", ent, [](auto& component)
+		DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", ent, [](auto& component)
 			{
 				const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
 				const char* currentBodyTypeString = bodyTypeStrings[(int)component.Type];
@@ -351,7 +351,7 @@ namespace Hazel
 						if (ImGui::Selectable(bodyTypeStrings[i], isSelected))
 						{
 							currentBodyTypeString = bodyTypeStrings[i];
-							component.Type = (Components::Rigidbody2D::BodyType)i;
+							component.Type = (Rigidbody2DComponent::BodyType)i;
 						}
 
 						if (isSelected)
@@ -366,7 +366,7 @@ namespace Hazel
 				ImGui::DragFloat("AngularVelocity", &component.angularVelocity);
 			});
 
-		DrawComponent<Components::BoxCollider2D>("Box Collider 2D", ent, [](auto& component)
+		DrawComponent<BoxCollider2DComponent>("Box Collider 2D", ent, [](auto& component)
 			{
 				ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset), .01f);
 				ImGui::DragFloat2("Size", glm::value_ptr(component.Size), .01f);
@@ -376,7 +376,7 @@ namespace Hazel
 				ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
 			});
 
-		DrawComponent<Components::CircleCollider2D>("Circle Collider 2D", ent, [](auto& component)
+		DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", ent, [](auto& component)
 			{
 				ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset), .01f);
 				ImGui::DragFloat("Radius", &component.Radius, .01f);
@@ -541,7 +541,7 @@ namespace Hazel
 		ImGui::SliderInt("##x", &palletLen, 0, 8);
 		Color::ColorPallete.resize((size_t)pow(2, palletLen));
 
-		if (ImGui::TreeNodeEx((void*)typeid(Components::SpriteRenderer).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+		if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
 		{
 			if (m_SavedColorIndex > m_SavedColor.size() - 1)
 				m_SavedColorIndex = m_SavedColor.size() - 1;

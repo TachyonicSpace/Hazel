@@ -281,8 +281,8 @@ namespace Hazel
 		ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
 
 		std::string name = "Null";
-		if (m_HoveredEntity && m_HoveredEntity.HasComponent<Components::Tag>())
-			name = m_HoveredEntity.GetComponent<Components::Tag>().name;
+		if (m_HoveredEntity && m_HoveredEntity.HasComponent<TagComponent>())
+			name = m_HoveredEntity.GetComponent<TagComponent>().name;
 		ImGui::Text("hovered entity: %s", name.c_str());
 
 		static std::string modes[] = { "none", "Translation", "Rotation", "Scale" };
@@ -290,8 +290,8 @@ namespace Hazel
 		ImGui::Text("ImGuizmo mode: %s", mode.c_str());
 		name = "";
 		Entity selected = m_SceneHierarchyPanel.GetSelectedEntity();
-		if (selected && selected.HasComponent<Components::Tag>())
-			name = "\n\tselected entity: " + selected.GetComponent<Components::Tag>().name;
+		if (selected && selected.HasComponent<TagComponent>())
+			name = "\n\tselected entity: " + selected.GetComponent<TagComponent>().name;
 		ImGui::TextColored({ 1, .5f, .98f, 1 }, "q:none, w:translation, e:rotation, r:scale%s", name.c_str());
 
 		if (Input::IsKeyPressed(KeyCode::LeftAlt))
@@ -446,7 +446,7 @@ namespace Hazel
 
 
 			// Entity transform
-			auto& tc = selectedEntity.GetComponent<Components::Transform>();
+			auto& tc = selectedEntity.GetComponent<TransformComponent>();
 			glm::mat4 transform = tc.GetTransform();
 
 			bool snapping = Input::IsKeyPressed(Key::LeftControl);
@@ -518,7 +518,7 @@ namespace Hazel
 		if (m_SceneState == SceneState::Play && m_ActiveScene->GetPrimaryCameraEntity())
 		{
 			Entity camera = m_ActiveScene->GetPrimaryCameraEntity();
-			Renderer2D::BeginScene(camera.GetComponent<Components::Cameras>().camera, camera.GetComponent<Components::Transform>().GetTransform());
+			Renderer2D::BeginScene(camera.GetComponent<CameraComponent>().camera, camera.GetComponent<TransformComponent>().GetTransform());
 		}
 		else
 		{
@@ -530,10 +530,10 @@ namespace Hazel
 		{
 			// Box Colliders
 			{
-				auto view = m_ActiveScene->GetAllEntitiesWith<Components::Transform, Components::BoxCollider2D>();
+				auto view = m_ActiveScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
 				for (auto entity : view)
 				{
-					auto [tc, bc2d] = view.get<Components::Transform, Components::BoxCollider2D>(entity);
+					auto [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
 
 					glm::vec3 translation = tc.Translation + glm::vec3(bc2d.Offset, 0.001f);
 					glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
@@ -548,10 +548,10 @@ namespace Hazel
 
 			// Circle Colliders
 			{
-				auto view = m_ActiveScene->GetAllEntitiesWith<Components::Transform, Components::CircleCollider2D>();
+				auto view = m_ActiveScene->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>();
 				for (auto entity : view)
 				{
-					auto [tc, cc2d] = view.get<Components::Transform, Components::CircleCollider2D>(entity);
+					auto [tc, cc2d] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
 
 					glm::vec3 translation = tc.Translation + glm::vec3(cc2d.Offset, 0.001f * (2*((int)isCameraForward)-1));
 					glm::vec3 scale = tc.Scale * glm::vec3(cc2d.Radius * 2.0f);

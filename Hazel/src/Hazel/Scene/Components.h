@@ -22,35 +22,34 @@ namespace Hazel
 	class ScriptableEntity;
 
 
-	namespace Components
-	{
-		struct ID
+	
+		struct IDComponent
 		{
 			UUID id;
 
-			ID() = default;
-			ID(const ID&) = default;
+			IDComponent() = default;
+			IDComponent(const IDComponent&) = default;
 		};
 
-		struct Tag
+		struct TagComponent
 		{
 			std::string name;
 
-			Tag() = default;
-			Tag(const Tag&) = default;
-			Tag(const std::string & tag)
+			TagComponent() = default;
+			TagComponent(const TagComponent&) = default;
+			TagComponent(const std::string & tag)
 				: name(tag) {}
 		};
 
-		struct Transform
+		struct TransformComponent
 		{
 			glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
 			glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 			glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
-			Transform() = default;
-			Transform(const Transform&) = default;
-			Transform(const glm::vec3& pos,
+			TransformComponent() = default;
+			TransformComponent(const TransformComponent&) = default;
+			TransformComponent(const glm::vec3& pos,
 					  const glm::vec3& rotation = glm::vec3(0),
 					  const glm::vec3& scale = glm::vec3(1))
 				: Translation(pos), Rotation(rotation), Scale(scale) {}
@@ -68,63 +67,63 @@ namespace Hazel
 			operator const glm::mat4& () const { return GetTransform(); }
 		};
 
-		struct SpriteRenderer
+		struct SpriteRendererComponent
 		{
 			Ref<Texture2D> Tex;
 			float TilingFactor;
 			Color color{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 
-			SpriteRenderer(const SpriteRenderer&) = default;
-			SpriteRenderer(const Color& col = { 1, 1, 1, 1 }, const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f)
+			SpriteRendererComponent(const SpriteRendererComponent&) = default;
+			SpriteRendererComponent(const Color& col = { 1, 1, 1, 1 }, const Ref<Texture2D>& tex = nullptr, float tilingFactor = 1.f)
 				: color(col), Tex(tex), TilingFactor(tilingFactor)
 			{}
-			SpriteRenderer(Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& col = { 1, 1, 1, 1 })
+			SpriteRendererComponent(Ref<Texture2D>& tex, float tilingFactor = 1.f, const Color& col = { 1, 1, 1, 1 })
 				:color(col), Tex(tex), TilingFactor(tilingFactor)
 			{}
 		};
 
-		struct CircleRenderer
+		struct CircleRendererComponent
 		{
 			glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 			float Thickness = 1.0f;
 			float Fade = 0.005f;
 
-			CircleRenderer() = default;
-			CircleRenderer(const CircleRenderer&) = default;
+			CircleRendererComponent() = default;
+			CircleRendererComponent(const CircleRendererComponent&) = default;
 		};
 
 
-		struct Cameras
+		struct CameraComponent
 		{
 			SceneCamera camera;
 			bool Primary = true;
 
 			bool fixedAspectRatio = false;
 
-			Cameras() = default;
-			Cameras(const Cameras&) = default;
-			Cameras(const SceneCamera& Cam)
+			CameraComponent() = default;
+			CameraComponent(const CameraComponent&) = default;
+			CameraComponent(const SceneCamera& Cam)
 				:camera(Cam) {}
 		};
 
-		struct NativeScript
+		struct NativeScriptComponent
 		{
 			ScriptableEntity* Instance = nullptr;
 
 			ScriptableEntity* (*InstantiateScript)();
-			void (*DestroyScript)(NativeScript*);
+			void (*DestroyScript)(NativeScriptComponent*);
 
 			template<typename T>
 			void Bind()
 			{
 				InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
-				DestroyScript = [](NativeScript* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+				DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
 			}
 		};
 
 		// Physics
-		struct Rigidbody2D
+		struct Rigidbody2DComponent
 		{
 			enum class BodyType { Static = 0, Dynamic, Kinematic };
 			BodyType Type = BodyType::Static;
@@ -137,11 +136,11 @@ namespace Hazel
 			// Storage for runtime
 			void* RuntimeBody = nullptr;
 
-			Rigidbody2D() = default;
-			Rigidbody2D(const Rigidbody2D&) = default;
+			Rigidbody2DComponent() = default;
+			Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
 		};
 
-		struct BoxCollider2D
+		struct BoxCollider2DComponent
 		{
 			glm::vec2 Offset = { 0.0f, 0.0f };
 			glm::vec2 Size = { 0.5f, 0.5f };
@@ -155,11 +154,11 @@ namespace Hazel
 			// Storage for runtime
 			void* RuntimeFixture = nullptr;
 
-			BoxCollider2D() = default;
-			BoxCollider2D(const BoxCollider2D&) = default;
+			BoxCollider2DComponent() = default;
+			BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 		};
 
-		struct CircleCollider2D
+		struct CircleCollider2DComponent
 		{
 			glm::vec2 Offset = { 0.0f, 0.0f };
 			float Radius = .5f;
@@ -173,21 +172,11 @@ namespace Hazel
 			// Storage for runtime
 			void* RuntimeFixture = nullptr;
 
-			CircleCollider2D() = default;
-			CircleCollider2D(const CircleCollider2D&) = default;
+			CircleCollider2DComponent() = default;
+			CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 		};
-	}
+	
 
-#define IDComponent Components::ID
-#define TagComponent Components::Tag
-#define TransformComponent Components::Transform
-#define SpriteRendererComponent Components::SpriteRenderer
-#define CircleRendererComponent Components::CircleRenderer
-#define CameraComponent Components::Cameras
-#define NativeScriptComponent Components::NativeScript
-#define Rigidbody2DComponent Components::Rigidbody2D
-#define BoxCollider2DComponent Components::BoxCollider2D
-#define CircleCollider2DComponent Components::CircleCollider2D
 
 
 	template<typename... Component>

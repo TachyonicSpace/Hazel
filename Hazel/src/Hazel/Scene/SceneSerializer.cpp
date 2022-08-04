@@ -107,27 +107,27 @@ namespace Hazel {
 		return out;
 	}
 
-	static std::string RigidBody2DBodyTypeToString(Components::Rigidbody2D::BodyType bodyType)
+	static std::string RigidBody2DBodyTypeToString(Rigidbody2DComponent::BodyType bodyType)
 	{
 		switch (bodyType)
 		{
-		case Components::Rigidbody2D::BodyType::Static:    return "Static";
-		case Components::Rigidbody2D::BodyType::Dynamic:   return "Dynamic";
-		case Components::Rigidbody2D::BodyType::Kinematic: return "Kinematic";
+		case Rigidbody2DComponent::BodyType::Static:    return "Static";
+		case Rigidbody2DComponent::BodyType::Dynamic:   return "Dynamic";
+		case Rigidbody2DComponent::BodyType::Kinematic: return "Kinematic";
 		}
 
 		HZ_CORE_ASSERT(false, "Unknown body type");
 		return {};
 	}
 
-	static Components::Rigidbody2D::BodyType RigidBody2DBodyTypeFromString(const std::string& bodyTypeString)
+	static Rigidbody2DComponent::BodyType RigidBody2DBodyTypeFromString(const std::string& bodyTypeString)
 	{
-		if (bodyTypeString == "Static")    return Components::Rigidbody2D::BodyType::Static;
-		if (bodyTypeString == "Dynamic")   return Components::Rigidbody2D::BodyType::Dynamic;
-		if (bodyTypeString == "Kinematic") return Components::Rigidbody2D::BodyType::Kinematic;
+		if (bodyTypeString == "Static")    return Rigidbody2DComponent::BodyType::Static;
+		if (bodyTypeString == "Dynamic")   return Rigidbody2DComponent::BodyType::Dynamic;
+		if (bodyTypeString == "Kinematic") return Rigidbody2DComponent::BodyType::Kinematic;
 
 		HZ_CORE_ASSERT(false, "Unknown body type");
-		return Components::Rigidbody2D::BodyType::Static;
+		return Rigidbody2DComponent::BodyType::Static;
 	}
 
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
@@ -137,28 +137,28 @@ namespace Hazel {
 
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
-		HZ_CORE_ASSERT(entity.HasComponent<Components::ID>());
+		HZ_CORE_ASSERT(entity.HasComponent<IDComponent>());
 
 		out << YAML::BeginMap; // Entity
 		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID(); // TODO: Entity ID goes here
 
-		if (entity.HasComponent<Components::Tag>())
+		if (entity.HasComponent<TagComponent>())
 		{
 			out << YAML::Key << "TagComponent";
 			out << YAML::BeginMap; // TagComponent
 
-			auto& tag = entity.GetComponent<Components::Tag>().name;
+			auto& tag = entity.GetComponent<TagComponent>().name;
 			out << YAML::Key << "Tag" << YAML::Value << tag;
 
 			out << YAML::EndMap; // TagComponent
 		}
 
-		if (entity.HasComponent<Components::Transform>())
+		if (entity.HasComponent<TransformComponent>())
 		{
 			out << YAML::Key << "TransformComponent";
 			out << YAML::BeginMap; // TransformComponent
 
-			auto& tc = entity.GetComponent<Components::Transform>();
+			auto& tc = entity.GetComponent<TransformComponent>();
 			out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
 			out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
 			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
@@ -166,12 +166,12 @@ namespace Hazel {
 			out << YAML::EndMap; // TransformComponent
 		}
 
-		if (entity.HasComponent<Components::Cameras>())
+		if (entity.HasComponent<CameraComponent>())
 		{
 			out << YAML::Key << "CameraComponent";
 			out << YAML::BeginMap; // CameraComponent
 
-			auto& cameraComponent = entity.GetComponent<Components::Cameras>();
+			auto& cameraComponent = entity.GetComponent<CameraComponent>();
 			auto& camera = cameraComponent.camera;
 
 			out << YAML::Key << "Camera" << YAML::Value;
@@ -191,12 +191,12 @@ namespace Hazel {
 			out << YAML::EndMap; // CameraComponent
 		}
 
-		if (entity.HasComponent<Components::SpriteRenderer>())
+		if (entity.HasComponent<SpriteRendererComponent>())
 		{
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // SpriteRendererComponent
 
-			auto& spriteRendererComponent = entity.GetComponent<Components::SpriteRenderer>();
+			auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.color.GetVec4();
 			out << YAML::Key << "TexturePath" << YAML::Value << spriteRendererComponent.Tex->GetPath();
 			out << YAML::Key << "tiling factor" << YAML::Value << spriteRendererComponent.TilingFactor;
@@ -204,12 +204,12 @@ namespace Hazel {
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
 
-		if (entity.HasComponent<Components::CircleRenderer>())
+		if (entity.HasComponent<CircleRendererComponent>())
 		{
 			out << YAML::Key << "CircleRendererComponent";
 			out << YAML::BeginMap;
 
-			auto& circleRendererComponent = entity.GetComponent<Components::CircleRenderer>();
+			auto& circleRendererComponent = entity.GetComponent<CircleRendererComponent>();
 			out << YAML::Key << "color" << YAML::Value << circleRendererComponent.Color;
 			out << YAML::Key << "thickness" << YAML::Value << circleRendererComponent.Thickness;
 			out << YAML::Key << "fade" << YAML::Value << circleRendererComponent.Fade;
@@ -217,27 +217,27 @@ namespace Hazel {
 			out << YAML::EndMap;
 		}
 
-		if (entity.HasComponent<Components::Rigidbody2D>())
+		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
 			out << YAML::Key << "Rigidbody2DComponent";
-			out << YAML::BeginMap; // Components::Rigidbody2D
+			out << YAML::BeginMap; // Rigidbody2DComponent
 
-			auto& rb2dComponent = entity.GetComponent<Components::Rigidbody2D>();
+			auto& rb2dComponent = entity.GetComponent<Rigidbody2DComponent>();
 			out << YAML::Key << "BodyType" << YAML::Value << RigidBody2DBodyTypeToString(rb2dComponent.Type);
 			out << YAML::Key << "FixedRotation" << YAML::Value << rb2dComponent.FixedRotation;
 
 			out << YAML::Key << "Velocity" << YAML::Value << rb2dComponent.velocity;
 			out << YAML::Key << "AngularVelocity" << YAML::Value << rb2dComponent.angularVelocity;
 
-			out << YAML::EndMap; // Components::Rigidbody2D
+			out << YAML::EndMap; // Rigidbody2DComponent
 		}
 
-		if (entity.HasComponent<Components::BoxCollider2D>())
+		if (entity.HasComponent<BoxCollider2DComponent>())
 		{
 			out << YAML::Key << "BoxCollider2DComponent";
-			out << YAML::BeginMap; // Components::BoxCollider2D
+			out << YAML::BeginMap; // BoxCollider2DComponent
 
-			auto& bc2dComponent = entity.GetComponent<Components::BoxCollider2D>();
+			auto& bc2dComponent = entity.GetComponent<BoxCollider2DComponent>();
 			out << YAML::Key << "Offset" << YAML::Value << bc2dComponent.Offset;
 			out << YAML::Key << "Size" << YAML::Value << bc2dComponent.Size;
 			out << YAML::Key << "Density" << YAML::Value << bc2dComponent.Density;
@@ -245,15 +245,15 @@ namespace Hazel {
 			out << YAML::Key << "Restitution" << YAML::Value << bc2dComponent.Restitution;
 			out << YAML::Key << "RestitutionThreshold" << YAML::Value << bc2dComponent.RestitutionThreshold;
 
-			out << YAML::EndMap; // Components::BoxCollider2D
+			out << YAML::EndMap; // BoxCollider2DComponent
 		}
 
-		if (entity.HasComponent<Components::CircleCollider2D>())
+		if (entity.HasComponent<CircleCollider2DComponent>())
 		{
 			out << YAML::Key << "CircleCollider2DComponent";
 			out << YAML::BeginMap;
 
-			auto& cc2dComponent = entity.GetComponent<Components::CircleCollider2D>();
+			auto& cc2dComponent = entity.GetComponent<CircleCollider2DComponent>();
 			out << YAML::Key << "Offset" << YAML::Value << cc2dComponent.Offset;
 			out << YAML::Key << "Radius" << YAML::Value << cc2dComponent.Radius;
 			out << YAML::Key << "Density" << YAML::Value << cc2dComponent.Density;
@@ -336,7 +336,7 @@ namespace Hazel {
 					if (transformComponent)
 					{
 						// Entities always have transforms
-						auto& tc = deserializedEntity.GetComponent<Components::Transform>();
+						auto& tc = deserializedEntity.GetComponent<TransformComponent>();
 						tc.Translation = transformComponent["Translation"].as<glm::vec3>();
 						tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
 						tc.Scale = transformComponent["Scale"].as<glm::vec3>();
@@ -345,7 +345,7 @@ namespace Hazel {
 					auto cameraComponent = entity["CameraComponent"];
 					if (cameraComponent)
 					{
-						auto& cc = deserializedEntity.AddComponent<Components::Cameras>();
+						auto& cc = deserializedEntity.AddComponent<CameraComponent>();
 
 						auto& cameraProps = cameraComponent["Camera"];
 						cc.camera.SetProjectionType((SceneCamera::ProjectionType)cameraProps["ProjectionType"].as<int>());
@@ -365,7 +365,7 @@ namespace Hazel {
 					auto spriteRendererComponent = entity["SpriteRendererComponent"];
 					if (spriteRendererComponent)
 					{
-						auto& src = deserializedEntity.AddComponent<Components::SpriteRenderer>();
+						auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 						src.color = spriteRendererComponent["Color"].as<glm::vec4>();
 						if (spriteRendererComponent["TexturePath"])
 							src.Tex = Texture2D::Create(spriteRendererComponent["TexturePath"].as<std::string>());
@@ -379,7 +379,7 @@ namespace Hazel {
 					auto circleRendererComponent = entity["CircleRendererComponent"];
 					if (circleRendererComponent)
 					{
-						auto& crc = deserializedEntity.AddComponent<Components::CircleRenderer>();
+						auto& crc = deserializedEntity.AddComponent<CircleRendererComponent>();
 						crc.Color = circleRendererComponent["color"].as<glm::vec4>();
 						crc.Thickness = circleRendererComponent["thickness"].as<float>();
 						crc.Fade = circleRendererComponent["fade"].as<float>();
@@ -389,7 +389,7 @@ namespace Hazel {
 					auto rigidbody2DComponent = entity["Rigidbody2DComponent"];
 					if (rigidbody2DComponent)
 					{
-						auto& rb2d = deserializedEntity.AddComponent<Components::Rigidbody2D>();
+						auto& rb2d = deserializedEntity.AddComponent<Rigidbody2DComponent>();
 						rb2d.Type = RigidBody2DBodyTypeFromString(rigidbody2DComponent["BodyType"].as<std::string>());
 						rb2d.FixedRotation = rigidbody2DComponent["FixedRotation"].as<bool>();
 						if (rigidbody2DComponent["Velocity"])
@@ -402,7 +402,7 @@ namespace Hazel {
 					auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
 					if (boxCollider2DComponent)
 					{
-						auto& bc2d = deserializedEntity.AddComponent<Components::BoxCollider2D>();
+						auto& bc2d = deserializedEntity.AddComponent<BoxCollider2DComponent>();
 						bc2d.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
 						bc2d.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
 						bc2d.Density = boxCollider2DComponent["Density"].as<float>();
@@ -414,7 +414,7 @@ namespace Hazel {
 					auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
 					if (circleCollider2DComponent)
 					{
-						auto& bc2d = deserializedEntity.AddComponent<Components::CircleCollider2D>();
+						auto& bc2d = deserializedEntity.AddComponent<CircleCollider2DComponent>();
 						bc2d.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
 						bc2d.Radius = circleCollider2DComponent["Radius"].as<float>();
 						bc2d.Density = circleCollider2DComponent["Density"].as<float>();
@@ -475,7 +475,7 @@ namespace Hazel {
 					if (transformComponent)
 					{
 						// Entities always have transforms
-						auto& tc = deserializedEntity.GetComponent<Components::Transform>();
+						auto& tc = deserializedEntity.GetComponent<TransformComponent>();
 						tc.Translation = transformComponent["Translation"].as<glm::vec3>();
 						tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
 						tc.Scale = transformComponent["Scale"].as<glm::vec3>();
@@ -484,7 +484,7 @@ namespace Hazel {
 					auto cameraComponent = entity["CameraComponent"];
 					if (cameraComponent)
 					{
-						auto& cc = deserializedEntity.AddComponent<Components::Cameras>();
+						auto& cc = deserializedEntity.AddComponent<CameraComponent>();
 
 						auto& cameraProps = cameraComponent["Camera"];
 						cc.camera.SetProjectionType((SceneCamera::ProjectionType)cameraProps["ProjectionType"].as<int>());
@@ -504,7 +504,7 @@ namespace Hazel {
 					auto spriteRendererComponent = entity["SpriteRendererComponent"];
 					if (spriteRendererComponent)
 					{
-						auto& src = deserializedEntity.AddComponent<Components::SpriteRenderer>();
+						auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 						src.color = spriteRendererComponent["Color"].as<glm::vec4>();
 						if (spriteRendererComponent["tiling factor"])
 							src.TilingFactor = spriteRendererComponent["tiling factor"].as<float>();
@@ -514,7 +514,7 @@ namespace Hazel {
 					auto rigidbody2DComponent = entity["Rigidbody2DComponent"];
 					if (rigidbody2DComponent)
 					{
-						auto& rb2d = deserializedEntity.AddComponent<Components::Rigidbody2D>();
+						auto& rb2d = deserializedEntity.AddComponent<Rigidbody2DComponent>();
 						rb2d.Type = RigidBody2DBodyTypeFromString(rigidbody2DComponent["BodyType"].as<std::string>());
 						rb2d.FixedRotation = rigidbody2DComponent["FixedRotation"].as<bool>();
 					}
@@ -522,7 +522,7 @@ namespace Hazel {
 					auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
 					if (boxCollider2DComponent)
 					{
-						auto& bc2d = deserializedEntity.AddComponent<Components::BoxCollider2D>();
+						auto& bc2d = deserializedEntity.AddComponent<BoxCollider2DComponent>();
 						bc2d.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
 						bc2d.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
 						bc2d.Density = boxCollider2DComponent["Density"].as<float>();
@@ -534,9 +534,9 @@ namespace Hazel {
 					auto InitialPhysicsStateComponent = entity["InitialPhysicsStateComponent"];
 					if (InitialPhysicsStateComponent)
 					{
-						if (deserializedEntity.HasComponent<Components::Rigidbody2D>())
+						if (deserializedEntity.HasComponent<Rigidbody2DComponent>())
 						{
-							auto& ips = deserializedEntity.GetComponent<Components::Rigidbody2D>();
+							auto& ips = deserializedEntity.GetComponent<Rigidbody2DComponent>();
 							ips.velocity = InitialPhysicsStateComponent["Velocity"].as<glm::vec2>();
 							ips.angularVelocity = InitialPhysicsStateComponent["Angular Velocity"].as<float>();
 						}

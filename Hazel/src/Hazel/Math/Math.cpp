@@ -7,7 +7,7 @@
 namespace Hazel::Math {
 
 	//convert a matrix transform into a transform component reference.
-	bool DecomposeTransform(const glm::mat4& transform, Components::Transform& newTransform)
+	bool DecomposeTransform(const glm::mat4& transform, TransformComponent& newTransform)
 	{
 		glm::vec3 pos, rotation, scale;
 		bool success = DecomposeTransform(transform, pos, rotation, scale);

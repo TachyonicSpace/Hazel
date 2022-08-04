@@ -456,7 +456,7 @@ namespace Hazel {
 
 
 
-	void Renderer2D::DrawSprite(const glm::mat4& transform, Components::SpriteRenderer& src, int entityID)
+	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
 	{
 		if (src.Tex)
 			DrawQuad(entityID, transform, src.color, src.Tex, src.TilingFactor);

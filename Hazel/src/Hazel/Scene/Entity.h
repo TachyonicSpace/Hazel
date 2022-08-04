@@ -85,8 +85,8 @@ namespace Hazel
 		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 
-		UUID GetUUID() { return GetComponent<Components::ID>().id; }		
-		const std::string& GetName() { return GetComponent<Components::Tag>().name; }
+		UUID GetUUID() { return GetComponent<IDComponent>().id; }
+		const std::string& GetName() { return GetComponent<TagComponent>().name; }
 
 		bool operator==(const Entity& other) const {
 			return
