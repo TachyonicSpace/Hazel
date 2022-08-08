@@ -4,6 +4,7 @@
 #include <Hazel/Scene/Components.h>
 #include "Entity.h"
 
+#include "Hazel/Scripting/ScriptEngine.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
 // This ignores all warnings raised inside External headers
@@ -138,30 +139,16 @@ namespace Hazel
 		e.AddComponent<TagComponent>(name);
 
 		e.AddComponent<TransformComponent>(translation, rotation, scale);
-		return e;
-	}
-	Entity Scene::CreateEntity(const glm::vec3& translation /* = glm::vec3(0) */,
-		const glm::vec3& rotation /* = glm::vec3(0) */,
-		const glm::vec3& scale /* = glm::vec3(1) */)
-	{
-		Entity e(m_Registry.create(), this);
-		e.AddComponent<TagComponent>("N/A");
-		e.AddComponent<TransformComponent>(translation, rotation, scale);
-		return e;
-	}
 
-	Entity Scene::CreateEntity()
-	{
-		Entity e(m_Registry.create(), this);
+		m_EntityMap[uuid] = e;
 
-		e.AddComponent<TagComponent>("N/A");
-		e.AddComponent<TransformComponent>();
 		return e;
 	}
 
 	void Scene::DestroyEntity(Entity entity)
 	{
-		m_Registry.destroy(entity);
+		m_Registry.destroy(entity);	
+		m_EntityMap.erase(entity.GetUUID());
 	}
 
 	bool Scene::ValidEntity(Entity ent) { return m_Registry.valid((entt::entity)ent); }
@@ -242,12 +229,28 @@ namespace Hazel
 				body->CreateFixture(&fixtureDef);
 			}
 		}
+
+
+		// Scripting
+		{
+			ScriptEngine::OnRuntimeStart(this);
+			// Instantiate all script entities
+
+			auto view = m_Registry.view<ScriptComponent>();
+			for (auto e : view)
+			{
+				Entity entity = { e, this };
+				ScriptEngine::OnCreateEntity(entity);
+			}
+		}
 	}
 
 	void Scene::OnRuntimeStop()
 	{
 		delete m_PhysicsWorld;
 		m_PhysicsWorld = nullptr;
+
+		ScriptEngine::OnRuntimeStop();
 	}
 
 	void Scene::RenderShapes(bool renderCameras)
@@ -283,21 +286,27 @@ namespace Hazel
 
 	void Scene::UpdateScripts(Timestep& t) 
 	{
-		//on Scene play
-		if (ScenePlay)
+		
+		// C# Entity OnUpdate
+		auto view = m_Registry.view<ScriptComponent>();
+		for (auto e : view)
 		{
-			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
-				{
-					if (!nsc.Instance)
-					{
-						nsc.Instance = nsc.InstantiateScript();
-						nsc.Instance->m_Entity = { entity, this };
-						nsc.Instance->OnCreate();
-					}
-
-					nsc.Instance->OnUpdate(t);
-				});
+			Entity entity = { e, this };
+			ScriptEngine::OnUpdateEntity(entity, t);
 		}
+
+		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+			{
+				if (!nsc.Instance)
+				{
+					nsc.Instance = nsc.InstantiateScript();
+					nsc.Instance->m_Entity = { entity, this };
+					nsc.Instance->OnCreate();
+				}
+
+				nsc.Instance->OnUpdate(t);
+			});
+	
 	}
 
 	void Scene::UpdatePhysics(Timestep& t)
@@ -400,6 +409,16 @@ namespace Hazel
 
 		CopyComponentIfExists(AllComponents{}, newEntity, entity);
 	}
+
+	Entity Scene::GetEntityByUUID(UUID uuid)
+	{
+		// TODO(Yan): Maybe should be assert
+		if (m_EntityMap.find(uuid) != m_EntityMap.end())
+			return { m_EntityMap.at(uuid), this };
+
+		return {};
+	}
+
 	Hazel::Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = m_Registry.view<CameraComponent>();
@@ -433,6 +452,11 @@ namespace Hazel
 	{
 		if (m_ViewportWidth > 0 && m_ViewportHeight > 0)
 			component.camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
+	{
 	}
 
 	template<>

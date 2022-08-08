@@ -310,7 +310,7 @@ namespace Hazel {
 			s_Data.LineVertexBuffer->SetData(s_Data.LineVertexBufferBase, dataSize);
 
 			s_Data.LineShader->Bind();
-			RenderCommand::SetLineWidth(s_Data.LineWidth);
+			//RenderCommand::SetLineWidth(s_Data.LineWidth);
 			RenderCommand::DrawIndexed(s_Data.LineVertexArray, s_Data.LineVertexCount, RenderType::LINES);
 			s_Data.stats.drawCalls++;
 		}

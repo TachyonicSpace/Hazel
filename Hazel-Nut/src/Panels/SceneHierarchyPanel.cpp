@@ -3,6 +3,8 @@
 #include "Hazel/Scene/Components.h"
 #include "Hazel/Utils/PlatformUtils.h"
 
+#include "Hazel/Scripting/ScriptEngine.h"
+
 #pragma warning(push, 0)
 #include "imgui/imgui.h"
 #include <imgui/imgui_internal.h>
@@ -179,6 +181,7 @@ namespace Hazel
 		if (ImGui::BeginPopup("AddComponent"))
 		{
 			DisplayAddComponentEntry<CameraComponent>("Camera");
+			DisplayAddComponentEntry<ScriptComponent>("Script");
 			DisplayAddComponentEntry<SpriteRendererComponent>("Sprite Renderer");
 			DisplayAddComponentEntry<CircleRendererComponent>("Circle Renderer");
 			DisplayAddComponentEntry<Rigidbody2DComponent>("Rigidbody 2D");
@@ -276,6 +279,23 @@ namespace Hazel
 				}
 
 
+			});
+
+		DrawComponent<ScriptComponent>("Script", ent, [](auto& component)
+			{
+				bool scriptClassExists = ScriptEngine::EntityClassExists(component.ClassName);
+
+				static char buffer[64];
+				strcpy(buffer, component.ClassName.c_str());
+
+				if (!scriptClassExists)
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.2f, 0.3f, 1.0f));
+
+				if (ImGui::InputText("Class", buffer, sizeof(buffer)))
+					component.ClassName = buffer;
+
+				if (!scriptClassExists)
+					ImGui::PopStyleColor();
 			});
 
 		DrawComponent<SpriteRendererComponent>("Sprite", ent, [&](auto& src)

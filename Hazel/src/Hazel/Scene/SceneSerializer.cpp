@@ -191,6 +191,16 @@ namespace Hazel {
 			out << YAML::EndMap; // CameraComponent
 		}
 
+		if (entity.HasComponent<ScriptComponent>())
+		{
+			auto& scriptComponent = entity.GetComponent<ScriptComponent>();
+
+			out << YAML::Key << "ScriptComponent";
+			out << YAML::BeginMap; // ScriptComponent
+			out << YAML::Key << "ClassName" << YAML::Value << scriptComponent.ClassName;
+			out << YAML::EndMap; // ScriptComponent
+		}
+
 		if (entity.HasComponent<SpriteRendererComponent>())
 		{
 			out << YAML::Key << "SpriteRendererComponent";
@@ -198,7 +208,7 @@ namespace Hazel {
 
 			auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.color.GetVec4();
-			out << YAML::Key << "TexturePath" << YAML::Value << spriteRendererComponent.Tex->GetPath();
+			out << YAML::Key << "TexturePath" << YAML::Value << ((spriteRendererComponent.Tex)? spriteRendererComponent.Tex->GetPath():"Null");
 			out << YAML::Key << "tiling factor" << YAML::Value << spriteRendererComponent.TilingFactor;
 
 			out << YAML::EndMap; // SpriteRendererComponent
@@ -210,9 +220,9 @@ namespace Hazel {
 			out << YAML::BeginMap;
 
 			auto& circleRendererComponent = entity.GetComponent<CircleRendererComponent>();
-			out << YAML::Key << "color" << YAML::Value << circleRendererComponent.Color;
-			out << YAML::Key << "thickness" << YAML::Value << circleRendererComponent.Thickness;
-			out << YAML::Key << "fade" << YAML::Value << circleRendererComponent.Fade;
+			out << YAML::Key << "Color" << YAML::Value << circleRendererComponent.Color;
+			out << YAML::Key << "Thickness" << YAML::Value << circleRendererComponent.Thickness;
+			out << YAML::Key << "Fade" << YAML::Value << circleRendererComponent.Fade;
 
 			out << YAML::EndMap;
 		}
@@ -362,13 +372,23 @@ namespace Hazel {
 						cc.fixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
 					}
 
+					auto scriptComponent = entity["ScriptComponent"];
+					if (scriptComponent)
+					{
+						auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
+						sc.ClassName = scriptComponent["ClassName"].as<std::string>();
+					}
+
 					auto spriteRendererComponent = entity["SpriteRendererComponent"];
 					if (spriteRendererComponent)
 					{
 						auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 						src.color = spriteRendererComponent["Color"].as<glm::vec4>();
 						if (spriteRendererComponent["TexturePath"])
-							src.Tex = Texture2D::Create(spriteRendererComponent["TexturePath"].as<std::string>());
+						{
+							std::string path = spriteRendererComponent["TexturePath"].as<std::string>();
+							src.Tex = ((path != "Null") ? Texture2D::Create(path) : nullptr);
+						}
 
 						if (spriteRendererComponent["TilingFactor"])
 							src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
@@ -380,9 +400,9 @@ namespace Hazel {
 					if (circleRendererComponent)
 					{
 						auto& crc = deserializedEntity.AddComponent<CircleRendererComponent>();
-						crc.Color = circleRendererComponent["color"].as<glm::vec4>();
-						crc.Thickness = circleRendererComponent["thickness"].as<float>();
-						crc.Fade = circleRendererComponent["fade"].as<float>();
+						crc.Color = circleRendererComponent["Color"].as<glm::vec4>();
+						crc.Thickness = circleRendererComponent["Thickness"].as<float>();
+						crc.Fade = circleRendererComponent["Fade"].as<float>();
 					}
 
 

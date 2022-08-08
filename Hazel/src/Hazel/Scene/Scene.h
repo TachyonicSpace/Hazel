@@ -23,18 +23,15 @@ namespace Hazel
 		Scene();
 		~Scene()
 		{
+			delete m_PhysicsWorld;
 			HZ_CORE_WARN("destroying scene");
 		};
 
 		static Ref<Scene> Copy(Ref<Scene> other);
 
-		Entity CreateEntity();
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name, const glm::vec3& transform = glm::vec3(0),
 			const glm::vec3& rotation = glm::vec3(0),
 			const glm::vec3& scale = glm::vec3(1));
-		Entity CreateEntity(const glm::vec3& transform = glm::vec3(0),
-							const glm::vec3& rotation = glm::vec3(0),
-							const glm::vec3& scale = glm::vec3(1));
 		Entity CreateEntity(const std::string& name, const glm::vec3& translation = glm::vec3(0) ,
 															const glm::vec3& rotation    = glm::vec3(0) ,
 															const glm::vec3& scale       = glm::vec3(1) );
@@ -60,6 +57,9 @@ namespace Hazel
 
 		void DrawIDBuffer(Ref<Framebuffer> target, EditorCamera& cam);
 		void DuplicateEntity(Entity entity);
+
+		Entity GetEntityByUUID(UUID uuid);
+
 		Entity GetPrimaryCameraEntity();
 
 
@@ -88,6 +88,9 @@ namespace Hazel
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 		b2World* m_PhysicsWorld = nullptr;
+
+		std::unordered_map<UUID, entt::entity> m_EntityMap;
+		
 		friend class Entity;
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;

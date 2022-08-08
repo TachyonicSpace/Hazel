@@ -107,6 +107,14 @@ namespace Hazel
 				:camera(Cam) {}
 		};
 
+		struct ScriptComponent
+		{
+			std::string ClassName;
+
+			ScriptComponent() = default;
+			ScriptComponent(const ScriptComponent&) = default;
+		};
+
 		struct NativeScriptComponent
 		{
 			ScriptableEntity* Instance = nullptr;
@@ -186,7 +194,7 @@ namespace Hazel
 	};
 	using AllComponents =
 		ComponentGroup<TransformComponent, SpriteRendererComponent, CircleRendererComponent,
-		CameraComponent, NativeScriptComponent, Rigidbody2DComponent,
+		CameraComponent, ScriptComponent, NativeScriptComponent, Rigidbody2DComponent,
 		BoxCollider2DComponent, CircleCollider2DComponent>;
 }
 
