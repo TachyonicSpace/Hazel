@@ -33,8 +33,6 @@ namespace Hazel {
 		m_Window = Window::Create(WindowProps(m_Specification.Name, m_Specification.length, m_Specification.width));
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
-		auto currentWorkingDir = std::filesystem::current_path();
-		std::filesystem::current_path("D:\\Hazel\\Hazel-Nut");
 		//starts the renderer to allow drawing
 		Renderer::Init();
 		ScriptEngine::Init();
@@ -43,7 +41,6 @@ namespace Hazel {
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 
-		std::filesystem::current_path() = currentWorkingDir;
 	}
 
 	Hazel::Application::~Application()
@@ -58,25 +55,17 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		auto currentWorkingDir = std::filesystem::current_path();
-		std::filesystem::current_path("D:\\Hazel\\Hazel-Nut");
 		m_LayerStack.PushLayer(layer);
 		layer->OnAttach();
-
-		std::filesystem::current_path() = currentWorkingDir;
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		auto currentWorkingDir = std::filesystem::current_path();
-		std::filesystem::current_path("D:\\Hazel\\Hazel-Nut");
-
 		m_LayerStack.PushOverlay(overlay);
 		overlay->OnAttach();
 
-		std::filesystem::current_path() = currentWorkingDir;
 	}
 
 	void Application::OnEvent(Event& e)
