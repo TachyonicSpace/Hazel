@@ -1,15 +1,20 @@
 #define HZ_MAIN
 #define _USE_MATH_DEFINES
 
-#define runningProject 1
+#define runningProject 2
 
 #if runningProject == 0
-	#include "RocketProgram.cpp"
+	#include "Rockets/RocketProgram.cpp"
 	#define layerToAdd RocketLayer
 	#else
 #if runningProject == 1
-	#include "NeuralNetworkProgram.cpp"
+	#include "MyAI/NeuralNetworkProgram.cpp"
 	#define layerToAdd NeuralNetworkLayer
+#else
+#if runningProject == 2
+	#include "Creel/CreelNN.cpp"
+	#define layerToAdd CreelLayer
+	#endif
 	#endif
 #endif
 
@@ -31,6 +36,8 @@ Hazel::Application* Hazel::CreateApplication(Hazel::ApplicationCommandLineArgs a
 	ApplicationSpecification spec;
 	spec.Name = "Sandbox";
 	spec.WorkingDirectory = "../Sandbox";
+	spec.width = 500;
+	spec.length = 500;
 	spec.CommandLineArgs = args;
 
 	return new Sandbox(spec);

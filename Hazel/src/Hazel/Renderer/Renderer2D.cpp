@@ -372,7 +372,7 @@ namespace Hazel {
 		}
 
 		
-
+		HZ_CORE_ASSERT(s_Data.quadVertexBufferPtr != nullptr, "Please begin the Scene.")
 		for (int i = 0; i < 4; i++)
 		{
 			s_Data.quadVertexBufferPtr->pos = transform * s_Data.quadVertexPositions[i];

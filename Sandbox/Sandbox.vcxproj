@@ -135,17 +135,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\DNA.h" />
-    <ClInclude Include="src\Rocket.h" />
+    <ClInclude Include="src\Creel\ActivationFunctions.h" />
+    <ClInclude Include="src\Creel\NetworkLayer.h" />
+    <ClInclude Include="src\Creel\TrainingSet.h" />
+    <ClInclude Include="src\Rockets\DNA.h" />
+    <ClInclude Include="src\Creel\Matrix.h" />
+    <ClInclude Include="src\Creel\NeuralNetwork.h" />
+    <ClInclude Include="src\Rockets\Rocket.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\DNA.cpp" />
-    <ClCompile Include="src\NeuralNetwork.cpp" />
-    <ClCompile Include="src\NeuralNetworkProgram.cpp" />
-    <ClCompile Include="src\Rocket.cpp" />
-    <ClCompile Include="src\RocketProgram.cpp" />
+    <ClCompile Include="src\Creel\CreelNN.cpp" />
+    <ClCompile Include="src\MyAI\NeuralNetworkProgram.cpp" />
+    <ClCompile Include="src\MyAI\oldNeuralNetwork.cpp" />
+    <ClCompile Include="src\MyAI\TrainingData.cpp" />
+    <ClCompile Include="src\Rockets\DNA.cpp" />
+    <ClCompile Include="src\Creel\Matrix.cpp" />
+    <ClCompile Include="src\Rockets\Rocket.cpp" />
+    <ClCompile Include="src\Rockets\RocketProgram.cpp" />
     <ClCompile Include="src\SandboxApp.cpp" />
-    <ClCompile Include="src\TrainingData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Hazel\Hazel.vcxproj">
