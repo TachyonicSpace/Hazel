@@ -35,7 +35,7 @@ namespace Hazel {
 
 		//starts the renderer to allow drawing
 		Renderer::Init();
-		//ScriptEngine::Init();
+		ScriptEngine::Init();
 
 		//makes a layer to allow for imgui to be used
 		m_ImGuiLayer = new ImGuiLayer();
@@ -47,7 +47,7 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		//ScriptEngine::Shutdown();
+		ScriptEngine::Shutdown();
 		Renderer::Shutdown();
 	}
 

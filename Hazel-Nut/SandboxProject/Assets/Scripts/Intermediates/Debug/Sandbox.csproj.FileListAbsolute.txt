@@ -1,0 +1,9 @@
+D:\Hazel\Hazel-Nut\SandboxProject\Assets\Scripts\Binaries\Sandbox.dll
+D:\Hazel\Hazel-Nut\SandboxProject\Assets\Scripts\Binaries\Sandbox.pdb
+D:\Hazel\Hazel-Nut\SandboxProject\Assets\Scripts\Binaries\Hazel-ScriptCore.dll
+D:\Hazel\Hazel-Nut\SandboxProject\Assets\Scripts\Binaries\Hazel-ScriptCore.pdb
+D:\Hazel\Hazel-Nut\SandboxProject\Assets\Scripts\Intermediates\Debug\Sandbox.csproj.AssemblyReference.cache
+D:\Hazel\Hazel-Nut\SandboxProject\Assets\Scripts\Intermediates\Debug\Sandbox.csproj.CoreCompileInputs.cache
+D:\Hazel\Hazel-Nut\SandboxProject\Assets\Scripts\Intermediates\Debug\Sandbox.csproj.CopyComplete
+D:\Hazel\Hazel-Nut\SandboxProject\Assets\Scripts\Intermediates\Debug\Sandbox.dll
+D:\Hazel\Hazel-Nut\SandboxProject\Assets\Scripts\Intermediates\Debug\Sandbox.pdb
