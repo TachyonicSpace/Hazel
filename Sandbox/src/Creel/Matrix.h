@@ -16,6 +16,14 @@ namespace AI
 	class Matrix
 	{
 	public:
+		Matrix()
+		{
+			rows = 0;
+			cols = 0; 
+			total = 0;
+			this->data = std::vector<std::vector<float>>();
+		}
+
 		Matrix(int rows, int cols)
 		{
 			this->rows = rows;
@@ -39,6 +47,14 @@ namespace AI
 		~Matrix()
 		{
 			
+		}
+
+		Matrix(const std::vector<std::vector<float>> a)
+		{
+			data = a;
+			rows = a.size();
+			cols = a[0].size();
+			total = rows * cols;
 		}
 
 		Matrix(const Matrix& a)
@@ -122,11 +138,10 @@ namespace AI
 			for (int r = 0; r < this->rows; r++)
 			{
 				for (int c = 0; c < b.cols; c++)
-				{
+				{//test speed of switching looping over r or c first
 					float total = 0.f;
 					for (int d = 0; d < sharedDim; d++)
 					{
-						float A = this->operator()(r, d), B = b(d, c);
 						total += this->operator()(r, d) * b(d, c);
 					}
 					result(r, c) = total;
@@ -135,6 +150,29 @@ namespace AI
 			return result;
 		}
 
+		bool isEmpty() 
+		{
+			return total == 0;
+		}
+
+		bool isNotEmpty()
+		{
+			return total != 0;
+		}
+
+		Matrix addNoise(float nouseAmount)
+		{
+			Matrix result(this->rows, this->cols);
+			for (int r = 0; r < result.rows; r++)
+			{
+				for (int c = 0; c < result.cols; c++)
+				{
+					float tmp = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
+					result(r, c) = this->operator()(r, c) + nouseAmount * tmp;
+				}
+			}
+			return result;
+		}
 
 		Matrix Hadamard(Matrix& a)
 		{
@@ -176,7 +214,7 @@ namespace AI
 		{
 			Matrix& a = *this;
 			Matrix result(a.rows, a.cols);
-			if (this->rows != a.rows || this->cols != a.cols)
+			if (this->rows != b.rows || this->cols != b.cols)
 				throw "Matrices must have same Dimensions";
 
 
@@ -189,6 +227,18 @@ namespace AI
 			}
 			return result;
 		}
+
+		Matrix subtractBatches(Matrix b)
+		{
+			Matrix output = *this;
+			output.ADD_COL_VEC(b.data[0]);
+			for (int i = 1; i < b.cols; i++)
+			{
+				output.ADD_COL_VEC(b.data[i]);
+			}
+			return output;
+		}
+
 		Matrix operator*(float x)
 		{
 			Matrix result(rows, cols);
@@ -225,6 +275,20 @@ namespace AI
 				for (int c = 0; c < cols; c++)
 				{
 					this->operator()(r, c) += colvec->operator()(0, c);
+				}
+			}
+		}
+
+		void ADD_COL_VEC(std::vector<float> colVec)
+		{
+			if (this->cols != colVec.size())
+				throw "Column vector's size is incorrect";
+
+			for (int r = 0; r < rows; r++)
+			{
+				for (int c = 0; c < cols; c++)
+				{
+					this->operator()(r, c) += colVec[r];
 				}
 			}
 		}
@@ -313,6 +377,19 @@ namespace AI
 		std::vector<int> shape()
 		{
 			return { rows, cols };
+		}
+
+		Matrix PushMatrixIntoRows(Matrix b)
+		{
+			std::vector<std::vector<float>> resultData = data;
+			if (this->cols != b.cols)
+				throw "Matrix cols must match";
+
+			for (std::vector<float> row : b.data)
+			{
+				resultData.push_back(row);
+			}
+			return Matrix(resultData);
 		}
 
 	private:

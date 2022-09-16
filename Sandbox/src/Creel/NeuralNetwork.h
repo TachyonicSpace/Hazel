@@ -24,7 +24,7 @@ namespace AI
 			layers.clear();
 		}
 
-		void Init(int inputNeuronCoiunt, int outputNeuronCount, float lr = .0002f)
+		void Init(int inputNeuronCoiunt, int outputNeuronCount, float lr = .002f)
 		{
 			if (layers.size() != 0)
 				throw "Network already has input layer";
@@ -77,12 +77,12 @@ namespace AI
 			return inputData;
 		}
 
-		void BackProp(Matrix& inputData, Matrix& outputData)
+		void BackProp(Matrix& inputData, Matrix& outputData, int batchSize = 1)
 		{
-			Matrix output = this->ForwardProp(inputData);
+			Matrix output = this->ForwardProp(inputData, batchSize);
 			Matrix outputError = output - outputData;
 
-			layers.back()->BackProp(outputError);
+			layers.back()->BackProp(outputError.T());
 		}
 
 		std::string toString()
@@ -125,7 +125,7 @@ namespace AI
 			return diff.Hadamard(diff);
 		}
 
-		void train(FFNeuralNet* nn)
+		void train(FFNeuralNet* nn, float noise = 0)
 		{
 			nn->BackProp(input, output);
 		}
@@ -145,5 +145,4 @@ namespace AI
 
 		Matrix input, output;
 	};
-
 }

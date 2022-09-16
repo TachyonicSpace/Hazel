@@ -4,7 +4,6 @@
 
 //allows us to tell what function to use
 enum class Activationfunctions { Sigmoid = 0, Tanh, LeakyReLU, Elu, Swish, SoftMax, Linear };
-static Activationfunctions currentFunc = Activationfunctions::Tanh;
 
 //holds the ranges if each function
 static float ranges[][2] = { {0, 1}, {-1, 1}, {0, 0}, {0, 0}, {0, 0}, {0, 1} };
@@ -59,7 +58,7 @@ static float LinearDX(float x) { return 1; }
 
 static float activationFunc(float x, Activationfunctions func)
 {
-	switch (currentFunc)
+	switch (func)
 	{
 	case Activationfunctions::Sigmoid:
 		return Sigmoid(x);
@@ -87,7 +86,7 @@ static float activationFunc(float x, Activationfunctions func)
 }
 static float activationFuncDX(float x, Activationfunctions func)
 {
-	switch (currentFunc)
+	switch (func)
 	{
 	case Activationfunctions::Sigmoid:
 		return SigmoidDX(x);

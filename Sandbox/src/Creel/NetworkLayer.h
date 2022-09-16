@@ -13,35 +13,30 @@ namespace AI
 		}
 		~NetworkLayer()
 		{
-			cleanNonTrainables();
-
-			delete weights;
-			delete bias;
-			
-			delete deltaWeights;
-			delete deltaBias;
 		}
 
 
 		void SetInputActivationMatrix(int neuronCount, int batchSize = 1)
 		{
-			activation = new Matrix(neuronCount, batchSize);
+			activation = Matrix(neuronCount, batchSize);
 		}
 		void SetInputActivationMatrix(Matrix inputMatrix)
 		{
-			activation = new Matrix(inputMatrix);
+			activation = inputMatrix;
 		}
 
 
 		void SetPreviousLayer(NetworkLayer* prevLayer)
 		{
-			weights = new Matrix(prevLayer->neuronCount, neuronCount);
-			weights->Randomize(prevLayer->neuronCount);
-			deltaWeights = new Matrix(prevLayer->neuronCount, neuronCount);
+			weights = Matrix(prevLayer->neuronCount, neuronCount);
+			weights.Randomize(prevLayer->neuronCount);
+			deltaWeights = Matrix(prevLayer->neuronCount, neuronCount);
 
-			bias = new Matrix(1, neuronCount);
-			bias->Randomize(prevLayer->neuronCount);
-			deltaBias = new Matrix(1, neuronCount);
+#ifdef useBias
+			bias = Matrix(1, neuronCount);
+			bias.Randomize(prevLayer->neuronCount);
+			deltaBias = Matrix(1, neuronCount);
+#endif
 
 			this->previousLayer = prevLayer;
 			prevLayer->nextLayer = this;
@@ -61,82 +56,63 @@ namespace AI
 
 		Matrix FeedForward(int batchSize = 1)
 		{
-			cleanNonTrainables();
 
-			activation = new Matrix(batchSize, neuronCount);
-			deltaActivation = new Matrix(batchSize, neuronCount);
+			activation = Matrix(batchSize, neuronCount);
+			deltaActivation = Matrix(batchSize, neuronCount);
 
-			sums = new Matrix(batchSize, neuronCount);
-			deltaSums = new Matrix(batchSize, neuronCount);
+			sums = Matrix(batchSize, neuronCount);
+			deltaSums = Matrix(batchSize, neuronCount);
 
-			if (weights != nullptr)
-			{
-				*sums = (previousLayer->activation)->dot(*weights);
-				//sums->ADD_ROW_VEC(bias);
-			}
+				sums = (previousLayer->activation).dot(weights);
+#ifdef useBias
+				sums->ADD_ROW_VEC(bias);
+#endif
 
 			if(previousLayer != nullptr)
-				*activation = sums->ApplyActivationFunction(function);
-
+				activation = sums.ApplyActivationFunction(function);
 
 			if (nextLayer != nullptr)
-			{
+				return nextLayer->FeedForward(batchSize);
 
-
-
-				return nextLayer->FeedForward();
-			}
-
-			if(activation != nullptr)
-				return *activation;
+			return activation;
 		}
 		void BackProp(Matrix& Errors)
 		{
 
-			Matrix hiddenErrors = this->weights->dot(Errors);//this->weights->dot(Errors);
+			Matrix hiddenErrors = this->weights.dot(Errors);//this->weights->dot(Errors);
 
 
-			Matrix activationError = Errors.Hadamard(activation->ApplyDXFunction(function).T());
-			*this->deltaWeights = (activationError).dot(*previousLayer->activation).T() * lr;
-			*this->weights = *this->weights - *this->deltaWeights;
-
+			Matrix activationError = Errors.Hadamard(activation.ApplyDXFunction(function).T());
+			this->deltaWeights = (activationError).dot(previousLayer->activation).T() * lr;
+			this->weights = this->weights - this->deltaWeights;
+#ifdef useBias
 			*this->deltaBias = activationError*lr;//same as the delta weights, but we do not multiply by the previous layers output
-			*this->bias = *this->bias - *this->deltaBias;
+			*this->bias = this->bias->subtractBatches(this->deltaBias->T());
+#endif
 
-			if (previousLayer->weights != nullptr)
+			if (previousLayer != nullptr && previousLayer->weights.isNotEmpty())
 				previousLayer->BackProp(hiddenErrors);
-		}
-
-		void cleanNonTrainables()
-		{
-			if (activation != nullptr)
-				delete activation;
-			activation = nullptr;
-			if (sums != nullptr)
-				delete sums;
-			sums = nullptr;
-
-			if (deltaActivation != nullptr)
-				delete deltaActivation;
-			deltaActivation = nullptr;
-			if (deltaSums != nullptr)
-				delete deltaSums;
-			deltaSums = nullptr;
 		}
 
 		std::string toString()
 		{
-			if (weights == nullptr || bias == nullptr)
-				return "";
+#ifdef useBias
 
 			static std::string funcString[] = { "Sigmoid", "Tanh", "LeakyReLU", "Elu", "Swish", "SoftMax", "Linear" };
 			return "<\nweights\n" + weights->toString() + "bias:\n" + bias->toString() + "ActivationFunction: " + funcString[(int)function] + "\n>\n";
+#else
+
+			static std::string funcString[] = { "Sigmoid", "Tanh", "LeakyReLU", "Elu", "Swish", "SoftMax", "Linear" };
+			return "<\nweights\n" + weights.toString() + "ActivationFunction: " + funcString[(int)function] + "\n>\n";
+#endif
 		}
 
 		void randomizeMatricies()
 		{
-			weights->Randomize(previousLayer->neuronCount);
-			bias->Randomize(previousLayer->neuronCount);
+			weights.Randomize(previousLayer->neuronCount);
+#ifdef useBias
+			bias.Randomize(previousLayer->neuronCount);
+#endif
 		}
 
 
@@ -144,16 +120,19 @@ namespace AI
 
 	private:
 
-		Matrix* activation = nullptr;
-		Matrix* sums = nullptr;
-		Matrix* weights = nullptr;
-		Matrix* bias = nullptr;
+		Matrix activation;
+		Matrix deltaActivation;
 
-		Matrix* deltaActivation = nullptr;
-		Matrix* deltaSums = nullptr;
-		Matrix* deltaWeights = nullptr;
-		Matrix* deltaBias = nullptr;
+		Matrix weights;
+		Matrix deltaWeights;
 
+		Matrix sums;
+		Matrix deltaSums;
+
+#ifdef useBias
+		Matrix bias;
+		Matrix deltaBias;
+#endif
 		int neuronCount;
 		float lr;
 
