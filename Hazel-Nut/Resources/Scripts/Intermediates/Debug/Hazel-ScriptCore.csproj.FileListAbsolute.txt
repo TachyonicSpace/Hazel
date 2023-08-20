@@ -1,6 +1,6 @@
-D:\Hazel\Hazel-Nut\Resources\Scripts\Intermediates\Debug\Hazel-ScriptCore.csproj.AssemblyReference.cache
 D:\Hazel\Hazel-Nut\Resources\Scripts\Intermediates\Debug\Hazel-ScriptCore.csproj.CoreCompileInputs.cache
 D:\Hazel\Hazel-Nut\Resources\Scripts\Intermediates\Debug\Hazel-ScriptCore.dll
 D:\Hazel\Hazel-Nut\Resources\Scripts\Intermediates\Debug\Hazel-ScriptCore.pdb
 D:\Hazel\Hazel-Nut\Resources\Scripts\Hazel-ScriptCore.dll
 D:\Hazel\Hazel-Nut\Resources\Scripts\Hazel-ScriptCore.pdb
+D:\Hazel\Hazel-Nut\Resources\Scripts\Intermediates\Debug\Hazel-ScriptCore.csproj.AssemblyReference.cache

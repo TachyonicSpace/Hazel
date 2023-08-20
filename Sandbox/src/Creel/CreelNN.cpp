@@ -7,6 +7,8 @@
 #include "imgui/imgui.h"
 #include <imgui/imgui_internal.h>
 
+#include <omp.h>
+
 class CreelLayer : public Hazel::Layer
 {
 public:
@@ -80,19 +82,24 @@ public:
 
 		if (showOutput)
 		{
+			//#pragma omp for//make sure to enable openmp support in project settings
 			for (float i = 0; i <= 1.00001; i += delta0)
 			{
 				for (float j = 0; j <= 1.00001; j += delta0)
 				{
+					if(omp_get_thread_num() == 1)
+						printf("\r%d        ", omp_get_num_threads());
 					glm::vec2 pos = { i, j };
 
 					auto output = n->ForwardProp(CreateInputMatrix(i, j));//nn.input({ i, j });
 					Hazel::Color result(output(0, 0));
 
-
-
-					Hazel::Renderer2D::DrawQuad(glm::vec2(map(i, 0, 1, -(1 - delta0), (1 - delta0)), map(j, 0, 1, -(1 - delta0), (1 - delta0))) * .99f, 2.f * glm::vec2(delta0, delta0), result);
-					result = Hazel::Color(0);
+					glm::vec2 f = { 
+						map(i, 0, 1, -(1 - delta0), (1 - delta0)), 
+						map(j, 0, 1, -(1 - delta0), (1 - delta0))
+					};
+					//Hazel::Renderer2D::DrawQuad(glm::vec2(map(i, 0, 1, -(1 - delta0), (1 - delta0)), map(j, 0, 1, -(1 - delta0), (1 - delta0))) * .99f, 2.f * glm::vec2(delta0, delta0), result);
+					Hazel::Renderer2D::DrawQuad(glm::vec2(f.x, f.y) * .99f, 2.f * glm::vec2(delta0, delta0), result);
 				}
 			}
 		}
@@ -170,7 +177,7 @@ public:
 
 			glm::vec2 mousePos = { Hazel::Input::GetMouseX(), 500.f - Hazel::Input::GetMouseY() };
 			mousePos /= 500.f;
-			ImGui::Text("MouseX: %f, MouseY: %f", mousePos.x, mousePos.y);
+			ImGui::Text("MouseX: %f, MouseY: %f\n\tValue: %f", mousePos.x, mousePos.y, n->ForwardProp(CreateInputMatrix(mousePos.x, mousePos.y))(0,0));
 
 			//todo: add ability to remove layers or add layers in specific places
 
@@ -276,12 +283,14 @@ public:
 				return;
 			}
 
-
-			AI::Matrix mousePos = CreateInputMatrix(Hazel::Input::GetMouseX() / 500.f, (500.f - Hazel::Input::GetMouseY()) / 500.f);
-			if (data != nullptr)
-				data->addLabeledData(AI::TrainingData(mousePos, output));
-			else
-				data = new BatchedTrainingData(AI::TrainingData(mousePos, output));
+			if (Hazel::Input::IsKeyPressed(Hazel::Key::W) || Hazel::Input::IsKeyPressed(Hazel::Key::S))
+			{
+				AI::Matrix mousePos = CreateInputMatrix(Hazel::Input::GetMouseX() / 500.f, (500.f - Hazel::Input::GetMouseY()) / 500.f);
+				if (data != nullptr)
+					data->addLabeledData(AI::TrainingData(mousePos, output));
+				else
+					data = new BatchedTrainingData(AI::TrainingData(mousePos, output));
+			}
 		}
 	}
 private:

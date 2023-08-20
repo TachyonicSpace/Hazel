@@ -192,6 +192,8 @@ public:
 					toggle = 0;
 			}
 
+
+
 			if (train)
 			{
 				HZ_PROFILE_SCOPE("Training Network");
@@ -221,6 +223,8 @@ public:
 					delete[] dataIndex;
 				}
 			}
+
+
 			if (ImGui::SliderInt("layers", &layers, 0, 10))
 			{
 				nn = network(layers);

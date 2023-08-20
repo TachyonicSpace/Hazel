@@ -63,7 +63,8 @@ namespace AI
 			sums = Matrix(batchSize, neuronCount);
 			deltaSums = Matrix(batchSize, neuronCount);
 
-				sums = (previousLayer->activation).dot(weights);
+			//add bias in prev activation
+			sums = (previousLayer->activation/*.addBias()*/).dot(weights);
 #ifdef useBias
 				sums->ADD_ROW_VEC(bias);
 #endif

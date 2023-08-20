@@ -392,6 +392,14 @@ namespace AI
 			return Matrix(resultData);
 		}
 
+		Matrix addBias(int val = 1)
+		{
+			std::vector<std::vector<float>> resultData = data;
+			for(int i = 0; i < resultData.size(); i++)
+				resultData[i].push_back(val);
+			return Matrix(resultData);
+		}
+
 	private:
 		std::vector<std::vector<float>> data;
 		//float* data = nullptr;

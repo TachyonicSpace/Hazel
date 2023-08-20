@@ -267,6 +267,8 @@ struct network
 			inputToHidden -= learningRate * tmp0;
 		}
 	}
+
+
 	//replace the values with random values of 1/sqrt(nodes going into this node)
 	void randomizeMatrixies()
 	{

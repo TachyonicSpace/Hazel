@@ -28,6 +28,15 @@
     <Filter Include="..\Hazel-Nut">
       <UniqueIdentifier>{888E7EC3-74F1-0D68-1D77-461E09B9D9EA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="..\Hazel-Nut\SandboxProject">
+      <UniqueIdentifier>{9D30C84F-093E-F635-9224-F220FE30C2EC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\Hazel-Nut\SandboxProject\Assets">
+      <UniqueIdentifier>{DF0404BD-CB40-0727-3453-1F1E20AEAF41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\Hazel-Nut\SandboxProject\Assets\Scripts">
+      <UniqueIdentifier>{165B9F2F-02C3-65FD-6B2E-7A1357B57CE9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="..\Hazel-ScriptCore">
       <UniqueIdentifier>{0F90FBDB-7BF1-D8E9-045F-1F9C70BF0FA9}</UniqueIdentifier>
     </Filter>
@@ -36,6 +45,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Hazel-Nut\SandboxProject\Assets\Scripts\premake5.lua">
+      <Filter>..\Hazel-Nut\SandboxProject\Assets\Scripts</Filter>
+    </None>
     <None Include="..\..\Hazel-Nut\premake5.lua">
       <Filter>..\Hazel-Nut</Filter>
     </None>
