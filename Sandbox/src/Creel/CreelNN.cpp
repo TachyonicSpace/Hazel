@@ -1,13 +1,17 @@
 #include <Hazel.h>
 
-//#define useBias
+#include <omp.h>
+#define useBias
 #include "NeuralNetwork.h"
 
 
 #include "imgui/imgui.h"
 #include <imgui/imgui_internal.h>
 
-#include <omp.h>
+
+#include <algorithm>
+#include <random>
+
 
 class CreelLayer : public Hazel::Layer
 {
@@ -24,7 +28,7 @@ public:
 
 	AI::Matrix CreateInputMatrix(float x, float y)
 	{
-		return { {x, y, x * x, y * y, x * x * x, y * y * y} };
+		return { {x, y, x * x, y * y, cos(x), sin(y)} };
 	}
 
 	void OnAttach()
@@ -33,12 +37,12 @@ public:
 		int numberOfInputs = CreateInputMatrix(0, 0).shape()[1];
 		n->Init(numberOfInputs, 1);
 		n->AddLayer(7);
-		n->AddLayer(3);
 		//n->AddLayer(12);
 		//std::cout << n->toString();
 
 		resetTrainingData(true);
 
+		omp_set_num_threads(8);
 	}
 	void OnDetach()
 	{
@@ -68,7 +72,7 @@ public:
 
 		if (data != nullptr)
 		{
-			for (int r = 0; r < data->tData.size(); r++)
+			for (int r = 0; r < data->getBatchSize(); r++)
 			{
 				Hazel::Color result = Hazel::Color::Lime;
 				if (showTargets)
@@ -98,7 +102,6 @@ public:
 						map(i, 0, 1, -(1 - delta0), (1 - delta0)), 
 						map(j, 0, 1, -(1 - delta0), (1 - delta0))
 					};
-					//Hazel::Renderer2D::DrawQuad(glm::vec2(map(i, 0, 1, -(1 - delta0), (1 - delta0)), map(j, 0, 1, -(1 - delta0), (1 - delta0))) * .99f, 2.f * glm::vec2(delta0, delta0), result);
 					Hazel::Renderer2D::DrawQuad(glm::vec2(f.x, f.y) * .99f, 2.f * glm::vec2(delta0, delta0), result);
 				}
 			}
@@ -177,20 +180,25 @@ public:
 
 			glm::vec2 mousePos = { Hazel::Input::GetMouseX(), 500.f - Hazel::Input::GetMouseY() };
 			mousePos /= 500.f;
-			ImGui::Text("MouseX: %f, MouseY: %f\n\tValue: %f", mousePos.x, mousePos.y, n->ForwardProp(CreateInputMatrix(mousePos.x, mousePos.y))(0,0));
+			std::string nodeOutputs = "";
+			
+			ImGui::Text("MouseX: %f, MouseY: %f\n\tValue: %f", mousePos.x, mousePos.y, n->ForwardProp(CreateInputMatrix(mousePos.x, mousePos.y), &nodeOutputs)(0,0));
+			ImGui::TextColored({ 1, 0, .5, 1 }, "Nodes: %s\n", nodeOutputs.c_str());
 
 			//todo: add ability to remove layers or add layers in specific places
 
-
+			ImGui::Checkbox("Use Default Training Data", &defaultTraining);
 			if (ImGui::Button("reset output"))
 				n->randomizeMatricies();
 			ImGui::SameLine();
 			if (ImGui::Button("reset training Data"))
-				resetTrainingData(true);
+				resetTrainingData(defaultTraining);
 
 			ImGui::Checkbox("training", &train);
 			ImGui::SameLine();
 			ImGui::Checkbox("ShowOutputGrid", &showOutput);
+			if (ImGui::SliderInt("Max Batch Size", &(data->maxBatchSize), 1, data->tData.size()))
+				data->ShuffleTrainingData();
 
 			ImGui::Checkbox("show what target values are suppose to be?", &showTargets);
 
@@ -255,27 +263,26 @@ public:
 			return;
 		}
 		data = new BatchedTrainingData(AI::TrainingData(CreateInputMatrix(0, 0), AI::Matrix({ {0} })));
-		data->addLabeledData(AI::TrainingData(CreateInputMatrix(0, 1), AI::Matrix({ {1} })));
-		data->addLabeledData(AI::TrainingData(CreateInputMatrix(1, 0), AI::Matrix({ {1} })));
-		data->addLabeledData(AI::TrainingData(CreateInputMatrix(1, 1), AI::Matrix({ {0} })));
+		for (int i = 0; i < 11; i++)
+		{
+			data->addLabeledData(AI::TrainingData(CreateInputMatrix(0, 1), AI::Matrix({ {1} })));
+			data->addLabeledData(AI::TrainingData(CreateInputMatrix(1, 0), AI::Matrix({ {1} })));
+			data->addLabeledData(AI::TrainingData(CreateInputMatrix(1, 1), AI::Matrix({ {0} })));
 
-		data->addLabeledData(AI::TrainingData(CreateInputMatrix(.25f, .25f), AI::Matrix({ {.95f} })));
-		data->addLabeledData(AI::TrainingData(CreateInputMatrix(.25f, .75f), AI::Matrix({ {.05f} })));
-		data->addLabeledData(AI::TrainingData(CreateInputMatrix(.75f, .25f), AI::Matrix({ {.05f} })));
-		data->addLabeledData(AI::TrainingData(CreateInputMatrix(.75f, .75f), AI::Matrix({ {.95f} })));
-
+			data->addLabeledData(AI::TrainingData(CreateInputMatrix(.25f, .25f), AI::Matrix({ {.95f} })));
+			data->addLabeledData(AI::TrainingData(CreateInputMatrix(.25f, .75f), AI::Matrix({ {.05f} })));
+			data->addLabeledData(AI::TrainingData(CreateInputMatrix(.75f, .25f), AI::Matrix({ {.05f} })));
+			data->addLabeledData(AI::TrainingData(CreateInputMatrix(.75f, .75f), AI::Matrix({ {.95f} })));
+		}
 		//data.push_back(AI::TrainingData(AI::Matrix({ {.50f, .50f} }), AI::Matrix({ {1} })));
+		data->ShuffleTrainingData();
 	}
 
 	void OnEvent(Hazel::Event& e)
 	{
-		if (e.GetEventType() == Hazel::EventType::KeyPressed && Hazel::Input::GetMouseX() <= 500 && Hazel::Input::GetMouseX() >= 0 && Hazel::Input::GetMouseY() <= 500 && Hazel::Input::GetMouseY() >= 0)
+		if ((e.GetEventType() == Hazel::EventType::KeyPressed || e.GetEventType() == Hazel::EventType::MouseButtonPressed) && Hazel::Input::GetMouseX() <= 500 && Hazel::Input::GetMouseX() >= 0 && Hazel::Input::GetMouseY() <= 500 && Hazel::Input::GetMouseY() >= 0)
 		{
-			AI::Matrix output(1, 1);
-			if (Hazel::Input::IsKeyPressed(Hazel::Key::W))
-				output(0, 0) = 1;
-			else if (Hazel::Input::IsKeyPressed(Hazel::Key::S))
-				output(0, 0) = 0;
+			
 
 			if (Hazel::Input::IsKeyPressed(Hazel::KeyCode::R))
 			{
@@ -283,8 +290,16 @@ public:
 				return;
 			}
 
-			if (Hazel::Input::IsKeyPressed(Hazel::Key::W) || Hazel::Input::IsKeyPressed(Hazel::Key::S))
+
+			bool white = Hazel::Input::IsMouseButtonPressed(0); //IsKeyPressed(Hazel::Key::W);
+			bool black = Hazel::Input::IsMouseButtonPressed(1); //IsKeyPressed(Hazel::Key::S);
+			if ( white || black )
 			{
+				AI::Matrix output(1, 1);
+				if (white)
+					output(0, 0) = 1;
+				else if (black)
+					output(0, 0) = 0;
 				AI::Matrix mousePos = CreateInputMatrix(Hazel::Input::GetMouseX() / 500.f, (500.f - Hazel::Input::GetMouseY()) / 500.f);
 				if (data != nullptr)
 					data->addLabeledData(AI::TrainingData(mousePos, output));
@@ -302,7 +317,9 @@ private:
 	{
 		AI::Matrix input, output;
 		std::vector<AI::TrainingData> tData;
+		int maxBatchSize = 20;
 		float tdNoise = 0.02f;
+		
 
 		BatchedTrainingData(AI::TrainingData d)
 			:input(1, 1), output(1, 1)
@@ -312,41 +329,40 @@ private:
 			this->tData.push_back(d);
 		}
 
+		int getBatchSize()
+		{
+			return min(maxBatchSize, tData.size());
+		}
+
 		void addLabeledData(AI::TrainingData d)
 		{
-			input = input.PushMatrixIntoRows(d.input);
-			output = output.PushMatrixIntoRows(d.output);
+			//input = input.PushMatrixIntoRows(d.input);
+			//output = output.PushMatrixIntoRows(d.output);
 			this->tData.push_back(d);
 		}
 
 		size_t size() { return tData.size(); }
 
-		void train(AI::FFNeuralNet* nn, int batchsize = 0)
+		void train(AI::FFNeuralNet* nn)
 		{
 			if (tData.size() != 0)
 			{
-				ShuffleTrainingData(batchsize);
+				ShuffleTrainingData();
 				nn->BackProp(input, output, tData.size());
 			}
 		}
 
-		void ShuffleTrainingData(int batchSize = 0)
+		void ShuffleTrainingData()
 		{
-			if (batchSize == 0)
-				batchSize = tData.size();
-
-			for (int i = 0; i < 10 * batchSize; i++)
-			{
-				int a = rand() % batchSize;
-				int b = rand() % batchSize;
-
-				AI::TrainingData tmp = tData[a];
-				tData[a] = tData[b];
-				tData[b] = tmp;
+			// first shuffle
+			for (int k = 0; k < tData.size(); k++) {
+				int r = k + rand() % (tData.size() - k); // careful here!
+				std::swap(tData[k], tData[r]);
 			}
+			
 			AI::Matrix shuffledInput = tData[0].input;
 			AI::Matrix shuffledOutput = tData[0].output;
-			for (int i = 1; i < batchSize; i++)
+			for (int i = 1; i < getBatchSize(); i++)
 			{
 				shuffledInput = shuffledInput.PushMatrixIntoRows(tData[i].input);
 				shuffledOutput = shuffledOutput.PushMatrixIntoRows(tData[i].output);
@@ -355,9 +371,9 @@ private:
 			output = shuffledOutput;
 		}
 
-		void feedforward(AI::FFNeuralNet* nn, int batchsize = 0)
+		void feedforward(AI::FFNeuralNet* nn)
 		{
-			ShuffleTrainingData(batchsize);
+			ShuffleTrainingData();
 			nn->ForwardProp(input);
 		}
 	};
@@ -369,5 +385,6 @@ private:
 	float timeStep = 0.f;
 	int toggle = 0;
 	bool train = true;
+	bool defaultTraining = true;
 	bool showTargets = false;
 };

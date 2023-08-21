@@ -66,14 +66,26 @@ namespace AI
 			layers.erase(layers.begin() + layerIndex);
 		}
 
-		Matrix ForwardProp(const Matrix inputData, int batchSize = 1)
+		Matrix ForwardProp(Matrix inputData, int batchSize = 1)
+		{
+			return ForwardProp(inputData, nullptr, batchSize);
+		}
+
+		Matrix ForwardProp(Matrix inputData, std::string* nodes, int batchSize = 1)
 		{
 			if (layers.size() <= 0)
 				throw "net cannot feed forward, not enough layers";
-
+			if (nodes != nullptr)
+			{
+#ifdef useBias
+				(*nodes) += inputData.addBias().toString();
+#else
+				(*nodes) += inputData.toString();
+#endif
+			}
 			layers[0]->SetInputActivationMatrix(inputData);
-			if(layers.size() > 1)
-				return layers[1]->FeedForward(batchSize);
+			if (layers.size() > 1)
+				return layers[1]->FeedForward(nodes, batchSize);
 			return inputData;
 		}
 

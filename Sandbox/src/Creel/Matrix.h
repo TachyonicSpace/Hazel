@@ -135,6 +135,7 @@ namespace AI
 				throw "Cols of a must equal rows of B";
 			
 			int sharedDim = this->cols;
+			#pragma omp parallel for collapse(3)
 			for (int r = 0; r < this->rows; r++)
 			{
 				for (int c = 0; c < b.cols; c++)
@@ -397,6 +398,18 @@ namespace AI
 			std::vector<std::vector<float>> resultData = data;
 			for(int i = 0; i < resultData.size(); i++)
 				resultData[i].push_back(val);
+			return Matrix(resultData);
+		}
+
+		//remove the last row of the matrix
+		Matrix removeBias()
+		{
+			std::vector<std::vector<float>> resultData = data;
+			resultData.pop_back();
+			/*
+			for (int i = 0; i < resultData.size(); i++)
+				resultData[i].pop_back();
+			*/
 			return Matrix(resultData);
 		}
 
