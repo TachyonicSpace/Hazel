@@ -1,15 +1,15 @@
 #define HZ_MAIN
 #define _USE_MATH_DEFINES
 
-#define runningProject 2
+#define runningProject 1
 
 #if runningProject == 0
 	#include "Rockets/RocketProgram.cpp"
 	#define layerToAdd RocketLayer
 	#else
 #if runningProject == 1
-	#include "MyAI/NeuralNetworkProgram.cpp"
-	#define layerToAdd NeuralNetworkLayer
+	#include "MyAI/FastNN.cpp"
+	#define layerToAdd FastNNLayer
 #else
 #if runningProject == 2
 	#include "Creel/CreelNN.cpp"

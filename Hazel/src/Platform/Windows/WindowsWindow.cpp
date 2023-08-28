@@ -176,7 +176,9 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		glfwPollEvents();
-		m_Context->SwapBuffers();
+		if(swapFrames)
+			m_Context->SwapBuffers();
+		swapFrames = true;
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)

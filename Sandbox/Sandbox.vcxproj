@@ -111,7 +111,6 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -141,15 +140,16 @@
     <ClInclude Include="src\Creel\NetworkLayer.h" />
     <ClInclude Include="src\Creel\NeuralNetwork.h" />
     <ClInclude Include="src\Creel\TrainingSet.h" />
+    <ClInclude Include="src\MyAI\ActivationFunctions.h" />
+    <ClInclude Include="src\MyAI\NetworkLayer.h" />
+    <ClInclude Include="src\MyAI\NeuralNetwork.h" />
+    <ClInclude Include="src\MyAI\TrainingSet.h" />
     <ClInclude Include="src\Rockets\DNA.h" />
     <ClInclude Include="src\Rockets\Rocket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Creel\CreelNN.cpp" />
-    <ClCompile Include="src\Creel\Matrix.cpp" />
-    <ClCompile Include="src\MyAI\NeuralNetworkProgram.cpp" />
-    <ClCompile Include="src\MyAI\TrainingData.cpp" />
-    <ClCompile Include="src\MyAI\oldNeuralNetwork.cpp" />
+    <ClCompile Include="src\MyAI\FastNN.cpp" />
     <ClCompile Include="src\Rockets\DNA.cpp" />
     <ClCompile Include="src\Rockets\Rocket.cpp" />
     <ClCompile Include="src\Rockets\RocketProgram.cpp" />

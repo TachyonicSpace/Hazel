@@ -6,7 +6,7 @@
 
 namespace AI
 {
-
+	
 	class FFNeuralNet
 	{
 
@@ -24,7 +24,7 @@ namespace AI
 			layers.clear();
 		}
 
-		void Init(int inputNeuronCoiunt, int outputNeuronCount, float lr = .000002f)
+		void Init(int inputNeuronCoiunt, int outputNeuronCount, float lr = .002f)
 		{
 			if (layers.size() != 0)
 				throw "Network already has input layer";
@@ -66,43 +66,30 @@ namespace AI
 			layers.erase(layers.begin() + layerIndex);
 		}
 
-		Matrix ForwardProp(Matrix& inputData, int batchSize = 1)
-		{
-			return ForwardProp(inputData, nullptr, batchSize);
-		}
-
-		Matrix ForwardProp(Matrix& inputData, std::string* nodes, int batchSize = 1)
+		arma::mat ForwardProp(arma::mat& inputData, int batchSize = 1)
 		{
 			if (layers.size() <= 0)
 				throw "net cannot feed forward, not enough layers";
-			if (nodes != nullptr)
-			{
-#ifdef useBias
-				(*nodes) += inputData.addBias().toString();
-#else
-				(*nodes) += inputData.toString();
-#endif
-			}
 			layers[0]->SetInputActivationMatrix(inputData);
 			if (layers.size() > 1)
-				return layers[1]->FeedForward(nodes, batchSize);
+				return layers[1]->FeedForward(batchSize);
 			return inputData;
 		}
 
-		void BackProp(Matrix& inputData, Matrix& outputData, int batchSize = 1)
+		void BackProp(arma::mat& inputData, arma::mat& outputData, int batchSize = 1)
 		{
-			Matrix output = this->ForwardProp(inputData, batchSize);
-			Matrix outputError = output - outputData;
+			arma::mat output = this->ForwardProp(inputData, batchSize);
+			arma::mat outputError = output - outputData;
 
-			layers.back()->BackProp(outputError.T());
+			layers.back()->BackProp(outputError.t());
 		}
 
-		std::string toString()
+		std::string toString(bool useOutputs = false)
 		{
 			std::string str = "";
 			for (NetworkLayer* l : layers)
 			{
-				str += l->toString() + "\n";
+				str += l->toString(useOutputs) + "\n";
 			}
 			return str;
 		}
@@ -111,7 +98,7 @@ namespace AI
 		{
 			for (int i = 1; i < layers.size(); i++)
 			{
-				layers[i]->randomizeMatricies();
+				layers[i]->randomizeWeights();
 			}
 		}
 
@@ -126,15 +113,15 @@ namespace AI
 
 	struct TrainingData
 	{
-		TrainingData(Matrix& in, Matrix& target)
+		TrainingData(arma::mat& in, arma::mat& target)
 			:input(in), output(target)
 		{
 		}
 
-		Matrix error(FFNeuralNet* net)
+		arma::mat error(FFNeuralNet* net)
 		{
-			Matrix diff = (output - net->ForwardProp(input));
-			return diff.Hadamard(diff);
+			arma::mat diff = (output - net->ForwardProp(input));
+			return diff%(diff);
 		}
 
 		void train(FFNeuralNet* nn, float noise = 0)
@@ -145,9 +132,9 @@ namespace AI
 		{
 			auto errors = error(nn);
 			bool traindata = false;
-			for (int r = 0; r < errors.shape()[0]; r++)
+			for (int r = 0; r < errors.n_rows; r++)
 			{
-				for (int c = 0; c < errors.shape()[1]; c++)
+				for (int c = 0; c < errors.n_cols; c++)
 				{
 					traindata |= (abs(errors(r, c)) > err);
 				}
@@ -155,6 +142,7 @@ namespace AI
 			return traindata;
 		}
 
-		Matrix input, output;
+		arma::mat input, output;
 	};
+	
 }

@@ -20,7 +20,7 @@ namespace AI
 		{
 			activation = Matrix(neuronCount, batchSize);
 		}
-		void SetInputActivationMatrix(Matrix inputMatrix)
+		void SetInputActivationMatrix(Matrix& inputMatrix)
 		{
 			activation = inputMatrix;
 		}

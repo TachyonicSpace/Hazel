@@ -68,7 +68,7 @@ namespace AI
 			for (int i = 0; i < rows; i++)
 				data[i] = matrixCols;
 
-
+			#pragma omp parallel for collapse(2) if(rows > 10 || cols > 10)
 			for (int r = 0; r < rows; r++)
 			{
 				for (int c = 0; c < cols; c++)
@@ -83,7 +83,7 @@ namespace AI
 		{
 			this->rows = a.size();
 			this->cols = 0;
-			for(auto l:a)
+			for (auto l:a)
 				this->cols = __max(this->cols, l.size());
 			this->total = rows*cols;
 			auto matrixCols = std::vector<float>(cols);
@@ -135,7 +135,8 @@ namespace AI
 				throw "Cols of a must equal rows of B";
 			
 			int sharedDim = this->cols;
-			#pragma omp parallel for collapse(3)
+			
+			#pragma omp parallel for collapse(3) if(this.rows > 10 || b.cols > 10 || sharedDim > 10)
 			for (int r = 0; r < this->rows; r++)
 			{
 				for (int c = 0; c < b.cols; c++)
@@ -183,6 +184,7 @@ namespace AI
 				throw "Matrices must have same Dimensions";
 
 
+#pragma omp parallel for collapse(2) if(rows > 10 || cols > 10)
 			for (int r = 0; r < rows; r++)
 			{
 				for (int c = 0; c < cols; c++)
@@ -201,6 +203,7 @@ namespace AI
 				throw "Matrices must have same Dimensions";
 
 
+#pragma omp parallel for collapse(2) if(rows > 10 || cols > 10)
 			for (int r = 0; r < rows; r++)
 			{
 				for (int c = 0; c < cols; c++)
@@ -219,6 +222,7 @@ namespace AI
 				throw "Matrices must have same Dimensions";
 
 
+#pragma omp parallel for collapse(2) if(rows > 10 || cols > 10)
 			for (int r = 0; r < rows; r++)
 			{
 				for (int c = 0; c < cols; c++)
@@ -229,7 +233,7 @@ namespace AI
 			return result;
 		}
 
-		Matrix subtractBatches(Matrix b)
+		Matrix subtractBatches(Matrix& b)
 		{
 			Matrix output = *this;
 			output.ADD_COL_VEC(b.data[0]);
@@ -243,6 +247,8 @@ namespace AI
 		Matrix operator*(float x)
 		{
 			Matrix result(rows, cols);
+
+#pragma omp parallel for collapse(2) if(rows > 10 || cols > 10)
 			for (int r = 0; r < rows; r++)
 			{
 				for (int c = 0; c < cols; c++)
@@ -342,6 +348,8 @@ namespace AI
 		Matrix T()
 		{
 			Matrix t(cols, rows);
+
+#pragma omp parallel for collapse(2) if(rows > 10 || cols > 10)
 			for (int r = 0; r < rows; r++)
 			{
 				for (int c = 0; c < cols; c++)
@@ -380,23 +388,22 @@ namespace AI
 			return { rows, cols };
 		}
 
-		Matrix PushMatrixIntoRows(Matrix b)
+		Matrix PushMatrixIntoRows(Matrix& b)
 		{
 			std::vector<std::vector<float>> resultData = data;
 			if (this->cols != b.cols)
 				throw "Matrix cols must match";
 
-			for (std::vector<float> row : b.data)
-			{
-				resultData.push_back(row);
-			}
+
+			resultData.insert(resultData.end(), b.data.begin(), b.data.end());
+
 			return Matrix(resultData);
 		}
 
 		Matrix addBias(int val = 1)
 		{
 			std::vector<std::vector<float>> resultData = data;
-			for(int i = 0; i < resultData.size(); i++)
+			for (int i = 0; i < resultData.size(); i++)
 				resultData[i].push_back(val);
 			return Matrix(resultData);
 		}
@@ -406,10 +413,6 @@ namespace AI
 		{
 			std::vector<std::vector<float>> resultData = data;
 			resultData.pop_back();
-			/*
-			for (int i = 0; i < resultData.size(); i++)
-				resultData[i].pop_back();
-			*/
 			return Matrix(resultData);
 		}
 
@@ -418,5 +421,7 @@ namespace AI
 		//float* data = nullptr;
 		int rows, cols;
 		int total;
+
+		friend class BatchedTrainingData;
 	};
 }

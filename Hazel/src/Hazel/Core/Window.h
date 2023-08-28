@@ -35,6 +35,8 @@ namespace Hazel {
 		virtual unsigned int GetHeight() const = 0;
 		virtual float GetAspectRatio() const = 0;
 
+		void dontSwapFrames() { swapFrames = false; };
+
 		//window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
@@ -43,5 +45,8 @@ namespace Hazel {
 		virtual void* GetNativeWindow() const = 0;
 
 		static Scope<Window> Create(const WindowProps& props = WindowProps());
+
+	protected:
+		bool swapFrames = true;
 	};
 }
