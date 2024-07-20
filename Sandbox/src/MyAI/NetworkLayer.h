@@ -133,6 +133,20 @@ namespace AI
 			*/
 		}
 
+		void prune_neurons(double threshold, int num_neurons) {
+			for (int i = 0; i < num_neurons; i++) {
+				float sum = 0;
+				for (int j = 0; j < weights.n_cols; j++) {
+					sum += abs(weights(i, j));
+				}
+				if (sum <= threshold) {
+					// remove neuron i
+					weights.shed_row(i--);
+					std::cout << "Pruned a neuron\n";
+				}
+			}
+			std::cout << "prune_neurons\n";
+		}
 
 
 		Activationfunctions function = Activationfunctions::Tanh;

@@ -24,7 +24,7 @@ namespace AI
 			layers.clear();
 		}
 
-		void Init(int inputNeuronCoiunt, int outputNeuronCount, float lr = .002f)
+		void Init(int inputNeuronCoiunt, int outputNeuronCount, float lr = .0002f)
 		{
 			if (layers.size() != 0)
 				throw "Network already has input layer";
@@ -92,6 +92,17 @@ namespace AI
 				str += l->toString(useOutputs) + "\n";
 			}
 			return str;
+		}
+
+		void pruneNeurons(double thresHold, int numLayers = -1, int numNeurons = 1)
+		{
+			if (numLayers == -1)
+				numLayers = layers.size();
+
+			for (int i = 1; i < layers.size() - 1 && numLayers != 0; i++, numLayers--)
+			{
+				layers[i]->prune_neurons(thresHold, numNeurons);
+			}
 		}
 
 		void randomizeMatricies()

@@ -58,11 +58,8 @@ public:
 		n = new AI::FFNeuralNet();
 		int numberOfInputs = CreateInputMatrix(0, 0).n_cols;
 		n->Init(numberOfInputs, 1);
-		n->AddLayer(3);
-		n->AddLayer(5);
-		n->AddLayer(3);
-		n->AddLayer(5);
-		n->AddLayer(3);
+		n->AddLayer(3 * numberOfInputs);
+		n->AddLayer(3 * numberOfInputs);
 		//n->AddLayer(12);
 		//std::cout << n->toString();
 
@@ -213,8 +210,22 @@ public:
 				data->ShuffleTrainingData();
 
 			ImGui::Checkbox("show what target values are suppose to be?", &showTargets);
+			static int newLayerSize = 3;
 
-			//todo: add the ability to change layer activation functions
+			ImGui::InputInt("New Layer Size", &newLayerSize);
+			if (ImGui::Button("Add Layer"))
+				n->AddLayer(newLayerSize);
+
+
+			ImGui::DragFloat("learningRate", &n->lr, .001, .001, 1.001);
+			ImGui::DragInt("Epochs", &epochs, 5, 1, 200);
+
+			if (data)
+				ImGui::DragFloat("Training Data Noise", &data->tdNoise, .001f, 0.f, 1.f);
+			if (ImGui::Button("Prune Layers"))
+				n->pruneNeurons(.1);
+
+			//manage the layers individually
 			for (int l = 1; l < n->layers.size(); l++)
 			{
 				if (ImGui::CollapsingHeader(("Network Layer: #" + std::to_string(l)).c_str()))
@@ -245,19 +256,6 @@ public:
 				}
 			}
 
-			static int newLayerSize = 3;
-
-			ImGui::InputInt("New Layer Size", &newLayerSize);
-			if (ImGui::Button("Add Layer"))
-				n->AddLayer(newLayerSize);
-
-
-			ImGui::DragFloat("learningRate", &n->lr, .001, .001, 1.001);
-			ImGui::DragInt("Epochs", &epochs, 5, 1, 200);
-
-			if(data)
-				ImGui::DragFloat("Training Data Noise", &data->tdNoise, .001f, 0.f, 1.f);
-			//ImGui::Text("Network Values:\n\n%s", n->toString().c_str());
 
 			
 			ImGui::End();
