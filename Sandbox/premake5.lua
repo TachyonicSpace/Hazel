@@ -10,7 +10,8 @@ project "Sandbox"
 	files
 	{
 		"src/**.h",
-		"src/**.cpp"
+		"src/**.cpp",
+		"vendor/armadillo/include/**.h"
 	}
 
 	includedirs
@@ -19,16 +20,22 @@ project "Sandbox"
 		"%{wks.location}/Hazel/src",
 		"%{wks.location}/Hazel/vendor",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{wks.location}/Sandbox/vendor/armadillo/include"
 	}
 
 	links
 	{
-		"Hazel"
+		"Hazel",
+		"%{wks.location}/Sandbox/vendor/openBlas/libopenblas"
 	}
 
 	filter "system:windows"
 		systemversion "latest"
+
+		postbuildcommands {
+			"{COPY} %{wks.location}/Sandbox/vendor/openBlas/libopenblas.dll %{cfg.buildtarget.directory}"
+		}
 
 	filter "configurations:Debug"
 		defines "HZ_DEBUG"

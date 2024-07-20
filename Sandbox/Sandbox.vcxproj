@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>HZ_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;..\Hazel\vendor\glm;..\Hazel\vendor\entt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;..\Hazel\vendor\glm;..\Hazel\vendor\entt\include;vendor\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -90,14 +90,18 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>vendor\openBlas\libopenblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST $(SolutionDir)\Sandbox\vendor\openBlas\libopenblas.dll\ (xcopy /Q /E /Y /I $(SolutionDir)\Sandbox\vendor\openBlas\libopenblas.dll $(TargetDir) &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\Sandbox\vendor\openBlas\libopenblas.dll $(TargetDir) &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>HZ_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;..\Hazel\vendor\glm;..\Hazel\vendor\entt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;..\Hazel\vendor\glm;..\Hazel\vendor\entt\include;vendor\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -111,14 +115,18 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>vendor\openBlas\libopenblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST $(SolutionDir)\Sandbox\vendor\openBlas\libopenblas.dll\ (xcopy /Q /E /Y /I $(SolutionDir)\Sandbox\vendor\openBlas\libopenblas.dll $(TargetDir) &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\Sandbox\vendor\openBlas\libopenblas.dll $(TargetDir) &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>HZ_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;..\Hazel\vendor\glm;..\Hazel\vendor\entt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\src;..\Hazel\vendor;..\Hazel\vendor\glm;..\Hazel\vendor\entt\include;vendor\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -132,7 +140,11 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>vendor\openBlas\libopenblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST $(SolutionDir)\Sandbox\vendor\openBlas\libopenblas.dll\ (xcopy /Q /E /Y /I $(SolutionDir)\Sandbox\vendor\openBlas\libopenblas.dll $(TargetDir) &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\Sandbox\vendor\openBlas\libopenblas.dll $(TargetDir) &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Creel\ActivationFunctions.h" />
@@ -146,6 +158,7 @@
     <ClInclude Include="src\MyAI\TrainingSet.h" />
     <ClInclude Include="src\Rockets\DNA.h" />
     <ClInclude Include="src\Rockets\Rocket.h" />
+    <ClInclude Include="vendor\armadillo\include\armadillo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Creel\CreelNN.cpp" />

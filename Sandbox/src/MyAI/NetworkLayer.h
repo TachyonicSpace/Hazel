@@ -1,5 +1,5 @@
 #pragma once
-#include <armadillo>
+#include <armadillo.h>
 #include "ActivationFunctions.h"
 
 #define useBias

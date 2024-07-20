@@ -2,14 +2,14 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\Hazel\bin\Debug-windows-x86_64\Hazel-Nut\Hazel-Nut.exe</FullPath>
+      <FullPath>D:\Programming\Hazel\bin\Debug-windows-x86_64\Hazel-Nut\Hazel-Nut.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
   <SatelliteDlls />
   <NonRecipeFileRefs>
     <NonRecipeFileRef>
-      <FullPath>D:\Hazel\Hazel-ScriptCore\Hazel-ScriptCore.csproj</FullPath>
+      <FullPath>D:\Programming\Hazel\Hazel-ScriptCore\Hazel-ScriptCore.csproj</FullPath>
     </NonRecipeFileRef>
   </NonRecipeFileRefs>
 </Project>

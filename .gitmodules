@@ -25,3 +25,6 @@
 [submodule "Hazel/vendor/box2d"]
 	path = Hazel/vendor/box2d
 	url = https://github.com/TheCherno/box2d
+[submodule "Sandbox\\vendor\\armadillo"]
+	path = Sandbox\\vendor\\armadillo
+	url = https://gitlab.com/conradsnicta/armadillo-code.git
